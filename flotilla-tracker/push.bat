@@ -1,5 +1,7 @@
 @echo off
 cd /d "%~dp0"
-git add position.json
-git commit -m "Update position"
+python update_breadcrumbs_loop.py
+git add position.json positions.json
+git commit -m "Auto-update position"
 git push
+pause
