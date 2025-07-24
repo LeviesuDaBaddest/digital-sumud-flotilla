@@ -11,6 +11,7 @@ def read_position():
         s.settimeout(10)
         while True:
             line = s.recv(1024).decode(errors="ignore")
+            print("📡 Got NMEA line:", line.strip())  # DEBUG LINE 👈
             if line.startswith("$GPRMC"):
                 parts = line.strip().split(",")
                 if parts[3] and parts[5]:
@@ -54,3 +55,4 @@ if __name__ == "__main__":
         else:
             print("⚠️ No GPS fix. Retrying in 15 minutes...")
         time.sleep(900)
+
