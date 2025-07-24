@@ -36,6 +36,22 @@
       border-left: 3px solid #e91e63;
       padding-left: 8px;
     }
+    details {
+      margin-top: 15px;
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    summary {
+      cursor: pointer;
+      font-weight: bold;
+      color: #e91e63;
+      margin-bottom: 8px;
+    }
+    details p {
+      margin: 8px 0;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -51,9 +67,21 @@
       <div class="martyr">Yazan Al-Masri</div>
       <div class="martyr">Layan Al-Sadeq</div>
       <div class="martyr">Ahmed Abu Daqqa</div>
-      <!-- Add more names as needed -->
     </div>
+
+    <details>
+      <summary>📜 Martyr Poems & Quotes</summary>
+      <p><strong>Refaat Alareer:</strong><br>
+      “If I must die, let it bring hope, let it be a tale.”</p>
+
+      <p><strong>Shireen Abu Akleh:</strong><br>
+      “I chose journalism to be close to people.”</p>
+
+      <p><strong>Mohammed Al-Durrah:</strong><br>
+      “I am just a child!”</p>
+    </details>
   </div>
+
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
