@@ -1,9 +1,3 @@
-import socket
-import json
-import time
-import subprocess
-import os
-
 def read_position():
     print("⏳ Waiting for NMEA data from Sailaway...")
     try:
@@ -15,45 +9,21 @@ def read_position():
             print("📡 Got NMEA line:", line.strip())
             if line.startswith("$GPRMC"):
                 parts = line.strip().split(",")
-                if parts[3] and parts[5]:
-                    lat = float(parts[3][:2]) + float(parts[3][2:]) / 60.0
-                    if parts[4] == "S":
-                        lat = -lat
-                    lon = float(parts[5][:3]) + float(parts[5][3:]) / 60.0
-                    if parts[6] == "W":
-                        lon = -lon
-                    print(f"✅ Got position: {lat}, {lon}")
-                    return lat, lon
+                print("🔍 GPRMC Parts:", parts)  # <--- NEW
+                try:
+                    if len(parts) > 6 and parts[3] and parts[5]:
+                        lat = float(parts[3][:2]) + float(parts[3][2:]) / 60.0
+                        if parts[4] == "S":
+                            lat = -lat
+                        lon = float(parts[5][:3]) + float(parts[5][3:]) / 60.0
+                        if parts[6] == "W":
+                            lon = -lon
+                        print(f"✅ Got position: {lat}, {lon}")
+                        return lat, lon
+                    else:
+                        print("⚠️ Missing lat/lon in GPRMC")
+                except Exception as parse_error:
+                    print("❌ Error parsing GPRMC:", parse_error)
     except Exception as e:
         print("❌ NMEA read error:", e)
         return None, None
-
-def append_position(lat, lon):
-    data = {"lat": lat, "lon": lon, "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
-    if os.path.exists("positions.json"):
-        with open("positions.json", "r") as f:
-            trail = json.load(f)
-    else:
-        trail = []
-    trail.append(data)
-    with open("positions.json", "w") as f:
-        json.dump(trail, f, indent=2)
-    print("📌 Appended:", data)
-
-def push_to_git():
-    subprocess.run(["git", "add", "positions.json"])
-    subprocess.run(["git", "commit", "-m", "🛰️ Test update"], shell=True)
-    subprocess.run(["git", "push"], shell=True)
-    print("📤 Pushed to GitHub.")
-
-if __name__ == "__main__":
-    while True:
-        lat, lon = read_position()
-        if lat and lon:
-            append_position(lat, lon)
-            push_to_git()
-        else:
-            print("⚠️ No GPS fix. Will try again.")
-
-        print("⏱️ Waiting 60 seconds before next update...")
-        time.sleep(60)
