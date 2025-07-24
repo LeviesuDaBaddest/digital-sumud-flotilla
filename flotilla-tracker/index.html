@@ -2,23 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Digital Sumud Flotilla</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; }
-    #map { height: 100%; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; background: #111; color: white; font-family: sans-serif; }
+    #map { position: absolute; top: 0; bottom: 0; right: 0; left: 250px; }
+    #sidebar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 250px;
+      background: #111;
+      color: #fff;
+      overflow-y: auto;
+      border-right: 2px solid #222;
+      padding: 20px 15px;
+      z-index: 999;
+    }
+    h1 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      color: #e91e63;
+    }
+    .martyr {
+      margin-bottom: 8px;
+      border-left: 3px solid #e91e63;
+      padding-left: 8px;
+    }
   </style>
 </head>
 <body>
+  <div id="sidebar">
+    <h1>Digital Sumud Flotilla</h1>
+    <div id="martyr-list">
+      <div class="martyr">Shireen Abu Akleh</div>
+      <div class="martyr">Hind Rajab</div>
+      <div class="martyr">Refaat Alareer</div>
+      <div class="martyr">Razan Al-Najjar</div>
+      <div class="martyr">Mohammed Al-Durra</div>
+      <div class="martyr">Aya Al-Banna</div>
+      <div class="martyr">Yazan Al-Masri</div>
+      <div class="martyr">Layan Al-Sadeq</div>
+      <div class="martyr">Ahmed Abu Daqqa</div>
+      <!-- Add more names as needed -->
+    </div>
+  </div>
   <div id="map"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([34.7, 33.2], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    fetch('position.json').then(res => res.json()).then(data => {
-      L.marker([data.lat, data.lon]).addTo(map).bindPopup('Hope').openPopup();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const boatIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/252/252025.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
     });
+
+    async function loadPositions() {
+      const res = await fetch("positions.json");
+      const positions = await res.json();
+      const latlngs = positions.map(p => [p.lat, p.lon]);
+      if (latlngs.length > 0) {
+        const latest = latlngs[latlngs.length - 1];
+        L.marker(latest, { icon: boatIcon }).addTo(map).bindPopup("Hope");
+        L.polyline(latlngs, { color: "#e91e63" }).addTo(map);
+        map.setView(latest, 7);
+      }
+    }
+
+    loadPositions();
   </script>
 </body>
 </html>
