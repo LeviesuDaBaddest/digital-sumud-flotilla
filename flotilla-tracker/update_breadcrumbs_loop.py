@@ -22,7 +22,7 @@ def read_position():
                         lon = -lon
                     return lat, lon
     except Exception as e:
-        print("NMEA read error:", e)
+        print("❌ NMEA read error:", e)
         return None, None
 
 def append_position(lat, lon):
@@ -35,7 +35,7 @@ def append_position(lat, lon):
     trail.append(data)
     with open("positions.json", "w") as f:
         json.dump(trail, f, indent=2)
-    print("Appended:", data)
+    print("📌 Appended:", data)
 
 def push_to_git():
     subprocess.run(["git", "add", "positions.json"])
@@ -44,11 +44,13 @@ def push_to_git():
 
 if __name__ == "__main__":
     while True:
+        print("⏳ Waiting for NMEA data from Sailaway...")
         lat, lon = read_position()
         if lat and lon:
+            print(f"✅ Got position: {lat}, {lon}")
             append_position(lat, lon)
             push_to_git()
+            print("📤 Pushed to GitHub. Waiting 15 minutes...")
         else:
-            print("No GPS fix. Will try again.")
-        print("Waiting 15 minutes...")
+            print("⚠️ No GPS fix. Retrying in 15 minutes...")
         time.sleep(900)
