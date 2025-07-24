@@ -43,7 +43,12 @@ def push_to_git():
     subprocess.run(["git", "push"], shell=True)
 
 if __name__ == "__main__":
-    lat, lon = read_position()
-    if lat and lon:
-        append_position(lat, lon)
-        push_to_git()
+    while True:
+        lat, lon = read_position()
+        if lat and lon:
+            append_position(lat, lon)
+            push_to_git()
+        else:
+            print("No GPS fix. Will try again.")
+        print("Waiting 15 minutes...")
+        time.sleep(900)
