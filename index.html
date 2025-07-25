@@ -16,21 +16,21 @@
     }
     #map {
       height: 100%;
-      width: calc(100% - 250px);
+      width: calc(100% - 300px);
       float: right;
     }
     #sidebar {
-      width: 250px;
+      width: 300px;
       background: #111;
       height: 100%;
       float: left;
-      padding: 10px;
+      padding: 15px;
       box-sizing: border-box;
       overflow-y: auto;
     }
     h1 {
       font-size: 18px;
-      margin: 5px 0;
+      margin: 5px 0 10px;
       text-align: center;
     }
     .flashing-dot {
@@ -46,15 +46,33 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+    ul li {
+      padding: 2px 0;
+      border-bottom: 1px solid #333;
+    }
+    .section {
+      margin-top: 15px;
+      padding: 10px;
+      background: #222;
+      border-radius: 6px;
+    }
     label {
       display: block;
-      margin-top: 10px;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
   <div id="sidebar">
     <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
+
     <ul>
       <li>Shireen Abu Akleh</li>
       <li>Hind Rajab</li>
@@ -66,8 +84,23 @@
       <li>Layan Al-Sadeq</li>
       <li>Ahmed Abu Daqqa</li>
     </ul>
+
+    <div class="section">
+      <h3>📜 Martyr Poems & Quotes</h3>
+      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope, let it be a tale."</p>
+      <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to people."</p>
+      <p><b>Mohammed Al-Durra:</b> "I am just a child!"</p>
+    </div>
+
+    <div class="section">
+      <h3>🕊️ Why This Flotilla Sails</h3>
+      <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
+      <p>Real-world counterpart: <a style="color: #ff4081;" href="https://freedomflotilla.org" target="_blank">Freedom Flotilla Tracker</a></p>
+    </div>
+
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
+
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
