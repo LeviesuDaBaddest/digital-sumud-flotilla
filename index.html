@@ -8,7 +8,15 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; width: 100%; background: #111; color: white; font-family: sans-serif; }
-    #map { position: absolute; top: 0; bottom: 0; right: 0; left: 270px; }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 270px;
+    }
+
     #sidebar {
       position: absolute;
       left: 0;
@@ -22,17 +30,27 @@
       padding: 20px 15px;
       z-index: 999;
     }
+
     h1 {
       font-size: 1.3rem;
       margin-bottom: 15px;
       text-transform: uppercase;
       color: #e91e63;
     }
+
+    .martyr-title {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #e91e63;
+    }
+
     .martyr {
       margin-bottom: 8px;
       border-left: 3px solid #e91e63;
       padding-left: 8px;
     }
+
     details {
       margin-top: 20px;
       background: #1a1a1a;
@@ -40,31 +58,52 @@
       border-radius: 6px;
       border: 1px solid #333;
     }
+
     summary {
       font-weight: bold;
       cursor: pointer;
       color: #e91e63;
     }
+
     a {
       color: #e91e63;
       text-decoration: none;
     }
+
     #controls {
       margin-top: 15px;
       font-size: 0.9rem;
     }
+
     #flag {
       margin-top: 20px;
       width: 100%;
       max-width: 100px;
     }
-    /* Flashing effect for marker */
-    .flashing-icon {
-      animation: flash 1s infinite;
+
+    /* Faint timestamp labels */
+    .timestamp-label {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 4px;
+      border-radius: 3px;
     }
-    @keyframes flash {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(2); }
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      #sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 2px solid #222;
+      }
+      #map {
+        left: 0;
+        top: auto;
+        height: calc(100% - 300px);
+      }
     }
   </style>
 </head>
@@ -72,6 +111,7 @@
   <div id="sidebar">
     <h1>🚢 Digital Sumud Flotilla</h1>
 
+    <div class="martyr-title">In Memory Of</div>
     <div id="martyr-list">
       <div class="martyr">Shireen Abu Akleh</div>
       <div class="martyr">Hind Rajab</div>
@@ -115,15 +155,17 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const boatIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/252/252025.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
-      className: 'flashing-icon' // Adds flashing class
+    // Replace ship icon with green dot
+    const greenDot = L.circleMarker([0,0], {
+      radius: 7,
+      color: "#0f0",
+      fillColor: "#0f0",
+      fillOpacity: 0.9
     });
 
     let breadcrumbLine = null;
     let currentMarker = null;
+    let timestampMarkers = [];
     const toggleBreadcrumbs = document.getElementById("toggleBreadcrumbs");
 
     async function loadPositions() {
@@ -131,40 +173,63 @@
       const positions = await res.json();
       const latlngs = positions.map(p => [p.lat, p.lon]);
 
-      // Clear old layers
+      // Remove old layers
       if (breadcrumbLine) map.removeLayer(breadcrumbLine);
       if (currentMarker) map.removeLayer(currentMarker);
+      timestampMarkers.forEach(m => map.removeLayer(m));
+      timestampMarkers = [];
 
       if (latlngs.length > 0) {
-        // Marker for latest point (with flashing effect)
-        const latest = latlngs[latlngs.length - 1];
-        currentMarker = L.marker(latest, { icon: boatIcon }).addTo(map).bindPopup("⛵ Hope");
+        const latest = positions[positions.length - 1];
+        currentMarker = L.circleMarker([latest.lat, latest.lon], {
+          radius: 7,
+          color: "#0f0",
+          fillColor: "#0f0",
+          fillOpacity: 0.9
+        }).addTo(map).bindPopup("⛵ Hope");
 
-        // Breadcrumb trail
         breadcrumbLine = L.polyline(latlngs, { color: "#e91e63", weight: 4 });
         if (toggleBreadcrumbs.checked) breadcrumbLine.addTo(map);
 
-        // Fit view to trail bounds
+        // Add faint timestamps along breadcrumb trail
+        positions.forEach(p => {
+          const label = L.marker([p.lat, p.lon], {
+            icon: L.divIcon({
+              className: "timestamp-label",
+              html: new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+              iconSize: [40, 12],
+              iconAnchor: [20, -5]
+            })
+          });
+          label.addTo(map);
+          timestampMarkers.push(label);
+        });
+
         if (latlngs.length > 1) {
           map.fitBounds(breadcrumbLine.getBounds(), { padding: [50, 50] });
         } else {
-          map.setView(latest, 7);
+          map.setView([latest.lat, latest.lon], 7);
         }
       }
     }
 
-    // Toggle breadcrumb visibility
     toggleBreadcrumbs.addEventListener("change", function () {
       if (breadcrumbLine) {
         if (this.checked) {
           breadcrumbLine.addTo(map);
+          timestampMarkers.forEach(m => m.addTo(map));
         } else {
           map.removeLayer(breadcrumbLine);
+          timestampMarkers.forEach(m => map.removeLayer(m));
         }
       }
     });
 
-    // Load positions initially and refresh every 2 minutes
+    // Resize map properly when screen size changes
+    window.addEventListener('resize', () => {
+      map.invalidateSize();
+    });
+
     loadPositions();
     setInterval(loadPositions, 120000);
   </script>
