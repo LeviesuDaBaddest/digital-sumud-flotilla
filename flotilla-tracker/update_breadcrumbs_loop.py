@@ -27,18 +27,22 @@ def read_position():
     except Exception as e:
         print("❌ NMEA read error:", e)
         return None, None
-
 def append_position(lat, lon):
     data = {
         "lat": lat,
         "lon": lon,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "heartbeat": str(time.time())  # 👈 Forces JSON to change every run
+        "updated": int(time.time()) % 2 == 0  # 🌀 Toggles true/false every run
     }
-    with open("position.json", "w") as f:
-        json.dump(data, f, indent=2)
-    print("📌 Wrote forced-update position:", data)
-
+    if os.path.exists("positions.json"):
+        with open("positions.json", "r") as f:
+            trail = json.load(f)
+    else:
+        trail = []
+    trail.append(data)
+    with open("positions.json", "w") as f:
+        json.dump(trail, f, indent=2)
+    print("📌 Appended with forced update:", data)
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
     subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"], shell=True)
@@ -54,4 +58,4 @@ if __name__ == "__main__":
         else:
             print("⚠️ No GPS fix. Will try again.")
         print("⏱️ Waiting 15 minutes before next update...")
-        time.sleep(900)
+        time.sleep(30)  # just for testing
