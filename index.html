@@ -1,250 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Sumud Flotilla</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; width: 100%; background: #111; color: white; font-family: sans-serif; }
-
-    #map {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 270px;
-      z-index: 1;
-    }
-
-    #sidebar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 270px;
-      background: #111;
-      color: #fff;
-      overflow-y: auto;
-      border-right: 2px solid #222;
-      padding: 20px 15px;
-      z-index: 999;
-      transition: transform 0.3s ease;
-    }
-
-    #sidebar.hidden {
-      transform: translateX(-100%);
-    }
-
-    #menu-toggle {
-      display: none;
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1000;
-      background: #e91e63;
-      border: none;
-      padding: 8px 12px;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    h1 {
-      font-size: 1.3rem;
-      margin-bottom: 15px;
-      text-transform: uppercase;
-      color: #e91e63;
-    }
-
-    .martyr-title {
-      font-size: 1rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #e91e63;
-    }
-
-    .martyr {
-      margin-bottom: 8px;
-      border-left: 3px solid #e91e63;
-      padding-left: 8px;
-    }
-
-    details {
-      margin-top: 20px;
-      background: #1a1a1a;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #333;
-    }
-
-    summary {
-      font-weight: bold;
-      cursor: pointer;
-      color: #e91e63;
-    }
-
-    a {
-      color: #e91e63;
-      text-decoration: none;
-    }
-
-    #controls {
-      margin-top: 15px;
-      font-size: 0.9rem;
-    }
-
-    #flag {
-      margin-top: 20px;
+    html, body {
+      margin: 0;
+      height: 100%;
       width: 100%;
-      max-width: 100px;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
     }
-
-    .timestamp-label {
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.5);
-      background: rgba(0, 0, 0, 0.4);
-      padding: 2px 4px;
-      border-radius: 3px;
+    #map {
+      height: 100%;
+      width: calc(100% - 250px);
+      float: right;
     }
-
-    /* Mobile: collapsible sidebar */
-    @media (max-width: 768px) {
-      #map {
-        left: 0;
-      }
-      #menu-toggle {
-        display: block;
-      }
+    #sidebar {
+      width: 250px;
+      background: #111;
+      height: 100%;
+      float: left;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 5px 0;
+      text-align: center;
+    }
+    .flashing-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: limegreen;
+      border-radius: 50%;
+      animation: flash 1s infinite;
+      vertical-align: middle;
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    label {
+      display: block;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <button id="menu-toggle">☰ Menu</button>
-  
   <div id="sidebar">
-    <h1>🚢 Digital Sumud Flotilla</h1>
-
-    <div class="martyr-title">In Memory Of</div>
-    <div id="martyr-list">
-      <div class="martyr">Shireen Abu Akleh</div>
-      <div class="martyr">Hind Rajab</div>
-      <div class="martyr">Refaat Alareer</div>
-      <div class="martyr">Razan Al-Najjar</div>
-      <div class="martyr">Mohammed Al-Durra</div>
-      <div class="martyr">Aya Al-Banna</div>
-      <div class="martyr">Yazan Al-Masri</div>
-      <div class="martyr">Layan Al-Sadeq</div>
-      <div class="martyr">Ahmed Abu Daqqa</div>
-    </div>
-
-    <details>
-      <summary>📜 Martyr Poems & Quotes</summary>
-      <p><strong>Refaat Alareer:</strong><br>“If I must die, let it bring hope, let it be a tale.”</p>
-      <p><strong>Shireen Abu Akleh:</strong><br>“I chose journalism to be close to people.”</p>
-      <p><strong>Mohammed Al-Durra:</strong><br>“I am just a child!”</p>
-    </details>
-
-    <details>
-      <summary>🕊️ Why This Flotilla Sails</summary>
-      <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
-      <p>Real-world counterpart: <a href="https://freedomflotilla.org/ffc-tracker/" target="_blank">Freedom Flotilla Tracker ↗</a></p>
-    </details>
-
-    <div id="controls">
-      <label><input type="checkbox" id="toggleBreadcrumbs" checked /> Show Breadcrumbs</label>
-    </div>
-
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Flag_of_Palestine.svg" alt="Palestinian Flag" id="flag" />
+    <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
+    <ul>
+      <li>Shireen Abu Akleh</li>
+      <li>Hind Rajab</li>
+      <li>Refaat Alareer</li>
+      <li>Razan Al-Najjar</li>
+      <li>Mohammed Al-Durra</li>
+      <li>Aya Al-Banna</li>
+      <li>Yazan Al-Masri</li>
+      <li>Layan Al-Sadeq</li>
+      <li>Ahmed Abu Daqqa</li>
+    </ul>
+    <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
-
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    // Sidebar toggle
-    const sidebar = document.getElementById("sidebar");
-    const menuToggle = document.getElementById("menu-toggle");
-    menuToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("hidden");
-      setTimeout(() => map.invalidateSize(), 300);
-    });
+    const map = L.map('map').setView([32.6, 28.9], 6);
 
-    // Leaflet map setup
-    const map = L.map('map').setView([34.7, 33.2], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let breadcrumbLine = null;
-    let currentMarker = null;
-    let timestampMarkers = [];
-    const toggleBreadcrumbs = document.getElementById("toggleBreadcrumbs");
+    let breadcrumbLayer = null;
+    let marker = null;
 
     async function loadPositions() {
-      const res = await fetch("positions.json?nocache=" + Date.now());
+      const res = await fetch('positions.json');
       const positions = await res.json();
-      const latlngs = positions.map(p => [p.lat, p.lon]);
 
-      // Remove old layers
-      if (breadcrumbLine) map.removeLayer(breadcrumbLine);
-      if (currentMarker) map.removeLayer(currentMarker);
-      timestampMarkers.forEach(m => map.removeLayer(m));
-      timestampMarkers = [];
+      if (!positions || positions.length === 0) return;
 
-      if (latlngs.length > 0) {
-        const latest = positions[positions.length - 1];
-        currentMarker = L.circleMarker([latest.lat, latest.lon], {
-          radius: 7,
-          color: "#0f0",
-          fillColor: "#0f0",
-          fillOpacity: 0.9
-        }).addTo(map).bindPopup("⛵ Hope");
+      // Show latest position marker
+      const last = positions[positions.length - 1];
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([last.lat, last.lon]).addTo(map);
 
-        breadcrumbLine = L.polyline(latlngs, { color: "#e91e63", weight: 4 });
-        if (toggleBreadcrumbs.checked) breadcrumbLine.addTo(map);
-
-        // Add faint timestamps
-        positions.forEach(p => {
-          const label = L.marker([p.lat, p.lon], {
-            icon: L.divIcon({
-              className: "timestamp-label",
-              html: new Date(p.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-              iconSize: [40, 12],
-              iconAnchor: [20, -5]
-            })
-          });
-          label.addTo(map);
-          timestampMarkers.push(label);
-        });
-
-        if (latlngs.length > 1) {
-          map.fitBounds(breadcrumbLine.getBounds(), { padding: [50, 50] });
-        } else {
-          map.setView([latest.lat, latest.lon], 7);
-        }
+      // Breadcrumbs
+      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
+      if (showBreadcrumbs) {
+        const latlngs = positions.map(p => [p.lat, p.lon]);
+        breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
       }
     }
 
-    toggleBreadcrumbs.addEventListener("change", function () {
-      if (breadcrumbLine) {
-        if (this.checked) {
-          breadcrumbLine.addTo(map);
-          timestampMarkers.forEach(m => m.addTo(map));
-        } else {
-          map.removeLayer(breadcrumbLine);
-          timestampMarkers.forEach(m => map.removeLayer(m));
-        }
-      }
-    });
+    document.getElementById('breadcrumbsToggle').addEventListener('change', loadPositions);
 
-    window.addEventListener('load', () => map.invalidateSize());
-    window.addEventListener('resize', () => map.invalidateSize());
-
+    // Initial load & refresh every 30 seconds
     loadPositions();
-    setInterval(loadPositions, 120000);
+    setInterval(loadPositions, 30000);
   </script>
 </body>
 </html>
