@@ -15,7 +15,7 @@
       bottom: 0;
       right: 0;
       left: 270px;
-      z-index: 1; /* make sure map is behind sidebar */
+      z-index: 1;
     }
 
     #sidebar {
@@ -29,7 +29,27 @@
       overflow-y: auto;
       border-right: 2px solid #222;
       padding: 20px 15px;
-      z-index: 1000; /* ensure sidebar is on top */
+      z-index: 999;
+      transition: transform 0.3s ease;
+    }
+
+    #sidebar.hidden {
+      transform: translateX(-100%);
+    }
+
+    #menu-toggle {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      background: #e91e63;
+      border: none;
+      padding: 8px 12px;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
     }
 
     h1 {
@@ -82,7 +102,6 @@
       max-width: 100px;
     }
 
-    /* Faint timestamp labels */
     .timestamp-label {
       font-size: 0.7rem;
       color: rgba(255, 255, 255, 0.5);
@@ -91,32 +110,20 @@
       border-radius: 3px;
     }
 
-    /* Blinking dot */
-    .blinking-dot {
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      50% { opacity: 0.3; }
-    }
-
-    /* Mobile responsive styles */
+    /* Mobile: collapsible sidebar */
     @media (max-width: 768px) {
-      #sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 2px solid #222;
-      }
       #map {
         left: 0;
-        top: auto;
-        height: calc(100% - 300px);
+      }
+      #menu-toggle {
+        display: block;
       }
     }
   </style>
 </head>
 <body>
+  <button id="menu-toggle">☰ Menu</button>
+  
   <div id="sidebar">
     <h1>🚢 Digital Sumud Flotilla</h1>
 
@@ -150,7 +157,6 @@
       <label><input type="checkbox" id="toggleBreadcrumbs" checked /> Show Breadcrumbs</label>
     </div>
 
-    <!-- Palestinian flag -->
     <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Flag_of_Palestine.svg" alt="Palestinian Flag" id="flag" />
   </div>
 
@@ -158,8 +164,16 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([34.7, 33.2], 6);
+    // Sidebar toggle
+    const sidebar = document.getElementById("sidebar");
+    const menuToggle = document.getElementById("menu-toggle");
+    menuToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("hidden");
+      setTimeout(() => map.invalidateSize(), 300);
+    });
 
+    // Leaflet map setup
+    const map = L.map('map').setView([34.7, 33.2], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -183,17 +197,16 @@
       if (latlngs.length > 0) {
         const latest = positions[positions.length - 1];
         currentMarker = L.circleMarker([latest.lat, latest.lon], {
-          radius: 9,
+          radius: 7,
           color: "#0f0",
           fillColor: "#0f0",
-          fillOpacity: 0.9,
-          className: "blinking-dot"
+          fillOpacity: 0.9
         }).addTo(map).bindPopup("⛵ Hope");
 
         breadcrumbLine = L.polyline(latlngs, { color: "#e91e63", weight: 4 });
         if (toggleBreadcrumbs.checked) breadcrumbLine.addTo(map);
 
-        // Add faint timestamps along breadcrumb trail
+        // Add faint timestamps
         positions.forEach(p => {
           const label = L.marker([p.lat, p.lon], {
             icon: L.divIcon({
@@ -227,10 +240,8 @@
       }
     });
 
-    // Resize map properly when screen size changes
-    window.addEventListener('resize', () => {
-      map.invalidateSize();
-    });
+    window.addEventListener('load', () => map.invalidateSize());
+    window.addEventListener('resize', () => map.invalidateSize());
 
     loadPositions();
     setInterval(loadPositions, 120000);
