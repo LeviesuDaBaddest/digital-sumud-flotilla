@@ -53,10 +53,18 @@
       margin-top: 15px;
       font-size: 0.9rem;
     }
-    #handala {
+    #flag {
       margin-top: 20px;
       width: 100%;
       max-width: 100px;
+    }
+    /* Flashing effect for marker */
+    .flashing-icon {
+      animation: flash 1s infinite;
+    }
+    @keyframes flash {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(2); }
     }
   </style>
 </head>
@@ -93,7 +101,8 @@
       <label><input type="checkbox" id="toggleBreadcrumbs" checked /> Show Breadcrumbs</label>
     </div>
 
-    <img src="https://freesvg.org/img/handala_1724931303.png" alt="Handala" id="handala" />
+    <!-- Palestinian flag -->
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/00/Flag_of_Palestine.svg" alt="Palestinian Flag" id="flag" />
   </div>
 
   <div id="map"></div>
@@ -109,37 +118,55 @@
     const boatIcon = L.icon({
       iconUrl: 'https://cdn-icons-png.flaticon.com/512/252/252025.png',
       iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      iconAnchor: [16, 16],
+      className: 'flashing-icon' // Adds flashing class
     });
 
-    let breadcrumbLine;
+    let breadcrumbLine = null;
+    let currentMarker = null;
+    const toggleBreadcrumbs = document.getElementById("toggleBreadcrumbs");
 
     async function loadPositions() {
-      const res = await fetch("positions.json");
+      const res = await fetch("positions.json?nocache=" + Date.now());
       const positions = await res.json();
       const latlngs = positions.map(p => [p.lat, p.lon]);
 
-      if (latlngs.length > 0) {
-        const latest = latlngs[latlngs.length - 1];
-        L.marker(latest, { icon: boatIcon }).addTo(map).bindPopup("⛵ Hope");
+      // Clear old layers
+      if (breadcrumbLine) map.removeLayer(breadcrumbLine);
+      if (currentMarker) map.removeLayer(currentMarker);
 
-        breadcrumbLine = L.polyline(latlngs, { color: "#e91e63" }).addTo(map);
-        map.setView(latlngs[latlngs.length - 1], 7);
+      if (latlngs.length > 0) {
+        // Marker for latest point (with flashing effect)
+        const latest = latlngs[latlngs.length - 1];
+        currentMarker = L.marker(latest, { icon: boatIcon }).addTo(map).bindPopup("⛵ Hope");
+
+        // Breadcrumb trail
+        breadcrumbLine = L.polyline(latlngs, { color: "#e91e63", weight: 4 });
+        if (toggleBreadcrumbs.checked) breadcrumbLine.addTo(map);
+
+        // Fit view to trail bounds
+        if (latlngs.length > 1) {
+          map.fitBounds(breadcrumbLine.getBounds(), { padding: [50, 50] });
+        } else {
+          map.setView(latest, 7);
+        }
       }
     }
 
     // Toggle breadcrumb visibility
-    document.getElementById("toggleBreadcrumbs").addEventListener("change", function () {
+    toggleBreadcrumbs.addEventListener("change", function () {
       if (breadcrumbLine) {
         if (this.checked) {
-          map.addLayer(breadcrumbLine);
+          breadcrumbLine.addTo(map);
         } else {
           map.removeLayer(breadcrumbLine);
         }
       }
     });
 
+    // Load positions initially and refresh every 2 minutes
     loadPositions();
+    setInterval(loadPositions, 120000);
   </script>
 </body>
 </html>
