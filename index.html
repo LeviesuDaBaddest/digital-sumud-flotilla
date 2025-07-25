@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digital Sumud Flotilla</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
@@ -13,6 +12,7 @@
       background: black;
       color: white;
       font-family: Arial, sans-serif;
+      overflow: hidden;
     }
     #map {
       height: 100%;
@@ -30,8 +30,14 @@
     }
     h1 {
       font-size: 18px;
-      margin: 5px 0 10px;
+      margin: 5px 0 5px;
       text-align: center;
+    }
+    h2 {
+      font-size: 14px;
+      margin: 0 0 10px;
+      text-align: center;
+      color: #ff8080;
     }
     .flashing-dot {
       display: inline-block;
@@ -72,7 +78,7 @@
 <body>
   <div id="sidebar">
     <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
-
+    <h2>In Memory Of</h2>
     <ul>
       <li>Shireen Abu Akleh</li>
       <li>Hind Rajab</li>
