@@ -11,41 +11,67 @@ def read_position():
         s.connect(("localhost", 10111))
         s.settimeout(10)
         while True:
-            line = s.recv(1024).decode(errors="ignore")
-            print("📡 Got NMEA line:", line.strip())
-            if line.startswith("$GPRMC"):
-                parts = line.strip().split(",")
-                if parts[3] and parts[5]:
-                    lat = float(parts[3][:2]) + float(parts[3][2:]) / 60.0
-                    if parts[4] == "S":
-                        lat = -lat
-                    lon = float(parts[5][:3]) + float(parts[5][3:]) / 60.0
-                    if parts[6] == "W":
-                        lon = -lon
-                    print(f"✅ Got position: {lat}, {lon}")
-                    return lat, lon
+            raw = s.recv(1024).decode(errors="ignore")
+            lines = raw.splitlines()
+            for line in lines:
+                line = line.strip()
+                print("📡 Got NMEA line:", line)
+                if line.startswith("$GPRMC"):
+                    parts = line.split(",")
+                    print(f"🔍 Raw parts: {parts}")
+                    if len(parts) < 7:
+                        print("⚠️ Incomplete GPRMC line.")
+                        continue
+                    try:
+                        lat_raw = parts[3]
+                        lat_dir = parts[4]
+                        lon_raw = parts[5]
+                        lon_dir = parts[6]
+                        if not lat_raw or not lon_raw:
+                            print("⚠️ Missing lat/lon in GPRMC.")
+                            continue
+                        lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
+                        if lat_dir == "S":
+                            lat = -lat
+                        lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
+                        if lon_dir == "W":
+                            lon = -lon
+                        print(f"✅ Got position: {lat}, {lon}")
+                        return lat, lon
+                    except Exception as e:
+                        print("❌ Error parsing GPRMC:", e)
     except Exception as e:
         print("❌ NMEA read error:", e)
-        return None, None
+    return None, None
+
 def append_position(lat, lon):
     data = {
         "lat": lat,
         "lon": lon,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "updated": int(time.time()) % 2 == 0  # 🌀 Toggles true/false every run
+        "updated": True
     }
     if os.path.exists("positions.json"):
         with open("positions.json", "r") as f:
-            trail = json.load(f)
+            try:
+                trail = json.load(f)
+                for point in trail:
+                    point["updated"] = False  # clear previous flags
+            except:
+                print("⚠️ Could not read positions.json — starting fresh.")
+                trail = []
     else:
         trail = []
     trail.append(data)
     with open("positions.json", "w") as f:
         json.dump(trail, f, indent=2)
-    print("📌 Appended with forced update:", data)
+    print("📌 Appended new position:", data)
+
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
-    subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"], shell=True)
+    result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"], shell=True)
+    if result.returncode != 0:
+        print("⚠️ Nothing to commit (no change in file?)")
     subprocess.run(["git", "push"], shell=True)
     print("📤 Pushed to GitHub.")
 
@@ -58,4 +84,4 @@ if __name__ == "__main__":
         else:
             print("⚠️ No GPS fix. Will try again.")
         print("⏱️ Waiting 15 minutes before next update...")
-        time.sleep(30)  # just for testing
+        time.sleep(900)  # 15 minutes
