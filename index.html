@@ -15,6 +15,7 @@
       bottom: 0;
       right: 0;
       left: 270px;
+      z-index: 1; /* make sure map is behind sidebar */
     }
 
     #sidebar {
@@ -28,7 +29,7 @@
       overflow-y: auto;
       border-right: 2px solid #222;
       padding: 20px 15px;
-      z-index: 999;
+      z-index: 1000; /* ensure sidebar is on top */
     }
 
     h1 {
@@ -88,6 +89,14 @@
       background: rgba(0, 0, 0, 0.4);
       padding: 2px 4px;
       border-radius: 3px;
+    }
+
+    /* Blinking dot */
+    .blinking-dot {
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0.3; }
     }
 
     /* Mobile responsive styles */
@@ -155,14 +164,6 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Replace ship icon with green dot
-    const greenDot = L.circleMarker([0,0], {
-      radius: 7,
-      color: "#0f0",
-      fillColor: "#0f0",
-      fillOpacity: 0.9
-    });
-
     let breadcrumbLine = null;
     let currentMarker = null;
     let timestampMarkers = [];
@@ -182,10 +183,11 @@
       if (latlngs.length > 0) {
         const latest = positions[positions.length - 1];
         currentMarker = L.circleMarker([latest.lat, latest.lon], {
-          radius: 7,
+          radius: 9,
           color: "#0f0",
           fillColor: "#0f0",
-          fillOpacity: 0.9
+          fillOpacity: 0.9,
+          className: "blinking-dot"
         }).addTo(map).bindPopup("⛵ Hope");
 
         breadcrumbLine = L.polyline(latlngs, { color: "#e91e63", weight: 4 });
