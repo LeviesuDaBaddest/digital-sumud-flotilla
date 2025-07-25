@@ -28,25 +28,20 @@ def read_position():
         print("❌ NMEA read error:", e)
         return None, None
 
-def append_breadcrumb(lat, lon):
+def append_position(lat, lon):
     data = {
         "lat": lat,
         "lon": lon,
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "heartbeat": str(time.time())  # 👈 Forces JSON to change every run
     }
-    if os.path.exists("positions.json"):
-        with open("positions.json", "r") as f:
-            trail = json.load(f)
-    else:
-        trail = []
-    trail.append(data)
-    with open("positions.json", "w") as f:
-        json.dump(trail, f, indent=2)
-    print("📌 Appended breadcrumb:", data)
+    with open("position.json", "w") as f:
+        json.dump(data, f, indent=2)
+    print("📌 Wrote forced-update position:", data)
 
 def push_to_git():
-    subprocess.run(["git", "add", "positions.json"])
-    subprocess.run(["git", "commit", "-m", "🛰️ Breadcrumb update"], shell=True)
+    subprocess.run(["git", "add", "-A"])
+    subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"], shell=True)
     subprocess.run(["git", "push"], shell=True)
     print("📤 Pushed to GitHub.")
 
@@ -54,7 +49,7 @@ if __name__ == "__main__":
     while True:
         lat, lon = read_position()
         if lat and lon:
-            append_breadcrumb(lat, lon)
+            append_position(lat, lon)
             push_to_git()
         else:
             print("⚠️ No GPS fix. Will try again.")
