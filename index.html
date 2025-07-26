@@ -2,208 +2,135 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Digital Sumud Flotilla</title>
+  <title>Digital Sumud Flotilla Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      width: 100%;
-      background: black;
-      color: white;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
-    #map {
-      height: calc(100% - 80px);
-      width: calc(100% - 300px);
-      float: right;
-    }
-    #sidebar {
-      width: 300px;
-      background: #111;
-      height: 100%;
-      float: left;
-      padding: 15px;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-    h1 {
-      font-size: 18px;
-      margin: 5px 0 5px;
-      text-align: center;
-    }
-    h2 {
-      font-size: 14px;
-      margin: 0 0 10px;
-      text-align: center;
-      color: #ff8080;
-    }
-    .flashing-dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      background: limegreen;
-      border-radius: 50%;
-      animation: flash 1s infinite;
-      vertical-align: middle;
-    }
-    @keyframes flash {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 15px 0;
-    }
-    ul li {
-      padding: 2px 0;
-      border-bottom: 1px solid #333;
-    }
-    .section {
-      margin-top: 15px;
-      background: #222;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .section summary {
-      padding: 8px 10px;
-      cursor: pointer;
-      background: #333;
-    }
-    .section p {
-      padding: 5px 10px;
-      margin: 0;
-    }
-    label {
-      display: block;
-      margin-top: 15px;
-      text-align: center;
-      font-size: 14px;
-    }
-    #slider-container {
-      width: calc(100% - 300px);
-      height: 80px;
-      background: #111;
-      position: absolute;
-      bottom: 0;
-      right: 0;
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; background: #111; color: #eee; }
+    #map { height: 80vh; }
+    #controls {
       padding: 10px;
-      box-sizing: border-box;
+      background: #222;
+      color: #fff;
       text-align: center;
     }
-    input[type="range"] {
-      width: 90%;
+    #date-range {
+      padding: 8px;
+      text-align: center;
+      font-size: 1em;
+      background: #222;
+      color: #ddd;
+      display: none; /* Hidden by default */
     }
-    #time-label {
-      display: block;
-      font-size: 14px;
-      margin-top: 5px;
+    select {
+      padding: 5px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #666;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
-    <h2>In Memory Of</h2>
-    <ul>
-      <li>Shireen Abu Akleh</li>
-      <li>Hind Rajab</li>
-      <li>Refaat Alareer</li>
-      <li>Razan Al-Najjar</li>
-      <li>Mohammed Al-Durra</li>
-      <li>Aya Al-Banna</li>
-      <li>Yazan Al-Masri</li>
-      <li>Layan Al-Sadeq</li>
-      <li>Ahmed Abu Daqqa</li>
-    </ul>
-
-    <details class="section">
-      <summary>📜 Martyr Poems & Quotes</summary>
-      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope, let it be a tale."</p>
-      <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to people."</p>
-      <p><b>Mohammed Al-Durra:</b> "I am just a child!"</p>
-    </details>
-
-    <details class="section">
-      <summary>🕊️ Why This Flotilla Sails</summary>
-      <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
-      <p>Real-world counterpart: <a style="color: #ff4081;" href="https://freedomflotilla.org" target="_blank">Freedom Flotilla Tracker</a></p>
-    </details>
-
-    <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
+  <div id="controls">
+    <label for="voyageSelector">Select Voyage: </label>
+    <select id="voyageSelector">
+      <option value="positions.json">Next Voyage (Not yet live)</option>
+      <option value="hope_archive.json">Hope (Archived Voyage)</option>
+    </select>
   </div>
-
   <div id="map"></div>
-  <div id="slider-container">
-    <input type="range" id="timeSlider" min="0" max="0" value="0" step="1">
-    <span id="time-label"></span>
-  </div>
+  <div id="date-range"></div>
 
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([32.6, 28.9], 6);
+    const map = L.map('map').setView([0, 0], 2);
 
+    // Tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      maxZoom: 19
     }).addTo(map);
 
-    let breadcrumbLayer = null;
-    let marker = null;
-    let positions = [];
+    const dateRangeDiv = document.getElementById('date-range');
+    let markers = [];
+    let polyline;
 
-    async function loadPositions() {
-      const res = await fetch('positions.json');
-      positions = await res.json();
-      if (!positions || positions.length === 0) return;
-
-      // Update slider max
-      const slider = document.getElementById('timeSlider');
-      slider.max = positions.length - 1;
-      slider.value = positions.length - 1;
-
-      updateMap(parseInt(slider.value));
+    // Helper to format date
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     }
 
-    function updateMap(index) {
-      if (!positions.length) return;
+    async function loadVoyage(file) {
+      try {
+        const response = await fetch(file + '?v=' + Date.now());
+        const data = await response.json();
 
-      // Slice positions up to slider index
-      const partial = positions.slice(0, index + 1);
+        // Clear old map elements
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        if (polyline) map.removeLayer(polyline);
 
-      // Clear previous
-      if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
-      if (marker) map.removeLayer(marker);
+        // Clear or show date range
+        dateRangeDiv.style.display = 'none';
+        dateRangeDiv.innerText = "";
 
-      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
-      if (showBreadcrumbs && partial.length > 1) {
-        const latlngs = partial.map(p => [p.lat, p.lon]);
-        breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
+        if (data.length === 0) {
+          alert("No positions recorded yet for this voyage!");
+          return;
+        }
+
+        // Determine date range for archive
+        let startDate = null, endDate = null;
+        if (file.includes("hope_archive.json")) {
+          startDate = formatDate(data[0].timestamp);
+          endDate = formatDate(data[data.length - 1].timestamp);
+
+          // Show below map
+          dateRangeDiv.innerText = `Hope Voyage: ${startDate} – ${endDate}`;
+          dateRangeDiv.style.display = 'block';
+        }
+
+        // Plot markers and polyline
+        const latlngs = data.map(pos => [pos.lat, pos.lon]);
+        latlngs.forEach((latlng, i) => {
+          const isLast = i === latlngs.length - 1;
+
+          const marker = L.circleMarker(latlng, {
+            radius: 5,
+            color: isLast ? 'red' : (file.includes('hope_archive.json') ? 'orange' : 'blue')
+          }).addTo(map);
+
+          // Show popup for the last marker in archive
+          if (file.includes("hope_archive.json") && isLast) {
+            marker.bindPopup(`<b>Hope</b><br>${startDate} – ${endDate}`).openPopup();
+          }
+
+          markers.push(marker);
+        });
+
+        // Draw breadcrumb line
+        polyline = L.polyline(latlngs, {
+          color: file.includes("hope_archive.json") ? 'orange' : 'cyan'
+        }).addTo(map);
+
+        map.fitBounds(polyline.getBounds());
+      } catch (err) {
+        console.error("Error loading voyage:", err);
+        alert("Couldn't load voyage data.");
       }
-
-      // Marker at current index
-      const current = positions[index];
-      marker = L.marker([current.lat, current.lon]).addTo(map);
-
-      // Time label
-      const ts = new Date(current.timestamp);
-      const label = `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
-      document.getElementById('time-label').textContent = label;
     }
 
-    document.getElementById('timeSlider').addEventListener('input', (e) => {
-      updateMap(parseInt(e.target.value));
+    // Selector change
+    const selector = document.getElementById('voyageSelector');
+    selector.addEventListener('change', () => {
+      loadVoyage(selector.value);
     });
 
-    document.getElementById('breadcrumbsToggle').addEventListener('change', () => {
-      const slider = document.getElementById('timeSlider');
-      updateMap(parseInt(slider.value));
-    });
-
-    // Initial load & refresh every 30s
-    loadPositions();
-    setInterval(loadPositions, 30000);
+    // Load initial
+    loadVoyage(selector.value);
   </script>
 </body>
 </html>
