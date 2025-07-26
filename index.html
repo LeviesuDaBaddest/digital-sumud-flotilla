@@ -18,6 +18,7 @@
       height: calc(100% - 100px);
       width: calc(100% - 300px);
       float: right;
+      transition: all 0.3s;
     }
     #sidebar {
       width: 300px;
@@ -27,6 +28,7 @@
       padding: 15px;
       box-sizing: border-box;
       overflow-y: auto;
+      transition: transform 0.3s;
     }
     h1 {
       font-size: 18px;
@@ -92,6 +94,7 @@
       padding: 10px;
       box-sizing: border-box;
       text-align: center;
+      transition: all 0.3s;
     }
     input[type="range"] {
       width: 90%;
@@ -119,9 +122,56 @@
       border: 1px solid #444;
       padding: 5px;
     }
+
+    /* Hamburger button */
+    #hamburger {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: #222;
+      color: white;
+      border: none;
+      font-size: 22px;
+      padding: 8px 12px;
+      cursor: pointer;
+      z-index: 1000;
+      border-radius: 5px;
+    }
+
+    /* -------- MOBILE RESPONSIVE -------- */
+    @media screen and (max-width: 768px) {
+      body {
+        overflow: auto;
+      }
+      #sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        z-index: 999;
+      }
+      #sidebar.open {
+        transform: translateX(0);
+      }
+      #map {
+        width: 100%;
+        height: 400px;
+      }
+      #slider-container {
+        width: 100%;
+        position: relative;
+      }
+      #hamburger {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
+  <button id="hamburger">☰</button>
+
   <div id="sidebar">
     <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
@@ -183,12 +233,10 @@
       positions = await res.json();
       if (!positions || positions.length === 0) return;
 
-      // Update slider max
       const slider = document.getElementById('timeSlider');
       slider.max = positions.length - 1;
       slider.value = positions.length - 1;
 
-      // Show date range if archive selected
       const dateRange = document.getElementById('date-range');
       if (currentFile.includes('archive')) {
         const first = new Date(positions[0].timestamp);
@@ -207,7 +255,6 @@
 
       const partial = positions.slice(0, index + 1);
 
-      // Clear previous
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
       if (marker) map.removeLayer(marker);
 
@@ -240,7 +287,13 @@
       loadPositions();
     });
 
-    // Initial load & refresh every 30s (only if live)
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+
     loadPositions();
     setInterval(() => {
       if (!currentFile.includes('archive')) loadPositions();
