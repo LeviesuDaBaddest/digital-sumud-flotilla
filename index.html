@@ -15,25 +15,9 @@
       overflow: hidden;
     }
     #map {
-      height: calc(100% - 60px);
+      height: calc(100% - 80px);
       width: calc(100% - 300px);
       float: right;
-    }
-    #slider-container {
-      width: calc(100% - 300px);
-      height: 60px;
-      float: right;
-      background: #111;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 14px;
-      padding: 5px;
-      box-sizing: border-box;
-    }
-    #slider {
-      width: 70%;
     }
     #sidebar {
       width: 300px;
@@ -79,20 +63,43 @@
     }
     .section {
       margin-top: 15px;
-      padding: 10px;
       background: #222;
       border-radius: 6px;
+      overflow: hidden;
     }
     .section summary {
+      padding: 8px 10px;
       cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
+      background: #333;
+    }
+    .section p {
+      padding: 5px 10px;
+      margin: 0;
     }
     label {
       display: block;
       margin-top: 15px;
       text-align: center;
       font-size: 14px;
+    }
+    #slider-container {
+      width: calc(100% - 300px);
+      height: 80px;
+      background: #111;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input[type="range"] {
+      width: 90%;
+    }
+    #time-label {
+      display: block;
+      font-size: 14px;
+      margin-top: 5px;
     }
   </style>
 </head>
@@ -130,8 +137,8 @@
 
   <div id="map"></div>
   <div id="slider-container">
-    <input type="range" id="slider" min="0" max="0" value="0">
-    <span id="slider-time">--/-- --:--</span>
+    <input type="range" id="timeSlider" min="0" max="0" value="0" step="1">
+    <span id="time-label"></span>
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -142,56 +149,59 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let positions = [];
     let breadcrumbLayer = null;
     let marker = null;
+    let positions = [];
 
     async function loadPositions() {
       const res = await fetch('positions.json');
       positions = await res.json();
       if (!positions || positions.length === 0) return;
 
-      document.getElementById('slider').max = positions.length - 1;
-      updateMap(positions.length - 1);
-    }
+      // Update slider max
+      const slider = document.getElementById('timeSlider');
+      slider.max = positions.length - 1;
+      slider.value = positions.length - 1;
 
-    function formatTime(ts) {
-      const date = new Date(ts.replace(" ", "T"));
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const mins = String(date.getMinutes()).padStart(2, '0');
-      return `${month}/${day} ${hours}:${mins}`;
+      updateMap(parseInt(slider.value));
     }
 
     function updateMap(index) {
-      const pos = positions[index];
-      if (!pos) return;
+      if (!positions.length) return;
 
-      // Marker
-      if (marker) map.removeLayer(marker);
-      marker = L.marker([pos.lat, pos.lon]).addTo(map);
-      map.setView([pos.lat, pos.lon], 7);
+      // Slice positions up to slider index
+      const partial = positions.slice(0, index + 1);
 
-      // Breadcrumbs
-      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      // Clear previous
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
-      if (showBreadcrumbs) {
-        const latlngs = positions.map(p => [p.lat, p.lon]);
+      if (marker) map.removeLayer(marker);
+
+      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      if (showBreadcrumbs && partial.length > 1) {
+        const latlngs = partial.map(p => [p.lat, p.lon]);
         breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
       }
 
-      document.getElementById('slider-time').innerText = formatTime(pos.timestamp);
+      // Marker at current index
+      const current = positions[index];
+      marker = L.marker([current.lat, current.lon]).addTo(map);
+
+      // Time label
+      const ts = new Date(current.timestamp);
+      const label = `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
+      document.getElementById('time-label').textContent = label;
     }
 
-    document.getElementById('slider').addEventListener('input', (e) => {
-      updateMap(e.target.value);
+    document.getElementById('timeSlider').addEventListener('input', (e) => {
+      updateMap(parseInt(e.target.value));
     });
 
     document.getElementById('breadcrumbsToggle').addEventListener('change', () => {
-      updateMap(document.getElementById('slider').value);
+      const slider = document.getElementById('timeSlider');
+      updateMap(parseInt(slider.value));
     });
 
+    // Initial load & refresh every 30s
     loadPositions();
     setInterval(loadPositions, 30000);
   </script>
