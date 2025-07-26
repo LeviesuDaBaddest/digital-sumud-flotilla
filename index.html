@@ -139,33 +139,36 @@
       border-radius: 5px;
     }
 
-    /* -------- MOBILE RESPONSIVE -------- */
+    /* Mobile */
     @media screen and (max-width: 768px) {
-      body {
-        overflow: auto;
-      }
+      body { overflow: auto; }
       #sidebar {
         position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
+        left: 0; top: 0; bottom: 0;
         transform: translateX(-100%);
         z-index: 999;
       }
-      #sidebar.open {
-        transform: translateX(0);
-      }
-      #map {
-        width: 100%;
-        height: 400px;
-      }
-      #slider-container {
-        width: 100%;
-        position: relative;
-      }
-      #hamburger {
-        display: block;
-      }
+      #sidebar.open { transform: translateX(0); }
+      #map { width: 100%; height: 400px; }
+      #slider-container { width: 100%; position: relative; }
+      #hamburger { display: block; }
+    }
+
+    /* Flashing Marker */
+    .live-marker {
+      background: limegreen;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid white;
+      animation: flash 1s infinite;
+    }
+    .archive-marker {
+      background: limegreen;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid darkgreen;
     }
   </style>
 </head>
@@ -181,23 +184,11 @@
       <li>Refaat Alareer</li>
       <li>Razan Al-Najjar</li>
       <li>Mohammed Al-Durra</li>
-      <li>Aya Al-Banna</li>
-      <li>Yazan Al-Masri</li>
-      <li>Layan Al-Sadeq</li>
-      <li>Ahmed Abu Daqqa</li>
     </ul>
 
     <details class="section">
       <summary>📜 Martyr Poems & Quotes</summary>
-      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope, let it be a tale."</p>
-      <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to people."</p>
-      <p><b>Mohammed Al-Durra:</b> "I am just a child!"</p>
-    </details>
-
-    <details class="section">
-      <summary>🕊️ Why This Flotilla Sails</summary>
-      <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
-      <p>Real-world counterpart: <a style="color: #ff4081;" href="https://freedomflotilla.org" target="_blank">Freedom Flotilla Tracker</a></p>
+      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
     </details>
 
     <select id="archive-select">
@@ -218,7 +209,6 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([32.6, 28.9], 6);
-
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
@@ -246,52 +236,68 @@
       } else {
         dateRange.style.display = 'none';
       }
-
       updateMap(parseInt(slider.value));
     }
 
     function updateMap(index) {
       if (!positions.length) return;
-
       const partial = positions.slice(0, index + 1);
 
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
       if (marker) map.removeLayer(marker);
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      const isArchive = currentFile.includes('archive');
+
+      // Breadcrumbs (only when toggled)
       if (showBreadcrumbs && partial.length > 1) {
         const latlngs = partial.map(p => [p.lat, p.lon]);
-        breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
+        breadcrumbLayer = L.polyline(latlngs, {
+          color: isArchive ? 'darkgreen' : 'limegreen',
+          dashArray: '5, 10'
+        }).addTo(map);
+
+        // Add dots at each position
+        partial.forEach(p => {
+          L.circleMarker([p.lat, p.lon], {
+            radius: 4,
+            color: isArchive ? 'darkgreen' : 'limegreen',
+            fillColor: isArchive ? 'darkgreen' : 'limegreen',
+            fillOpacity: 1
+          }).addTo(map);
+        });
       }
 
+      // Marker
       const current = positions[index];
-      marker = L.marker([current.lat, current.lon]).addTo(map);
-      if (currentFile.includes('archive')) marker.bindPopup("Hope (Archived)").openPopup();
+      marker = L.marker([current.lat, current.lon], {
+        icon: L.divIcon({
+          className: isArchive ? 'archive-marker' : 'live-marker'
+        })
+      }).addTo(map);
+
+      if (isArchive) marker.bindPopup("Hope (Archived)").openPopup();
 
       const ts = new Date(current.timestamp);
-      const label = `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
-      document.getElementById('time-label').textContent = label;
+      document.getElementById('time-label').textContent =
+        `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
     }
 
-    document.getElementById('timeSlider').addEventListener('input', (e) => {
+    document.getElementById('timeSlider').addEventListener('input', e => {
       updateMap(parseInt(e.target.value));
     });
 
     document.getElementById('breadcrumbsToggle').addEventListener('change', () => {
-      const slider = document.getElementById('timeSlider');
-      updateMap(parseInt(slider.value));
+      updateMap(parseInt(document.getElementById('timeSlider').value));
     });
 
-    document.getElementById('archive-select').addEventListener('change', (e) => {
+    document.getElementById('archive-select').addEventListener('change', e => {
       currentFile = e.target.value;
       loadPositions();
     });
 
-    // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const sidebar = document.getElementById('sidebar');
-    hamburger.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
     });
 
     loadPositions();
