@@ -41,6 +41,24 @@
       text-align: center;
       color: #ff8080;
     }
+    /* Ticker */
+    .ticker-container {
+      overflow: hidden;
+      white-space: nowrap;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+      margin-bottom: 10px;
+    }
+    .ticker-text {
+      display: inline-block;
+      padding-left: 100%;
+      animation: ticker 25s linear infinite;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
     .flashing-dot {
       display: inline-block;
       width: 10px;
@@ -54,15 +72,8 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 15px 0;
-    }
-    ul li {
-      padding: 2px 0;
-      border-bottom: 1px solid #333;
-    }
+    ul { display:none; } /* Hide old static list */
+
     .section {
       margin-top: 15px;
       background: #222;
@@ -123,7 +134,6 @@
       padding: 5px;
     }
 
-    /* Hamburger button */
     #hamburger {
       display: none;
       position: absolute;
@@ -139,7 +149,6 @@
       border-radius: 5px;
     }
 
-    /* Mobile */
     @media screen and (max-width: 768px) {
       body { overflow: auto; }
       #sidebar {
@@ -154,7 +163,6 @@
       #hamburger { display: block; }
     }
 
-    /* Flashing Marker */
     .live-marker {
       background: limegreen;
       width: 16px;
@@ -178,13 +186,13 @@
   <div id="sidebar">
     <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
-    <ul>
-      <li>Shireen Abu Akleh</li>
-      <li>Hind Rajab</li>
-      <li>Refaat Alareer</li>
-      <li>Razan Al-Najjar</li>
-      <li>Mohammed Al-Durra</li>
-    </ul>
+
+    <!-- New Ticker -->
+    <div class="ticker-container">
+      <div class="ticker-text">
+        Shireen Abu Akleh • Hind Rajab • Refaat Alareer • Razan Al-Najjar • Mohammed Al-Durra • Ahmad Abu Hussein • Wael Dahdouh's Family • Iman Hejjo • Layan Hamadeh • Thousands of Martyrs of Palestine 🌹 
+      </div>
+    </div>
 
     <details class="section">
       <summary>📜 Martyr Poems & Quotes</summary>
@@ -214,6 +222,7 @@
     }).addTo(map);
 
     let breadcrumbLayer = null;
+    let dotsLayer = null;
     let marker = null;
     let positions = [];
     let currentFile = 'positions.json';
@@ -244,31 +253,32 @@
       const partial = positions.slice(0, index + 1);
 
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
+      if (dotsLayer) map.removeLayer(dotsLayer);
       if (marker) map.removeLayer(marker);
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
       const isArchive = currentFile.includes('archive');
 
-      // Breadcrumbs (only when toggled)
       if (showBreadcrumbs && partial.length > 1) {
         const latlngs = partial.map(p => [p.lat, p.lon]);
         breadcrumbLayer = L.polyline(latlngs, {
           color: isArchive ? 'darkgreen' : 'limegreen',
-          dashArray: '5, 10'
+          weight: 2
         }).addTo(map);
 
-        // Add dots at each position
+        // dots layer
+        dotsLayer = L.layerGroup();
         partial.forEach(p => {
           L.circleMarker([p.lat, p.lon], {
-            radius: 4,
+            radius: 3,
             color: isArchive ? 'darkgreen' : 'limegreen',
             fillColor: isArchive ? 'darkgreen' : 'limegreen',
             fillOpacity: 1
-          }).addTo(map);
+          }).addTo(dotsLayer);
         });
+        dotsLayer.addTo(map);
       }
 
-      // Marker
       const current = positions[index];
       marker = L.marker([current.lat, current.lon], {
         icon: L.divIcon({
