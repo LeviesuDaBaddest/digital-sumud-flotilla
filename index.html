@@ -15,9 +15,25 @@
       overflow: hidden;
     }
     #map {
-      height: 100%;
+      height: calc(100% - 60px);
       width: calc(100% - 300px);
       float: right;
+    }
+    #slider-container {
+      width: calc(100% - 300px);
+      height: 60px;
+      float: right;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      padding: 5px;
+      box-sizing: border-box;
+    }
+    #slider {
+      width: 70%;
     }
     #sidebar {
       width: 300px;
@@ -67,6 +83,11 @@
       background: #222;
       border-radius: 6px;
     }
+    .section summary {
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
     label {
       display: block;
       margin-top: 15px;
@@ -91,23 +112,27 @@
       <li>Ahmed Abu Daqqa</li>
     </ul>
 
-    <div class="section">
-      <h3>📜 Martyr Poems & Quotes</h3>
+    <details class="section">
+      <summary>📜 Martyr Poems & Quotes</summary>
       <p><b>Refaat Alareer:</b> "If I must die, let it bring hope, let it be a tale."</p>
       <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to people."</p>
       <p><b>Mohammed Al-Durra:</b> "I am just a child!"</p>
-    </div>
+    </details>
 
-    <div class="section">
-      <h3>🕊️ Why This Flotilla Sails</h3>
+    <details class="section">
+      <summary>🕊️ Why This Flotilla Sails</summary>
       <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
       <p>Real-world counterpart: <a style="color: #ff4081;" href="https://freedomflotilla.org" target="_blank">Freedom Flotilla Tracker</a></p>
-    </div>
+    </details>
 
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
 
   <div id="map"></div>
+  <div id="slider-container">
+    <input type="range" id="slider" min="0" max="0" value="0">
+    <span id="slider-time">--/-- --:--</span>
+  </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
@@ -117,19 +142,36 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    let positions = [];
     let breadcrumbLayer = null;
     let marker = null;
 
     async function loadPositions() {
       const res = await fetch('positions.json');
-      const positions = await res.json();
-
+      positions = await res.json();
       if (!positions || positions.length === 0) return;
 
-      // Show latest position marker
-      const last = positions[positions.length - 1];
+      document.getElementById('slider').max = positions.length - 1;
+      updateMap(positions.length - 1);
+    }
+
+    function formatTime(ts) {
+      const date = new Date(ts.replace(" ", "T"));
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const mins = String(date.getMinutes()).padStart(2, '0');
+      return `${month}/${day} ${hours}:${mins}`;
+    }
+
+    function updateMap(index) {
+      const pos = positions[index];
+      if (!pos) return;
+
+      // Marker
       if (marker) map.removeLayer(marker);
-      marker = L.marker([last.lat, last.lon]).addTo(map);
+      marker = L.marker([pos.lat, pos.lon]).addTo(map);
+      map.setView([pos.lat, pos.lon], 7);
 
       // Breadcrumbs
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
@@ -138,11 +180,18 @@
         const latlngs = positions.map(p => [p.lat, p.lon]);
         breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
       }
+
+      document.getElementById('slider-time').innerText = formatTime(pos.timestamp);
     }
 
-    document.getElementById('breadcrumbsToggle').addEventListener('change', loadPositions);
+    document.getElementById('slider').addEventListener('input', (e) => {
+      updateMap(e.target.value);
+    });
 
-    // Initial load & refresh every 30 seconds
+    document.getElementById('breadcrumbsToggle').addEventListener('change', () => {
+      updateMap(document.getElementById('slider').value);
+    });
+
     loadPositions();
     setInterval(loadPositions, 30000);
   </script>
