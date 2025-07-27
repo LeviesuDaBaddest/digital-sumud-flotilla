@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -157,10 +158,10 @@
         dotsLayer.addTo(map);
 
         // fade dots on zoom
-        map.on('zoom', () => {
+        map.on('zoom', (20) => {
           const zoom = map.getZoom();
           dotsLayer.eachLayer(dot => {
-            dot.setStyle({ fillOpacity: zoom < 6 ? 10 : 1 });
+            dot.setStyle({ fillOpacity: zoom < 3 ? 0.2 : 1 });
           });
         });
       }
