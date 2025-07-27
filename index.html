@@ -7,53 +7,43 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
-    html, body { margin: 0; height: 100%; }
-    #map { height: 100%; width: 100%; }
+    html, body { margin:0; height:100%; background:#000; }
+    #map { position:absolute; top:0; bottom:0; left:280px; right:0; }
 
-    /* Sidebar with quotes and ticker */
+    /* Sidebar */
     #sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: 300px;
-      background: rgba(0, 0, 0, 0.85); color: #fff;
-      overflow: hidden; padding: 15px; font-family: sans-serif;
-      display: flex; flex-direction: column; justify-content: space-between;
-      z-index: 1000;
+      position: fixed; left: 0; top: 0; bottom: 0; width: 280px;
+      background: rgba(0, 0, 0, 0.9); color: #fff;
+      display:flex; flex-direction:column; justify-content:space-between;
+      font-family: sans-serif; z-index:1000; padding:12px;
+      border-right:2px solid #444;
     }
 
-    #quote { 
-      font-style: italic; font-size: 16px; text-align: center; margin-bottom: 20px;
-    }
+    #quote { font-size:14px; font-style:italic; text-align:center; padding:10px; }
 
     /* Martyr ticker scroll */
     #ticker-container {
-      position: relative;
-      height: 40px;
-      overflow: hidden;
-      border-top: 1px solid #666;
-      border-bottom: 1px solid #666;
+      height: 35px; overflow:hidden; border-top:1px solid #666; border-bottom:1px solid #666;
+      margin-top:10px;
     }
     #ticker {
-      position: absolute;
-      white-space: nowrap;
-      will-change: transform;
-      animation: scroll 30s linear infinite;
-      font-size: 14px;
+      white-space:nowrap; display:inline-block;
+      animation: scroll 30s linear infinite; font-size:13px;
     }
     @keyframes scroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+      0% {transform: translateX(100%);}
+      100% {transform: translateX(-100%);}
     }
 
-    /* Flashing live marker */
+    /* Live flashing marker */
     @keyframes flash {
-      0% { box-shadow: 0 0 5px 5px rgba(0, 255, 0, 0.5); }
-      50% { box-shadow: 0 0 15px 15px rgba(0, 255, 0, 0); }
-      100% { box-shadow: 0 0 5px 5px rgba(0, 255, 0, 0.5); }
+      0%,100% {box-shadow: 0 0 5px 5px rgba(0,255,0,0.4);}
+      50% {box-shadow: 0 0 15px 15px rgba(0,255,0,0);}
     }
     .live-marker {
       background: limegreen;
       border-radius: 50%;
-      width: 14px;
-      height: 14px;
+      width: 14px; height: 14px;
       animation: flash 1s infinite;
       border: 2px solid white;
     }
@@ -62,22 +52,19 @@
 <body>
   <div id="sidebar">
     <div id="quote"></div>
-    <div id="ticker-container">
-      <div id="ticker"></div>
-    </div>
+    <div id="ticker-container"><div id="ticker"></div></div>
   </div>
   <div id="map"></div>
 
   <script>
-    // --- QUOTES ---
+    // Quotes & poems
     const quotes = [
       `"We will have a homeland, even if it is only a word." — Refaat Alareer`,
       `"Don't tell me I'm brave. Tell the world why I had to be." — Hind Rajab`,
       `"The occupation fears our words more than our weapons." — Shireen Abu Akleh`,
       `"If I must die, let it be with dignity." — Refaat Alareer`,
-      `"I will return, even if only in my children’s dreams." — Unknown`,
+      `"I will return, even if only in my children’s dreams." — Unknown`
     ];
-
     let quoteIndex = 0;
     const quoteEl = document.getElementById("quote");
     function cycleQuotes() {
@@ -87,69 +74,62 @@
     cycleQuotes();
     setInterval(cycleQuotes, 7000);
 
-    // --- MARTYR TICKER ---
+    // Martyr ticker
     const martyrs = [
-      "Shireen Abu Akleh", "Hind Rajab", "Refaat Alareer", 
-      "Ahmad Erekat", "Iyad Hallaq", "Mohammed Abu Khdeir",
-      "Yasser Arafat", "Rachel Corrie", "Fadi Alloun", "Ali Dawabsheh"
+      "Shireen Abu Akleh","Hind Rajab","Refaat Alareer","Ahmad Erekat",
+      "Iyad Hallaq","Mohammed Abu Khdeir","Yasser Arafat","Rachel Corrie",
+      "Fadi Alloun","Ali Dawabsheh"
     ];
     document.getElementById("ticker").textContent = martyrs.join(" ✦ ");
 
-    // --- MAP INIT ---
+    // Leaflet map setup
     const map = L.map('map').setView([31.5, 34.5], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    let polyline, breadcrumbMarkers=[], liveMarker;
 
-    let polyline, breadcrumbMarkers = [], liveMarker;
-
+    // Load positions.json and render
     function loadPositions() {
-      fetch('positions.json?_t=' + Date.now()) // cache-bust
-        .then(res => res.json())
-        .then(positions => {
-          if (!positions.length) return;
+      fetch('positions.json?_t=' + Date.now())
+      .then(res => res.json())
+      .then(positions => {
+        if (!positions.length) return;
 
-          // Clear previous
-          if (polyline) map.removeLayer(polyline);
-          breadcrumbMarkers.forEach(m => map.removeLayer(m));
-          if (liveMarker) map.removeLayer(liveMarker);
+        // Clear old layers
+        if(polyline) map.removeLayer(polyline);
+        breadcrumbMarkers.forEach(m => map.removeLayer(m));
+        if(liveMarker) map.removeLayer(liveMarker);
 
-          // Add polyline
-          polyline = L.polyline(positions, {
-            color: "red",
-            weight: 3,
-            opacity: 1
-          }).addTo(map);
+        // Draw trail
+        polyline = L.polyline(positions, {color:"red", weight:3}).addTo(map);
 
-          // Breadcrumb dots
-          breadcrumbMarkers = positions.slice(0, -1).map(coord => 
-            L.circleMarker(coord, {
-              radius: 4,
-              color: "#555",
-              fillColor: "#999",
-              fillOpacity: 1
-            }).addTo(map)
-          );
+        // Breadcrumb markers
+        breadcrumbMarkers = positions.slice(0,-1).map(coord => 
+          L.circleMarker(coord, {
+            radius:4, color:"#555", fillColor:"#999", fillOpacity:1
+          }).addTo(map)
+        );
 
-          // Live flashing marker
-          const lastPos = positions[positions.length - 1];
-          const liveIcon = L.divIcon({ className: "live-marker" });
-          liveMarker = L.marker(lastPos, { icon: liveIcon }).addTo(map);
+        // Live marker (flashing)
+        const last = positions[positions.length-1];
+        const liveIcon = L.divIcon({ className:"live-marker" });
+        liveMarker = L.marker(last, { icon: liveIcon }).addTo(map);
 
-          map.fitBounds(polyline.getBounds());
-
-          // Fade breadcrumbs when zooming out
-          map.on('zoomend', () => {
-            const zoom = map.getZoom();
-            const opacity = Math.min(1, Math.max(0.2, (zoom - 4) / 6));
-            breadcrumbMarkers.forEach(m => m.setStyle({ fillOpacity: opacity, opacity: opacity }));
-          });
+        // Breadcrumb fade on zoom
+        map.on('zoomend', () => {
+          const zoom = map.getZoom();
+          const opacity = Math.min(1, Math.max(0.2, (zoom-4)/6));
+          breadcrumbMarkers.forEach(m => m.setStyle({opacity, fillOpacity:opacity}));
         });
+
+        map.fitBounds(polyline.getBounds());
+      });
     }
 
+    // Load now & auto-refresh every 15 min
     loadPositions();
-    setInterval(loadPositions, 900000); // 15 min auto-refresh
+    setInterval(loadPositions, 900000);
   </script>
 </body>
 </html>
+
