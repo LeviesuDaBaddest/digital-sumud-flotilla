@@ -1,5 +1,4 @@
-
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -82,7 +81,7 @@
       <option value="hope_archive.json">📜 Hope Archive</option>
     </select>
 
-    <label><input type="checkbox" id="breadcrumbsToggle" checked> Show Breadcrumbs</label>
+    <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
 
   <div id="map"></div>
@@ -158,10 +157,10 @@
         dotsLayer.addTo(map);
 
         // fade dots on zoom
-        map.on('zoom', (20) => {
+        map.on('zoom', () => {
           const zoom = map.getZoom();
           dotsLayer.eachLayer(dot => {
-            dot.setStyle({ fillOpacity: zoom < 3 ? 0.2 : 1 });
+            dot.setStyle({ fillOpacity: zoom < 5 ? 0.2 : 1 });
           });
         });
       }
