@@ -59,14 +59,22 @@
     </div>
 
     <details class="section">
-  <summary>📜 Martyr Poems & Quotes</summary>
-  <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
-  <p><b>Shireen Abu Akleh:</b> "I chose journalism so I could be close to the people. It might not be easy to change the reality, but at least I could bring their voices to the world."</p>
-  <p><b>Razan Al-Najjar:</b> "I am not afraid to be seen. I want the world to know we care for the wounded and that we will never stop caring."</p>
-  <p><b>Hind Rajab:</b> "Tell them... I just want to live."</p>
-  <p><b>Ghada Al-Najjar:</b> "Our roots are deep in this land. Even if they burn our olive trees, we will replant them with our blood."</p>
-  <p><b>Mohammed Al-Durra:</b> "I am only a child, but I carry the dreams of my people on my shoulders."</p>
-</details>
+      <summary>📜 Martyr Poems & Quotes</summary>
+      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
+      <p><b>Shireen Abu Akleh:</b> "I chose journalism so I could be close to the people. It might not be easy to change the reality, but at least I could bring their voices to the world."</p>
+      <p><b>Razan Al-Najjar:</b> "I am not afraid to be seen. I want the world to know we care for the wounded and that we will never stop caring."</p>
+      <p><b>Hind Rajab:</b> "Tell them... I just want to live."</p>
+      <p><b>Ghada Al-Najjar:</b> "Our roots are deep in this land. Even if they burn our olive trees, we will replant them with our blood."</p>
+      <p><b>Mohammed Al-Durra:</b> "I am only a child, but I carry the dreams of my people on my shoulders."</p>
+    </details>
+
+    <!-- WHY THIS FLOTILLA SAILS -->
+    <details class="section">
+      <summary>🌊 Why This Flotilla Sails</summary>
+      <p>The <b>Digital Sumud Flotilla</b> was created to echo the mission of real-world flotillas sailing towards Gaza. When physical Freedom Flotilla missions face delays or are stopped, this digital flotilla continues to sail in solidarity, keeping their spirit alive online.</p>
+      <p>Whenever a real flotilla mission fails or is intercepted, we reset our virtual voyage and set sail again, aligning our start with the next launch. This ensures the world remains aware of the ongoing struggle to break the siege on Gaza.</p>
+      <p>Learn more about the real missions at the <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a>.</p>
+    </details>
 
     <select id="archive-select">
       <option value="positions.json">🌊 Current Voyage (Live)</option>
@@ -91,6 +99,7 @@
     }).addTo(map);
 
     let breadcrumbLayer = null;
+    let dotsLayer = null;
     let marker = null;
     let positions = [];
     let currentFile = 'positions.json';
@@ -121,6 +130,7 @@
       const partial = positions.slice(0, index + 1);
 
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
+      if (dotsLayer) map.removeLayer(dotsLayer);
       if (marker) map.removeLayer(marker);
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
@@ -132,6 +142,27 @@
           color: isArchive ? 'darkgreen' : 'limegreen',
           weight: 2
         }).addTo(map);
+
+        // dots layer with fade on zoom
+        dotsLayer = L.layerGroup();
+        partial.forEach(p => {
+          const dot = L.circleMarker([p.lat, p.lon], {
+            radius: 3,
+            color: isArchive ? 'darkgreen' : 'limegreen',
+            fillColor: isArchive ? 'darkgreen' : 'limegreen',
+            fillOpacity: 1
+          });
+          dotsLayer.addLayer(dot);
+        });
+        dotsLayer.addTo(map);
+
+        // fade dots on zoom
+        map.on('zoom', () => {
+          const zoom = map.getZoom();
+          dotsLayer.eachLayer(dot => {
+            dot.setStyle({ fillOpacity: zoom < 5 ? 0.2 : 1 });
+          });
+        });
       }
 
       const current = positions[index];
@@ -141,7 +172,7 @@
         })
       }).addTo(map);
 
-      if (isArchive) marker.bindPopup("Hope (Archived)").openPopup();
+      if (isArchive) marker.bindPopup("Hope (26/07/2025)").openPopup();
 
       const ts = new Date(current.timestamp);
       document.getElementById('time-label').textContent =
@@ -160,4 +191,3 @@
   </script>
 </body>
 </html>
-
