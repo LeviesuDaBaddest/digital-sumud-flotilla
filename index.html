@@ -197,6 +197,15 @@
     <details class="section">
       <summary>📜 Martyr Poems & Quotes</summary>
       <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
+      <p><b>Hind Rajab:</b> "We only wanted to play. Now we are part of the earth."</p>
+      <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to the people."</p>
+      <p><b>Razan Al-Najjar:</b> "I am here as a human shield for the wounded."</p>
+    </details>
+
+    <details class="section">
+      <summary>🌊 Why this flotilla sails</summary>
+      <p>This digital flotilla sails in solidarity with Palestine, preserving the memory of martyrs and resisting erasure through presence and art.</p>
+      <p>It is a journey of sumud (steadfastness), showing that the sea carries voices that cannot be silenced.</p>
     </details>
 
     <select id="archive-select">
@@ -266,17 +275,26 @@
           weight: 2
         }).addTo(map);
 
-        // dots layer
+        // dots layer with fade effect on zoom
         dotsLayer = L.layerGroup();
         partial.forEach(p => {
-          L.circleMarker([p.lat, p.lon], {
+          const dot = L.circleMarker([p.lat, p.lon], {
             radius: 3,
             color: isArchive ? 'darkgreen' : 'limegreen',
             fillColor: isArchive ? 'darkgreen' : 'limegreen',
             fillOpacity: 1
-          }).addTo(dotsLayer);
+          });
+          dotsLayer.addLayer(dot);
         });
         dotsLayer.addTo(map);
+
+        // Adjust opacity when zoom changes
+        map.on('zoomend', () => {
+          const zoom = map.getZoom();
+          dotsLayer.eachLayer(layer => {
+            layer.setStyle({ fillOpacity: zoom < 6 ? 0.2 : 1 });
+          });
+        });
       }
 
       const current = positions[index];
