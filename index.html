@@ -91,7 +91,6 @@
     }).addTo(map);
 
     let breadcrumbLayer = null;
-    let dotsLayer = null;
     let marker = null;
     let positions = [];
     let currentFile = 'positions.json';
@@ -122,7 +121,6 @@
       const partial = positions.slice(0, index + 1);
 
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
-      if (dotsLayer) map.removeLayer(dotsLayer);
       if (marker) map.removeLayer(marker);
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
@@ -134,27 +132,6 @@
           color: isArchive ? 'darkgreen' : 'limegreen',
           weight: 2
         }).addTo(map);
-
-        // dots layer with fade on zoom
-        dotsLayer = L.layerGroup();
-        partial.forEach(p => {
-          const dot = L.circleMarker([p.lat, p.lon], {
-            radius: 3,
-            color: isArchive ? 'darkgreen' : 'limegreen',
-            fillColor: isArchive ? 'darkgreen' : 'limegreen',
-            fillOpacity: 1
-          });
-          dotsLayer.addLayer(dot);
-        });
-        dotsLayer.addTo(map);
-
-        // fade dots on zoom
-        map.on('zoom', () => {
-          const zoom = map.getZoom();
-          dotsLayer.eachLayer(dot => {
-            dot.setStyle({ fillOpacity: zoom < 5 ? 0.2 : 1 });
-          });
-        });
       }
 
       const current = positions[index];
