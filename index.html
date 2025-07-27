@@ -5,87 +5,137 @@
   <title>Digital Sumud Flotilla</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    /* --- SAME STYLES AS YOUR VERSION --- */
-    html, body { margin: 0; height: 100%; width: 100%; background: black; color: white; font-family: Arial, sans-serif; overflow: hidden; }
-    #map { height: calc(100% - 100px); width: calc(100% - 300px); float: right; transition: all 0.3s; }
-    #sidebar { width: 300px; background: #111; height: 100%; float: left; padding: 15px; box-sizing: border-box; overflow-y: auto; transition: transform 0.3s; }
-    h1 { font-size: 18px; margin: 5px 0 5px; text-align: center; }
-    h2 { font-size: 14px; margin: 0 0 10px; text-align: center; color: #ff8080; }
-
-    /* Ticker */
-    .ticker-container { overflow: hidden; white-space: nowrap; border-top: 1px solid #333; border-bottom: 1px solid #333; margin-bottom: 10px; }
-    .ticker-text { display: inline-block; padding-left: 100%; animation: ticker 25s linear infinite; }
-    @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-
-    .flashing-dot { display: inline-block; width: 10px; height: 10px; background: limegreen; border-radius: 50%; animation: flash 1s infinite; vertical-align: middle; }
-    @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-    ul { display:none; }
-
-    .section { margin-top: 15px; background: #222; border-radius: 6px; overflow: hidden; }
-    .section summary { padding: 8px 10px; cursor: pointer; background: #333; }
-    .section p { padding: 5px 10px; margin: 0; }
-    label { display: block; margin-top: 15px; text-align: center; font-size: 14px; }
-    #slider-container { width: calc(100% - 300px); height: 80px; background: #111; position: absolute; bottom: 0; right: 0; padding: 10px; box-sizing: border-box; text-align: center; transition: all 0.3s; }
-    input[type="range"] { width: 90%; }
-    #time-label { display: block; font-size: 14px; margin-top: 5px; }
-    #date-range { display: none; text-align: center; padding: 5px; background: #222; color: #ff8080; font-size: 13px; }
-    #archive-select { margin: 10px auto; display: block; width: 90%; font-size: 14px; background: #222; color: white; border: 1px solid #444; padding: 5px; }
-    #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
-
-    @media screen and (max-width: 768px) {
-      body { overflow: auto; }
-      #sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 999; }
-      #sidebar.open { transform: translateX(0); }
-      #map { width: 100%; height: 400px; }
-      #slider-container { width: 100%; position: relative; }
-      #hamburger { display: block; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
     }
-
-    .live-marker { background: limegreen; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; animation: flash 1s infinite; }
-    .archive-marker { background: limegreen; width: 14px; height: 14px; border-radius: 50%; border: 2px solid darkgreen; }
+    #map {
+      height: calc(100% - 80px);
+      width: calc(100% - 300px);
+      float: right;
+    }
+    #sidebar {
+      width: 300px;
+      background: #111;
+      height: 100%;
+      float: left;
+      padding: 15px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 5px 0 5px;
+      text-align: center;
+    }
+    h2 {
+      font-size: 14px;
+      margin: 0 0 10px;
+      text-align: center;
+      color: #ff8080;
+    }
+    .flashing-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: limegreen;
+      border-radius: 50%;
+      animation: flash 1s infinite;
+      vertical-align: middle;
+    }
+    @keyframes flash {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+    ul li {
+      padding: 2px 0;
+      border-bottom: 1px solid #333;
+    }
+    .section {
+      margin-top: 15px;
+      background: #222;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .section summary {
+      padding: 8px 10px;
+      cursor: pointer;
+      background: #333;
+    }
+    .section p {
+      padding: 5px 10px;
+      margin: 0;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+    #slider-container {
+      width: calc(100% - 300px);
+      height: 80px;
+      background: #111;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input[type="range"] {
+      width: 90%;
+    }
+    #time-label {
+      display: block;
+      font-size: 14px;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
-  <button id="hamburger">☰</button>
   <div id="sidebar">
     <h1>🚢 DIGITAL SUMUD FLOTILLA <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
-
-    <!-- Martyr Ticker -->
-    <div class="ticker-container">
-      <div class="ticker-text">
-        Shireen Abu Akleh Hind Rajab Refaat Alareer Razan Al-Najjar Mohammed Al-Durra Ahmad Abu Hussein Wael Dahdouh's Family Iman Hejjo Layan Hamadeh Thousands of Martyrs of Palestine 🌹 
-      </div>
-    </div>
+    <ul>
+      <li>Shireen Abu Akleh</li>
+      <li>Hind Rajab</li>
+      <li>Refaat Alareer</li>
+      <li>Razan Al-Najjar</li>
+      <li>Mohammed Al-Durra</li>
+      <li>Aya Al-Banna</li>
+      <li>Yazan Al-Masri</li>
+      <li>Layan Al-Sadeq</li>
+      <li>Ahmed Abu Daqqa</li>
+    </ul>
 
     <details class="section">
       <summary>📜 Martyr Poems & Quotes</summary>
-      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
-      <p><b>Shireen Abu Akleh:</b> "I chose journalism so I could be close to the people. It might not be easy to change the reality, but at least I could bring their voices to the world."</p>
-      <p><b>Razan Al-Najjar:</b> "I am not afraid to be seen. I want the world to know we care for the wounded and that we will never stop caring."</p>
-      <p><b>Hind Rajab:</b> "Tell them... I just want to live."</p>
-      <p><b>Ghada Al-Najjar:</b> "Our roots are deep in this land. Even if they burn our olive trees, we will replant them with our blood."</p>
-      <p><b>Mohammed Al-Durra:</b> "I am only a child, but I carry the dreams of my people on my shoulders."</p>
+      <p><b>Refaat Alareer:</b> "If I must die, let it bring hope, let it be a tale."</p>
+      <p><b>Shireen Abu Akleh:</b> "I chose journalism to be close to people."</p>
+      <p><b>Mohammed Al-Durra:</b> "I am just a child!"</p>
     </details>
 
-    <!-- WHY THIS FLOTILLA SAILS -->
     <details class="section">
-      <summary>🌊 Why This Flotilla Sails</summary>
-      <p>The <b>Digital Sumud Flotilla</b> was created to echo the mission of real-world flotillas sailing towards Gaza. When physical Freedom Flotilla missions face delays or are stopped, this digital flotilla continues to sail in solidarity, keeping their spirit alive online.</p>
-      <p>Whenever a real flotilla mission fails or is intercepted, we reset our virtual voyage and set sail again, aligning our start with the next launch. This ensures the world remains aware of the ongoing struggle to break the siege on Gaza.</p>
-      <p>Learn more about the real missions at the <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a>.</p>
+      <summary>🕊️ Why This Flotilla Sails</summary>
+      <p>This is a digital flotilla of solidarity for Gaza, Palestine — carrying voices, memory, resistance and remembrance. It sails not through seas, but through code, in honor of those who no longer can.</p>
+      <p>Real-world counterpart: <a style="color: #ff4081;" href="https://freedomflotilla.org" target="_blank">Freedom Flotilla Tracker</a></p>
     </details>
-
-    <select id="archive-select">
-      <option value="positions.json">🌊 Current Voyage (Live)</option>
-      <option value="hope_archive.json">📜 Hope Archive</option>
-    </select>
 
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
 
   <div id="map"></div>
-  <div id="date-range"></div>
   <div id="slider-container">
     <input type="range" id="timeSlider" min="0" max="0" value="0" step="1">
     <span id="time-label"></span>
@@ -94,100 +144,66 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([32.6, 28.9], 6);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
     let breadcrumbLayer = null;
-    let dotsLayer = null;
     let marker = null;
     let positions = [];
-    let currentFile = 'positions.json';
 
     async function loadPositions() {
-      const res = await fetch(currentFile + '?t=' + Date.now()); // prevent cache
+      const res = await fetch('positions.json');
       positions = await res.json();
       if (!positions || positions.length === 0) return;
 
+      // Update slider max
       const slider = document.getElementById('timeSlider');
       slider.max = positions.length - 1;
       slider.value = positions.length - 1;
 
-      const dateRange = document.getElementById('date-range');
-      if (currentFile.includes('archive')) {
-        const first = new Date(positions[0].timestamp);
-        const last = new Date(positions[positions.length - 1].timestamp);
-        dateRange.style.display = 'block';
-        dateRange.textContent = 📅 ${first.toLocaleDateString()} → ${last.toLocaleDateString()};
-      } else {
-        dateRange.style.display = 'none';
-      }
       updateMap(parseInt(slider.value));
     }
 
     function updateMap(index) {
       if (!positions.length) return;
+
+      // Slice positions up to slider index
       const partial = positions.slice(0, index + 1);
 
+      // Clear previous
       if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
-      if (dotsLayer) map.removeLayer(dotsLayer);
       if (marker) map.removeLayer(marker);
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
-      const isArchive = currentFile.includes('archive');
-
       if (showBreadcrumbs && partial.length > 1) {
         const latlngs = partial.map(p => [p.lat, p.lon]);
-        breadcrumbLayer = L.polyline(latlngs, {
-          color: isArchive ? 'darkgreen' : 'limegreen',
-          weight: 2
-        }).addTo(map);
-
-        // dots layer with fade on zoom
-        dotsLayer = L.layerGroup();
-        partial.forEach(p => {
-          const dot = L.circleMarker([p.lat, p.lon], {
-            radius: 3,
-            color: isArchive ? 'darkgreen' : 'limegreen',
-            fillColor: isArchive ? 'darkgreen' : 'limegreen',
-            fillOpacity: 1
-          });
-          dotsLayer.addLayer(dot);
-        });
-        dotsLayer.addTo(map);
-
-        // fade dots on zoom
-        map.on('zoom', () => {
-          const zoom = map.getZoom();
-          dotsLayer.eachLayer(dot => {
-            dot.setStyle({ fillOpacity: zoom < 5 ? 0.2 : 1 });
-          });
-        });
+        breadcrumbLayer = L.polyline(latlngs, { color: 'red' }).addTo(map);
       }
 
+      // Marker at current index
       const current = positions[index];
-      marker = L.marker([current.lat, current.lon], {
-        icon: L.divIcon({
-          className: isArchive ? 'archive-marker' : 'live-marker'
-        })
-      }).addTo(map);
+      marker = L.marker([current.lat, current.lon]).addTo(map);
 
-      if (isArchive) marker.bindPopup("Hope (26/07/2025)").openPopup();
-
+      // Time label
       const ts = new Date(current.timestamp);
-      document.getElementById('time-label').textContent =
-        ${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')};
+      const label = `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
+      document.getElementById('time-label').textContent = label;
     }
 
-    // Controls
-    document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
-    document.getElementById('breadcrumbsToggle').addEventListener('change', () => updateMap(parseInt(document.getElementById('timeSlider').value)));
-    document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
-    document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+    document.getElementById('timeSlider').addEventListener('input', (e) => {
+      updateMap(parseInt(e.target.value));
+    });
 
-    // Load & auto-refresh every 15 min (900000 ms)
+    document.getElementById('breadcrumbsToggle').addEventListener('change', () => {
+      const slider = document.getElementById('timeSlider');
+      updateMap(parseInt(slider.value));
+    });
+
+    // Initial load & refresh every 30s
     loadPositions();
-    setInterval(() => { if (!currentFile.includes('archive')) loadPositions(); }, 900000);
+    setInterval(loadPositions, 30000);
   </script>
 </body>
 </html>
