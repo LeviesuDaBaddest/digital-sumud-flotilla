@@ -87,9 +87,8 @@
     let marker = null;
     let positions = [];
     let currentFile = 'positions.json';
-    let userMovedMap = false; // NEW flag to detect manual pan/zoom
+    let userMovedMap = false;
 
-    // Detect manual map movement
     map.on('movestart', () => { userMovedMap = true; });
 
     async function loadPositions() {
@@ -131,7 +130,6 @@
           weight: 2
         }).addTo(map);
 
-        // Show every 10th point as a dot
         const density = 10;
         dotsLayer = L.layerGroup();
         partial.forEach((p, i) => {
@@ -162,9 +160,10 @@
         })
       }).addTo(map);
 
-      if (isArchive) marker.bindPopup("Hope (26/07/2025)").openPopup();
+      if (isArchive && index === positions.length - 1) {
+        marker.bindPopup("Hope (26/07/2025)").openPopup();
+      }
 
-      // Only recenter if user hasn't moved the map manually
       if (!userMovedMap) {
         map.setView([current.lat, current.lon], map.getZoom());
       }
