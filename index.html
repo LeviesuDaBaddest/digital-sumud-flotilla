@@ -87,6 +87,10 @@
     let marker = null;
     let positions = [];
     let currentFile = 'positions.json';
+    let userMovedMap = false; // NEW flag to detect manual pan/zoom
+
+    // Detect manual map movement
+    map.on('movestart', () => { userMovedMap = true; });
 
     async function loadPositions() {
       const res = await fetch(currentFile + '?t=' + Date.now());
@@ -160,6 +164,11 @@
 
       if (isArchive) marker.bindPopup("Hope (26/07/2025)").openPopup();
 
+      // Only recenter if user hasn't moved the map manually
+      if (!userMovedMap) {
+        map.setView([current.lat, current.lon], map.getZoom());
+      }
+
       const ts = new Date(current.timestamp);
       document.getElementById('time-label').textContent =
         `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
@@ -174,3 +183,4 @@
   </script>
 </body>
 </html>
+
