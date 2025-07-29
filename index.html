@@ -127,7 +127,7 @@
           weight: 2
         }).addTo(map);
 
-        // Fixed density: every 10th point
+        // Show every 10th point as a dot
         const density = 10;
         dotsLayer = L.layerGroup();
         partial.forEach((p, i) => {
@@ -168,6 +168,7 @@
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
     document.getElementById('breadcrumbsToggle').addEventListener('change', () => updateMap(parseInt(document.getElementById('timeSlider').value)));
     document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
+    document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
     loadPositions();
   </script>
