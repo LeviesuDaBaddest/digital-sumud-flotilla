@@ -90,14 +90,20 @@
 
     map.on('movestart', () => { userMovedMap = true; });
 
-    async function loadPositions() {
+    async function loadPositions(autoUpdate = false) {
       const res = await fetch(currentFile + '?t=' + Date.now());
-      positions = await res.json();
-      if (!positions || positions.length === 0) return;
+      const newPositions = await res.json();
+      if (!newPositions || newPositions.length === 0) return;
 
       const slider = document.getElementById('timeSlider');
+      const atEndBefore = parseInt(slider.value) === positions.length - 1;
+
+      positions = newPositions;
       slider.max = positions.length - 1;
-      slider.value = positions.length - 1;
+
+      if (!autoUpdate || atEndBefore) {
+        slider.value = positions.length - 1;
+      }
 
       const dateRange = document.getElementById('date-range');
       if (currentFile.includes('archive')) {
@@ -154,7 +160,11 @@
     document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
+    // Initial load
     loadPositions();
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => loadPositions(true), 30000);
   </script>
 </body>
 </html>
