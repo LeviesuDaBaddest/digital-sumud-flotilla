@@ -74,14 +74,3 @@ def push_to_git():
         print("⚠️ Nothing to commit (no change in file?)")
     subprocess.run(["git", "push"], shell=True)
     print("📤 Pushed to GitHub.")
-
-if __name__ == "__main__":
-    while True:
-        lat, lon = read_position()
-        if lat and lon:
-            append_position(lat, lon)
-            push_to_git()
-        else:
-            print("⚠️ No GPS fix. Will try again.")
-        print("⏱️ Waiting 15 minutes before next update...")
-        time.sleep(900)  # 15 minutes
