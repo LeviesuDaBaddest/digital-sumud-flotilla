@@ -18,47 +18,33 @@ def read_position():
                 print("📡 Got NMEA line:", line)
                 if line.startswith("$GPRMC"):
                     parts = line.split(",")
-                    print(f"🔍 Raw parts: {parts}")
-                    if len(parts) < 8:
-                        print("⚠️ Incomplete GPRMC line.")
+                    if len(parts) < 7:
                         continue
                     try:
                         lat_raw = parts[3]
                         lat_dir = parts[4]
                         lon_raw = parts[5]
                         lon_dir = parts[6]
-                        speed_knots_raw = parts[7]
-
                         if not lat_raw or not lon_raw:
-                            print("⚠️ Missing lat/lon in GPRMC.")
                             continue
-
                         lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
                         if lat_dir == "S":
                             lat = -lat
                         lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
                         if lon_dir == "W":
                             lon = -lon
-
-                        # Convert speed string to float, default to 0 if empty
-                        try:
-                            speed_knots = float(speed_knots_raw) if speed_knots_raw else 0.0
-                        except:
-                            speed_knots = 0.0
-
-                        print(f"✅ Got position: {lat}, {lon} | Speed: {speed_knots} kn")
-                        return lat, lon, speed_knots
+                        print(f"✅ Got position: {lat}, {lon}")
+                        return lat, lon
                     except Exception as e:
                         print("❌ Error parsing GPRMC:", e)
     except Exception as e:
         print("❌ NMEA read error:", e)
-    return None, None, 0.0
+    return None, None
 
-def append_position(lat, lon, speed_knots):
+def append_position(lat, lon):
     data = {
         "lat": lat,
         "lon": lon,
-        "speed_knots": speed_knots,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "updated": True
     }
@@ -67,9 +53,8 @@ def append_position(lat, lon, speed_knots):
             try:
                 trail = json.load(f)
                 for point in trail:
-                    point["updated"] = False  # clear previous flags
+                    point["updated"] = False
             except:
-                print("⚠️ Could not read positions.json — starting fresh.")
                 trail = []
     else:
         trail = []
@@ -80,9 +65,23 @@ def append_position(lat, lon, speed_knots):
 
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
-    result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"], shell=True)
+    result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"])
     if result.returncode != 0:
-        print("⚠️ Nothing to commit (no change in file?)")
-    subprocess.run(["git", "push"], shell=True)
+        print("⚠️ Nothing to commit")
+    subprocess.run(["git", "push"])
     print("📤 Pushed to GitHub.")
+
+# ----------------------
+# Main loop
+# ----------------------
+if __name__ == "__main__":
+    while True:
+        lat, lon = read_position()
+        if lat and lon:
+            append_position(lat, lon)
+            push_to_git()
+        else:
+            print("⚠️ No valid position this cycle.")
+        print("⏲️ Sleeping 15 minutes...")
+        time.sleep(900)  # 15 minutes
 
