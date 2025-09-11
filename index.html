@@ -142,6 +142,11 @@
         })
       }).addTo(map);
 
+      // Add popup showing speed in knots
+      if (current.speed_knots !== undefined && !isArchive) {
+        marker.bindPopup(`Speed: ${current.speed_knots.toFixed(1)} kn`);
+      }
+
       if (isArchive && index === positions.length - 1) {
         marker.bindPopup("Hope (26/07/2025)").openPopup();
       }
@@ -151,8 +156,12 @@
       }
 
       const ts = new Date(current.timestamp);
+      let speed = current.speed_knots !== undefined && current.speed_knots !== null
+        ? `${current.speed_knots.toFixed(1)} kn`
+        : "N/A";
+
       document.getElementById('time-label').textContent =
-        `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
+        `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')} | 🚤 ${speed}`;
     }
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
@@ -160,12 +169,8 @@
     document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
-    // Initial load
     loadPositions();
-
-    // Auto-refresh every 30 seconds
     setInterval(() => loadPositions(true), 30000);
   </script>
 </body>
 </html>
-

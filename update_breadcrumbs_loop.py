@@ -19,7 +19,7 @@ def read_position():
                 if line.startswith("$GPRMC"):
                     parts = line.split(",")
                     print(f"🔍 Raw parts: {parts}")
-                    if len(parts) < 7:
+                    if len(parts) < 8:
                         print("⚠️ Incomplete GPRMC line.")
                         continue
                     try:
@@ -27,27 +27,38 @@ def read_position():
                         lat_dir = parts[4]
                         lon_raw = parts[5]
                         lon_dir = parts[6]
+                        speed_knots_raw = parts[7]
+
                         if not lat_raw or not lon_raw:
                             print("⚠️ Missing lat/lon in GPRMC.")
                             continue
+
                         lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
                         if lat_dir == "S":
                             lat = -lat
                         lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
                         if lon_dir == "W":
                             lon = -lon
-                        print(f"✅ Got position: {lat}, {lon}")
-                        return lat, lon
+
+                        # Convert speed string to float, default to 0 if empty
+                        try:
+                            speed_knots = float(speed_knots_raw) if speed_knots_raw else 0.0
+                        except:
+                            speed_knots = 0.0
+
+                        print(f"✅ Got position: {lat}, {lon} | Speed: {speed_knots} kn")
+                        return lat, lon, speed_knots
                     except Exception as e:
                         print("❌ Error parsing GPRMC:", e)
     except Exception as e:
         print("❌ NMEA read error:", e)
-    return None, None
+    return None, None, 0.0
 
-def append_position(lat, lon):
+def append_position(lat, lon, speed_knots):
     data = {
         "lat": lat,
         "lon": lon,
+        "speed_knots": speed_knots,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "updated": True
     }
@@ -74,3 +85,4 @@ def push_to_git():
         print("⚠️ Nothing to commit (no change in file?)")
     subprocess.run(["git", "push"], shell=True)
     print("📤 Pushed to GitHub.")
+
