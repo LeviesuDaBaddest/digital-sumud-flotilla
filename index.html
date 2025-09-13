@@ -169,26 +169,27 @@
     setInterval(() => loadPositions(true), 30000);
 
 // ==============================
-// 👻 GHOST FLEET ADDITION (CLEAN)
+// 👻 GHOST FLEET ADDITION (WITH SEPARATE CONTROL)
 // ==============================
 const ghostFleetSize = 15;
 let ghostFleet = [];
 let ghostOffsets = [];
+let showGhosts = true; // you can make a checkbox toggle this later
 
-// Randomize initial offsets around the real ship
 function randomizeGhostOffsets() {
   ghostOffsets = [];
   for (let i = 0; i < ghostFleetSize; i++) {
     ghostOffsets.push({
-      lat: (Math.random() - 0.5) * 0.02, // ~1.1km
+      lat: (Math.random() - 0.5) * 0.02,
       lon: (Math.random() - 0.5) * 0.02
     });
   }
 }
 
-// Update ghost markers and breadcrumb trails
 function updateGhostFleet(index) {
-  // Remove previous ghosts and trails
+  if (!showGhosts) return;
+
+  // Remove old ghosts
   ghostFleet.forEach(g => {
     map.removeLayer(g.marker);
     map.removeLayer(g.trail);
@@ -200,21 +201,14 @@ function updateGhostFleet(index) {
 
   for (let i = 0; i < ghostFleetSize; i++) {
     const offset = ghostOffsets[i];
-
     const ghostTrail = baseTrail.map(p => ({
       lat: p.lat + offset.lat,
       lon: p.lon + offset.lon
     }));
 
-    // Draw ghost breadcrumb trail
     const latlngs = ghostTrail.map(p => [p.lat, p.lon]);
-    const trail = L.polyline(latlngs, {
-      color: "cyan",
-      weight: 1.5,
-      opacity: 0.6
-    }).addTo(map);
+    const trail = L.polyline(latlngs, { color: "cyan", weight: 1.5, opacity: 0.6 }).addTo(map);
 
-    // Draw ghost marker
     const current = ghostTrail[ghostTrail.length - 1];
     const marker = L.marker([current.lat, current.lon], {
       icon: L.divIcon({
@@ -233,18 +227,17 @@ function updateGhostFleet(index) {
     ghostFleet.push({ trail, marker });
   }
 
-  // Slightly drift offsets for next update
   randomizeGhostOffsets();
 }
 
-// Hook ghost fleet into your existing map update function
+// Hook into your map update function
 const _oldUpdateMap = updateMap;
 updateMap = function(index) {
-  _oldUpdateMap(index);     // original map update
-  updateGhostFleet(index);  // add ghost fleet
+  _oldUpdateMap(index);      // original real marker & breadcrumb update
+  updateGhostFleet(index);   // ghosts updated independently
 };
 
-// Kick off
+// Kickoff
 randomizeGhostOffsets();
   </script>
 </body>
