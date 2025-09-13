@@ -8,11 +8,12 @@ import random
 # ----------------------
 # CONFIG
 # ----------------------
-GHOST_FLEET_SIZE = 15
-GHOST_SPREAD = 0.02  # max offset in degrees for ghosts
+NUM_GHOSTS = 15
+GHOST_OFFSET_MAX = 0.02  # Max lat/lon offset from real ship
+POSITIONS_FILE = "positions.json"
 
 # ----------------------
-# Functions
+# Helper functions
 # ----------------------
 def read_position():
     print("⏳ Waiting for NMEA data from Sailaway...")
@@ -51,46 +52,56 @@ def read_position():
         print("❌ NMEA read error:", e)
     return None, None
 
-def append_positions(lat, lon):
-    """Append real position + ghost fleet"""
-    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-    # Load existing trail
-    if os.path.exists("positions.json"):
-        with open("positions.json", "r") as f:
-            try:
-                trail = json.load(f)
-                for point in trail:
-                    point["updated"] = False
-            except:
-                trail = []
-    else:
-        trail = []
+def load_positions():
+    if os.path.exists(POSITIONS_FILE):
+        try:
+            with open(POSITIONS_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return []
+    return []
 
-    # Real ship
-    trail.append({
-        "lat": lat,
-        "lon": lon,
-        "timestamp": timestamp,
-        "updated": True,
-        "type": "real"
-    })
-
-    # Ghost ships
-    for i in range(GHOST_FLEET_SIZE):
-        offset_lat = (random.random() - 0.5) * GHOST_SPREAD
-        offset_lon = (random.random() - 0.5) * GHOST_SPREAD
-        trail.append({
-            "lat": lat + offset_lat,
-            "lon": lon + offset_lon,
-            "timestamp": timestamp,
-            "updated": True,
-            "type": f"ghost{i+1}"
-        })
-
-    with open("positions.json", "w") as f:
+def save_positions(trail):
+    with open(POSITIONS_FILE, "w") as f:
         json.dump(trail, f, indent=2)
 
-    print(f"📌 Appended real + {GHOST_FLEET_SIZE} ghost positions at {timestamp}")
+def generate_ghosts(real_lat, real_lon):
+    ghosts = []
+    for i in range(NUM_GHOSTS):
+        offset_lat = (random.random() - 0.5) * GHOST_OFFSET_MAX
+        offset_lon = (random.random() - 0.5) * GHOST_OFFSET_MAX
+        ghost = {
+            "lat": real_lat + offset_lat,
+            "lon": real_lon + offset_lon,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "updated": True,
+            "ghost": True
+        }
+        ghosts.append(ghost)
+    return ghosts
+
+def append_positions(real_lat, real_lon):
+    trail = load_positions()
+    # Mark previous points as not updated
+    for point in trail:
+        point["updated"] = False
+
+    # Add real ship
+    real_ship = {
+        "lat": real_lat,
+        "lon": real_lon,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "updated": True,
+        "ghost": False
+    }
+    trail.append(real_ship)
+
+    # Add ghosts
+    ghosts = generate_ghosts(real_lat, real_lon)
+    trail.extend(ghosts)
+
+    save_positions(trail)
+    print(f"📌 Appended real ship + {len(ghosts)} ghost ships to positions.json")
 
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
@@ -101,7 +112,7 @@ def push_to_git():
     print("📤 Pushed to GitHub.")
 
 # ----------------------
-# Main loop
+# MAIN LOOP
 # ----------------------
 if __name__ == "__main__":
     while True:
