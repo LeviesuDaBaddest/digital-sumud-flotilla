@@ -1385,111 +1385,223 @@
     "lat": 37.106458333333336,
     "lon": 11.690036666666666,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": false
   },
   {
     "lat": 37.108000575198936,
     "lon": 11.692374215589373,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.10511807397806,
     "lon": 11.689440535378303,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.09991147035347,
     "lon": 11.694681763357469,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.10691053653347,
     "lon": 11.685293528279994,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.110079860237406,
     "lon": 11.683169019721413,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.106312819249396,
     "lon": 11.695459102296518,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.100460886693334,
     "lon": 11.680332644275513,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.10055054474783,
     "lon": 11.69705932702996,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.09798000821676,
     "lon": 11.694292854022054,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.11420877580961,
     "lon": 11.680558737962183,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.11450107469133,
     "lon": 11.692411486777825,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.11099974924505,
     "lon": 11.686854479358086,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.10812165538907,
     "lon": 11.699495231905267,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.10181127957719,
     "lon": 11.689947060795678,
     "timestamp": "2025-09-13 23:56:26",
-    "updated": true,
+    "updated": false,
     "ghost": true
   },
   {
     "lat": 37.1142182379361,
     "lon": 11.688526184329021,
     "timestamp": "2025-09-13 23:56:26",
+    "updated": false,
+    "ghost": true
+  },
+  {
+    "lat": 37.102648333333335,
+    "lon": 11.730593333333333,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": false
+  },
+  {
+    "lat": 37.09465483465799,
+    "lon": 11.739755851562876,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.10691022350489,
+    "lon": 11.736247851490191,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.099265002671544,
+    "lon": 11.737405283015084,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.10538616627222,
+    "lon": 11.721441013781622,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.09297659319424,
+    "lon": 11.733207143390016,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.095493407272585,
+    "lon": 11.731100940329762,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.09281674781021,
+    "lon": 11.727537028218498,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.11155240095034,
+    "lon": 11.738596303413157,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.100808559170815,
+    "lon": 11.739029686559952,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.107405611059214,
+    "lon": 11.734730007732136,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.09890232745047,
+    "lon": 11.730311149934783,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.11173383321779,
+    "lon": 11.721554362524317,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.103454314515844,
+    "lon": 11.729062276837599,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.104760348115136,
+    "lon": 11.730463080192804,
+    "timestamp": "2025-09-14 00:11:29",
+    "updated": true,
+    "ghost": true
+  },
+  {
+    "lat": 37.103019432948386,
+    "lon": 11.73145137949441,
+    "timestamp": "2025-09-14 00:11:29",
     "updated": true,
     "ghost": true
   }
