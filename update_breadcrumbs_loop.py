@@ -3,7 +3,17 @@ import json
 import time
 import subprocess
 import os
+import random
 
+# ----------------------
+# CONFIG
+# ----------------------
+GHOST_FLEET_SIZE = 15
+GHOST_SPREAD = 0.02  # max offset in degrees for ghosts
+
+# ----------------------
+# Functions
+# ----------------------
 def read_position():
     print("⏳ Waiting for NMEA data from Sailaway...")
     try:
@@ -41,13 +51,10 @@ def read_position():
         print("❌ NMEA read error:", e)
     return None, None
 
-def append_position(lat, lon):
-    data = {
-        "lat": lat,
-        "lon": lon,
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "updated": True
-    }
+def append_positions(lat, lon):
+    """Append real position + ghost fleet"""
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    # Load existing trail
     if os.path.exists("positions.json"):
         with open("positions.json", "r") as f:
             try:
@@ -58,10 +65,32 @@ def append_position(lat, lon):
                 trail = []
     else:
         trail = []
-    trail.append(data)
+
+    # Real ship
+    trail.append({
+        "lat": lat,
+        "lon": lon,
+        "timestamp": timestamp,
+        "updated": True,
+        "type": "real"
+    })
+
+    # Ghost ships
+    for i in range(GHOST_FLEET_SIZE):
+        offset_lat = (random.random() - 0.5) * GHOST_SPREAD
+        offset_lon = (random.random() - 0.5) * GHOST_SPREAD
+        trail.append({
+            "lat": lat + offset_lat,
+            "lon": lon + offset_lon,
+            "timestamp": timestamp,
+            "updated": True,
+            "type": f"ghost{i+1}"
+        })
+
     with open("positions.json", "w") as f:
         json.dump(trail, f, indent=2)
-    print("📌 Appended new position:", data)
+
+    print(f"📌 Appended real + {GHOST_FLEET_SIZE} ghost positions at {timestamp}")
 
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
@@ -78,10 +107,10 @@ if __name__ == "__main__":
     while True:
         lat, lon = read_position()
         if lat and lon:
-            append_position(lat, lon)
+            append_positions(lat, lon)
             push_to_git()
         else:
             print("⚠️ No valid position this cycle.")
         print("⏲️ Sleeping 15 minutes...")
-        time.sleep(900)  # 15 minutes
+        time.sleep(900)
 
