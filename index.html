@@ -169,26 +169,30 @@
     setInterval(() => loadPositions(true), 30000);
 
 // ==============================
-// 👻 GHOST FLEET ADDITION
+// 👻 GHOST FLEET ADDITION (CLEAN)
 // ==============================
 const ghostFleetSize = 15;
 let ghostFleet = [];
 let ghostOffsets = [];
 
+// Randomize initial offsets around the real ship
 function randomizeGhostOffsets() {
   ghostOffsets = [];
   for (let i = 0; i < ghostFleetSize; i++) {
-    // Random offset around real ship (drifts slightly each refresh)
     ghostOffsets.push({
-      lat: (Math.random() - 0.5) * 0.02, // +/- ~1.1km
+      lat: (Math.random() - 0.5) * 0.02, // ~1.1km
       lon: (Math.random() - 0.5) * 0.02
     });
   }
 }
 
+// Update ghost markers and breadcrumb trails
 function updateGhostFleet(index) {
-  // remove old ghosts
-  ghostFleet.forEach(g => map.removeLayer(g.marker));
+  // Remove previous ghosts and trails
+  ghostFleet.forEach(g => {
+    map.removeLayer(g.marker);
+    map.removeLayer(g.trail);
+  });
   ghostFleet = [];
 
   if (!positions.length) return;
@@ -196,12 +200,13 @@ function updateGhostFleet(index) {
 
   for (let i = 0; i < ghostFleetSize; i++) {
     const offset = ghostOffsets[i];
+
     const ghostTrail = baseTrail.map(p => ({
       lat: p.lat + offset.lat,
       lon: p.lon + offset.lon
     }));
 
-    // Breadcrumb trail
+    // Draw ghost breadcrumb trail
     const latlngs = ghostTrail.map(p => [p.lat, p.lon]);
     const trail = L.polyline(latlngs, {
       color: "cyan",
@@ -209,7 +214,7 @@ function updateGhostFleet(index) {
       opacity: 0.6
     }).addTo(map);
 
-    // Marker (cyan, flashing)
+    // Draw ghost marker
     const current = ghostTrail[ghostTrail.length - 1];
     const marker = L.marker([current.lat, current.lon], {
       icon: L.divIcon({
@@ -228,18 +233,18 @@ function updateGhostFleet(index) {
     ghostFleet.push({ trail, marker });
   }
 
-  // randomize offsets slightly each update for "drifting" effect
+  // Slightly drift offsets for next update
   randomizeGhostOffsets();
 }
 
-// Hook ghost fleet into existing map update
+// Hook ghost fleet into your existing map update function
 const _oldUpdateMap = updateMap;
 updateMap = function(index) {
-  _oldUpdateMap(index);   // run original update
-  updateGhostFleet(index); // then update ghosts
+  _oldUpdateMap(index);     // original map update
+  updateGhostFleet(index);  // add ghost fleet
 };
 
-// Kick it off
+// Kick off
 randomizeGhostOffsets();
   </script>
 </body>
