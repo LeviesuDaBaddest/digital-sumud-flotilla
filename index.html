@@ -169,14 +169,15 @@
     setInterval(() => loadPositions(true), 30000);
 
 // ==============================
-// 👻 GHOST FLEET ADDITION (WITH SEPARATE CONTROL)
+// 👻 INDEPENDENT GHOST FLEET
 // ==============================
+
 const ghostFleetSize = 15;
 let ghostFleet = [];
 let ghostOffsets = [];
-let showGhosts = true; // you can make a checkbox toggle this later
 
-function randomizeGhostOffsets() {
+// Initialize ghost offsets once
+function initGhostOffsets() {
   ghostOffsets = [];
   for (let i = 0; i < ghostFleetSize; i++) {
     ghostOffsets.push({
@@ -186,21 +187,22 @@ function randomizeGhostOffsets() {
   }
 }
 
-function updateGhostFleet(index) {
-  if (!showGhosts) return;
-
-  // Remove old ghosts
+// Draw ghosts independently
+function drawGhosts() {
+  // Remove previous ghosts
   ghostFleet.forEach(g => {
-    map.removeLayer(g.marker);
     map.removeLayer(g.trail);
+    map.removeLayer(g.marker);
   });
   ghostFleet = [];
 
   if (!positions.length) return;
-  const baseTrail = positions.slice(0, index + 1);
+
+  const baseTrail = positions; // full trail (or you can limit length if you want)
 
   for (let i = 0; i < ghostFleetSize; i++) {
     const offset = ghostOffsets[i];
+
     const ghostTrail = baseTrail.map(p => ({
       lat: p.lat + offset.lat,
       lon: p.lon + offset.lon
@@ -226,19 +228,17 @@ function updateGhostFleet(index) {
 
     ghostFleet.push({ trail, marker });
   }
-
-  randomizeGhostOffsets();
 }
 
-// Hook into your map update function
-const _oldUpdateMap = updateMap;
-updateMap = function(index) {
-  _oldUpdateMap(index);      // original real marker & breadcrumb update
-  updateGhostFleet(index);   // ghosts updated independently
-};
+// Slowly drift ghosts every 30 seconds
+setInterval(() => {
+  ghostOffsets.forEach(o => {
+    o.lat += (Math.random() - 0.5) * 0.001;
+    o.lon += (Math.random() - 0.5) * 0.001;
+  });
+  drawGhosts();
+}, 30000);
 
-// Kickoff
-randomizeGhostOffsets();
-  </script>
-</body>
-</html>
+// Initial setup
+initGhostOffsets();
+drawGhosts();
