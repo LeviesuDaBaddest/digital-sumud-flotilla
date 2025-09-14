@@ -10,8 +10,8 @@ import math
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 15
-BASE_SPEED = 0.0004       # base movement per tick
-SPEED_VARIATION = 0.00015
+BASE_SPEED = 0.000032       # base movement per tick (~7 knots)
+SPEED_VARIATION = 0.15      # ±15% variation
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
 UPDATE_INTERVAL = 60  # seconds
@@ -148,7 +148,8 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     if distance == 0:
         distance = 1e-6
 
-    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"]
+    # Natural ghost speed around 7 knots with variation
+    speed = BASE_SPEED * state["speed_multiplier"] * random.uniform(1 - SPEED_VARIATION, 1 + SPEED_VARIATION)
 
     if state.get("burst_active", False):
         state["burst_ticks"] -= 1
@@ -158,6 +159,11 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
 
     move_lat = (delta_lat / distance) * speed
     move_lon = (delta_lon / distance) * speed
+
+    # Small random drift for realism
+    drift_factor = 0.000005
+    move_lat += random.uniform(-drift_factor, drift_factor)
+    move_lon += random.uniform(-drift_factor, drift_factor)
 
     new_lat = last_lat + move_lat
     new_lon = last_lon + move_lon
@@ -185,8 +191,6 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             "ghost": True,
             "dot": True
         })
-
-        # Keep all breadcrumbs, no limit
 
     return fleet
 
@@ -229,6 +233,7 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
 
 
 
