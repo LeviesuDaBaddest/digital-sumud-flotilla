@@ -19,7 +19,7 @@ REAL_SHIP_ID = "al_awda"
 # CUSTOM GHOST NAMES
 # ----------------------
 GHOST_NAMES = [
-    "Free Gaza", 
+    "Ma’an", 
     "Al Quds", 
     "Voyage2Gaza", 
     "Resistance", 
