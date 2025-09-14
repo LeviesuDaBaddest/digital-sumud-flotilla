@@ -16,6 +16,21 @@ POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
 
 # ----------------------
+# CUSTOM GHOST NAMES
+# ----------------------
+GHOST_NAMES = [
+    "Free Gaza", 
+    "Al Quds", 
+    "Voyage2Gaza", 
+    "Resistance", 
+    "Humanity", 
+    "Olive Branch", 
+    "Gamers4Justice", 
+    "Hebron", 
+    "Khan Younis"
+]
+
+# ----------------------
 # GLOBAL STATE
 # ----------------------
 GHOST_STATES = {}
@@ -79,10 +94,9 @@ def save_positions(fleet):
 # GHOST MOVEMENT
 # ----------------------
 def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
-    """Ghosts sail in loose formation with swerves, groups, arcs, bursts, and pauses"""
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
-            "offset_lat": random.uniform(-0.02, 0.02),   # spawn ~1–2 km
+            "offset_lat": random.uniform(-0.02, 0.02),
             "offset_lon": random.uniform(-0.02, 0.02),
             "burst_ticks": 0,
             "pause_ticks": 0,
@@ -91,7 +105,7 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
             "swerve_speed": random.uniform(0.05, 0.15),
             "crossing": False,
             "cross_ticks": 0,
-            "group_id": random.randint(1, 3)  # small packs
+            "group_id": random.randint(1, 3)
         }
 
     state = GHOST_STATES[ghost_id]
@@ -99,16 +113,15 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
     # Pauses
     if state["pause_ticks"] > 0:
         state["pause_ticks"] -= 1
-        return real_lat + state["offset_lat"], real_lon + state["offset_lon"]
+        return real_lat + state["offset_lat"], real_lon + state["offset_lon"], sog_knots
 
-    if random.random() < 0.02:  # 2% chance to pause
+    if random.random() < 0.02:
         state["pause_ticks"] = random.randint(2, 5)
 
-    # Base speed = your speed ± variation
+    # Base speed
     speed_mult = 1.0 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
     ghost_speed = sog_knots * speed_mult
 
-    # Distance travelled this tick (nm → degrees)
     dist_nm = ghost_speed * (UPDATE_INTERVAL / 3600.0)
     dist_deg = dist_nm / 60.0
 
@@ -131,33 +144,7 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
     swerve_lat = math.sin(state["swerve_phase"]) * state["swerve_amp"]
     swerve_lon = math.cos(state["swerve_phase"]) * state["swerve_amp"]
 
-    # Crossings
-    if not state["crossing"] and random.random() < 0.01:
-        state["crossing"] = True
-        state["cross_ticks"] = random.randint(4, 10)
-        state["cross_angle"] = random.choice([math.pi/2, -math.pi/2])
-
-    if state["crossing"]:
-        overshoot = 0.0002
-        swerve_lat += overshoot * math.sin(state["cross_angle"])
-        swerve_lon += overshoot * math.cos(state["cross_angle"])
-        state["cross_ticks"] -= 1
-        if state["cross_ticks"] <= 0:
-            state["crossing"] = False
-
-    # Grouping: ghosts in same group share slight attraction
-    group_pull_lat = 0
-    group_pull_lon = 0
-    for other_id, other in GHOST_STATES.items():
-        if other_id == ghost_id:
-            continue
-        if other["group_id"] == state["group_id"]:
-            group_pull_lat += (other["offset_lat"] - state["offset_lat"]) * 0.01
-            group_pull_lon += (other["offset_lon"] - state["offset_lon"]) * 0.01
-    state["offset_lat"] += group_pull_lat
-    state["offset_lon"] += group_pull_lon
-
-    # Move forward along course
+    # Move along course
     rad = math.radians(cog_deg)
     delta_lat = dist_deg * math.cos(rad) * burst_mult
     delta_lon = dist_deg * math.sin(rad) * burst_mult / max(0.1, math.cos(math.radians(real_lat)))
@@ -165,44 +152,59 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
     new_lat = real_lat + state["offset_lat"] + delta_lat + drift_lat + swerve_lat
     new_lon = real_lon + state["offset_lon"] + delta_lon + drift_lon + swerve_lon
 
-    return new_lat, new_lon
+    return new_lat, new_lon, ghost_speed
 
 def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
+        ghost_name = GHOST_NAMES[(i-1) % len(GHOST_NAMES)]
+
         if ghost_id not in fleet:
             fleet[ghost_id] = []
 
-        new_lat, new_lon = move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id)
+        new_lat, new_lon, ghost_speed = move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id)
 
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "ghost": True,
-            "dot": True
+            "name": ghost_name,
+            "speed": round(ghost_speed, 2),
+            "heading": round(cog_deg, 1)
         })
 
     return fleet
 
+# ----------------------
+# APPEND POSITIONS
+# ----------------------
 def append_positions(real_lat, real_lon, sog_knots, cog_deg):
     fleet = load_positions()
 
+    # Real ship
     real_point = {
         "lat": real_lat,
         "lon": real_lon,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "ghost": False,
-        "dot": True
+        "name": "Al Awda",
+        "speed": round(sog_knots, 2),
+        "heading": round(cog_deg, 1)
     }
     if REAL_SHIP_ID not in fleet:
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
 
+    # Ghost ships
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet)
+
     save_positions(fleet)
     print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to {POSITIONS_FILE}")
 
+# ----------------------
+# GIT PUSH
+# ----------------------
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
     result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"])
@@ -224,6 +226,4 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
-
 
