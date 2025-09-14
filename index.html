@@ -83,10 +83,10 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let fleet = {};            // shipId -> positions
-    let markers = {};          // shipId -> marker
-    let breadcrumbLayers = {}; // shipId -> breadcrumb
-    let timestamps = [];       // master timeline
+    let fleet = {};
+    let markers = {};
+    let breadcrumbLayers = {};
+    let timestamps = [];
     let currentFile = 'positions.json';
     let userMovedMap = false;
 
@@ -97,14 +97,12 @@
       const newData = await res.json();
       if (!newData) return;
 
-      // Handle both archive (array) and flotilla (object)
       if (Array.isArray(newData)) {
         fleet = { archive: newData };
       } else {
         fleet = newData;
       }
 
-      // Build master timestamp list from al_awda or first ship
       const firstShipId = Object.keys(fleet)[0];
       timestamps = fleet[firstShipId].map(p => p.timestamp);
 
@@ -118,8 +116,8 @@
 
       const dateRange = document.getElementById('date-range');
       if (currentFile.includes('archive')) {
-        const first = new Date(timestamps[0]);
-        const last = new Date(timestamps[timestamps.length - 1]);
+        const first = new Date(timestamps[0].replace(" ", "T"));
+        const last = new Date(timestamps[timestamps.length - 1].replace(" ", "T"));
         dateRange.style.display = 'block';
         dateRange.textContent = `📅 ${first.toLocaleDateString()} → ${last.toLocaleDateString()}`;
       } else {
@@ -127,79 +125,60 @@
       }
       updateMap(parseInt(slider.value));
     }
-function updateMap(index) {
-  if (!timestamps.length) return;
-  const ts = timestamps[index];
 
-  const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
-  const isArchive = currentFile.includes('archive');
+    function updateMap(index) {
+      if (!timestamps.length) return;
+      const ts = timestamps[index];
+      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      const isArchive = currentFile.includes('archive');
 
-  for (const shipId in fleet) {
-    const trail = fleet[shipId].filter(p => new Date(p.timestamp.replace(" ", "T")) <= new Date(ts));
-    if (!trail.length) continue;
-
-    const current = trail[trail.length - 1];
-
-    // --- Breadcrumb polyline ---
-    if (showBreadcrumbs && trail.length > 1) {
-      const latlngs = trail.map(p => [p.lat, p.lon]);
-      if (breadcrumbLayers[shipId]) {
-        breadcrumbLayers[shipId].setLatLngs(latlngs); // update instead of remove/re-add
-      } else {
-        breadcrumbLayers[shipId] = L.polyline(latlngs, {
-          color: isArchive ? 'darkgreen' : (shipId.startsWith("ghost") ? 'cyan' : 'limegreen'),
-          weight: 2
-        }).addTo(map);
-      }
-    } else if (breadcrumbLayers[shipId]) {
-      map.removeLayer(breadcrumbLayers[shipId]);
-      delete breadcrumbLayers[shipId];
-    }
-
-    // --- Marker ---
-    if (markers[shipId]) {
-      markers[shipId].setLatLng([current.lat, current.lon]);
-      markers[shipId].setPopupContent(`<b>${shipId.replace("_", " ")}</b><br>${current.timestamp}`);
-    } else {
-      markers[shipId] = L.marker([current.lat, current.lon], {
-        icon: L.divIcon({
-          className: isArchive
-            ? 'archive-marker'
-            : (shipId.startsWith("ghost") ? 'ghost-marker' : 'live-marker'),
-          iconSize: [16, 16],
-          iconAnchor: [8, 8] // centers the dot
-        })
-      }).addTo(map);
-      markers[shipId].bindPopup(`<b>${shipId.replace("_", " ")}</b><br>${current.timestamp}`);
-    }
-
-    // --- Auto-follow main ship ---
-    if (!userMovedMap && shipId === "al_awda") {
-      map.setView([current.lat, current.lon], map.getZoom());
-    }
-  }
-
-  document.getElementById('time-label').textContent =
-    `${(new Date(ts.replace(" ", "T"))).toLocaleString()}`;
-}
-
+      for (const shipId in fleet) {
+        const trail = fleet[shipId].filter(p => new Date(p.timestamp.replace(" ", "T")) <= new Date(ts.replace(" ", "T")));
+        if (!trail.length) continue;
 
         const current = trail[trail.length - 1];
-        markers[shipId] = L.marker([current.lat, current.lon], {
-          icon: L.divIcon({
-            className: isArchive ? 'archive-marker' : (shipId.startsWith("ghost") ? 'ghost-marker' : 'live-marker')
-          })
-        }).addTo(map);
 
-        markers[shipId].bindPopup(`<b>${shipId.replace("_", " ")}</b><br>${current.timestamp}`);
+        // --- Breadcrumb ---
+        if (showBreadcrumbs && trail.length > 1) {
+          const latlngs = trail.map(p => [p.lat, p.lon]);
+          if (breadcrumbLayers[shipId]) {
+            breadcrumbLayers[shipId].setLatLngs(latlngs);
+          } else {
+            breadcrumbLayers[shipId] = L.polyline(latlngs, {
+              color: isArchive ? 'darkgreen' : (shipId.startsWith("ghost") ? 'cyan' : 'limegreen'),
+              weight: 2
+            }).addTo(map);
+          }
+        } else if (breadcrumbLayers[shipId]) {
+          map.removeLayer(breadcrumbLayers[shipId]);
+          delete breadcrumbLayers[shipId];
+        }
 
+        // --- Marker ---
+        if (markers[shipId]) {
+          markers[shipId].setLatLng([current.lat, current.lon]);
+          markers[shipId].setPopupContent(`<b>${shipId.replace("_", " ")}</b><br>${current.timestamp}`);
+        } else {
+          markers[shipId] = L.marker([current.lat, current.lon], {
+            icon: L.divIcon({
+              className: isArchive
+                ? 'archive-marker'
+                : (shipId.startsWith("ghost") ? 'ghost-marker' : 'live-marker'),
+              iconSize: [16, 16],
+              iconAnchor: [8, 8]
+            })
+          }).addTo(map);
+          markers[shipId].bindPopup(`<b>${shipId.replace("_", " ")}</b><br>${current.timestamp}`);
+        }
+
+        // --- Auto-follow ---
         if (!userMovedMap && shipId === "al_awda") {
           map.setView([current.lat, current.lon], map.getZoom());
         }
       }
 
       document.getElementById('time-label').textContent =
-        `${(new Date(ts)).toLocaleString()}`;
+        `${(new Date(ts.replace(" ", "T"))).toLocaleString()}`;
     }
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
@@ -207,10 +186,7 @@ function updateMap(index) {
     document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
-    // Initial load
     loadPositions();
-
-    // Auto-refresh every 30 seconds
     setInterval(() => loadPositions(true), 30000);
   </script>
 </body>
