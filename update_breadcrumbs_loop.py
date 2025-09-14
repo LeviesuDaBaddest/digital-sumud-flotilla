@@ -9,7 +9,7 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-NUM_GHOSTS = 15
+NUM_GHOSTS = 9
 UPDATE_INTERVAL = 60  # seconds
 SPEED_VARIATION = 0.08  # ±8% variation
 POSITIONS_FILE = "fleet_positions.json"
