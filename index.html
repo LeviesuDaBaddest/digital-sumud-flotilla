@@ -15,16 +15,16 @@
     @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
     .flashing-dot { display: inline-block; width: 10px; height: 10px; background: limegreen; border-radius: 50%; animation: flash 1s infinite; vertical-align: middle; }
     @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-    ul { display: none; }
     .section { margin-top: 15px; background: #222; border-radius: 6px; overflow: hidden; }
     .section summary { padding: 8px 10px; cursor: pointer; background: #333; }
     .section p { padding: 5px 10px; margin: 0; }
     label { display: block; margin-top: 15px; text-align: center; font-size: 14px; }
+    #boat-list { margin-top: 15px; }
+    .boat-item { padding: 5px 8px; background: #222; margin-bottom: 5px; border-radius: 5px; cursor: pointer; }
+    .boat-item:hover { background: #333; }
     #slider-container { width: calc(100% - 300px); height: 80px; background: #111; position: absolute; bottom: 0; right: 0; padding: 10px; box-sizing: border-box; text-align: center; transition: all 0.3s; }
     input[type="range"] { width: 90%; }
     #time-label { display: block; font-size: 14px; margin-top: 5px; }
-    #date-range { display: none; text-align: center; padding: 5px; background: #222; color: #ff8080; font-size: 13px; }
-    #archive-select { margin: 10px auto; display: block; width: 90%; font-size: 14px; background: #222; color: white; border: 1px solid #444; padding: 5px; }
     #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
     @media screen and (max-width: 768px) {
       body { overflow: auto; }
@@ -34,8 +34,8 @@
       #slider-container { width: 100%; position: relative; }
       #hamburger { display: block; }
     }
-    .live-marker { background: limegreen; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; animation: flash 1s infinite; }
-    .ghost-marker { background: limegreen; width: 12px; height: 12px; border-radius: 50%; border: 2px solid darkgreen; opacity: 0.8; }
+    .live-marker { background: limegreen; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; animation: flash 1s infinite; transform-origin: center center; }
+    .ghost-marker { background: limegreen; width: 12px; height: 12px; border-radius: 50%; border: 2px solid darkgreen; opacity: 0.8; transform-origin: center center; }
   </style>
 </head>
 <body>
@@ -64,32 +64,30 @@
       <p>Learn more about the real missions at the <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a>.</p>
     </details>
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
+    <div id="boat-list"></div>
   </div>
+
   <div id="map"></div>
-  <div id="date-range"></div>
   <div id="slider-container">
     <input type="range" id="timeSlider" min="0" max="0" value="0" step="1">
     <span id="time-label"></span>
   </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([32.6, 28.9], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
     let markersLayer = L.layerGroup().addTo(map);
     let positions = {};
-    let currentFile = 'fleet_positions.json';
     let userMovedMap = false;
 
     map.on('movestart', () => { userMovedMap = true; });
 
     async function loadPositions(autoUpdate = false) {
-      const res = await fetch(currentFile + '?t=' + Date.now());
+      const res = await fetch('fleet_positions.json?t=' + Date.now());
       const newPositions = await res.json();
       if (!newPositions) return;
-
       positions = Array.isArray(newPositions) ? { fleet: newPositions } : newPositions;
 
       const slider = document.getElementById('timeSlider');
@@ -100,30 +98,23 @@
       if (!autoUpdate) slider.value = slider.max;
 
       updateMap(parseInt(slider.value));
+      updateSidebar();
     }
 
     function updateMap(index) {
       markersLayer.clearLayers();
-
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
 
       let latSum = 0, lonSum = 0, count = 0;
 
       for (const shipId in positions) {
         const shipData = positions[shipId];
-        if (shipData.length === 0) continue;
+        if (!shipData.length) continue;
         const pos = shipData[Math.min(index, shipData.length - 1)];
-
-        const markerHtml = pos.ghost
-          ? '<div class="ghost-marker"></div>'
-          : '<div class="live-marker"></div>';
+        const markerHtml = pos.ghost ? '<div class="ghost-marker"></div>' : '<div class="live-marker"></div>';
 
         L.marker([pos.lat, pos.lon], {
-          icon: L.divIcon({
-            className: "",
-            html: markerHtml,
-            iconAnchor: [8, 16]
-          })
+          icon: L.divIcon({ className: "", html: markerHtml, iconAnchor: [8, 16] })
         }).addTo(markersLayer);
 
         if (showBreadcrumbs && shipData.length > 1) {
@@ -131,21 +122,35 @@
           L.polyline(trail, { color: pos.ghost ? 'limegreen' : 'cyan', weight: 2 }).addTo(markersLayer);
         }
 
-        latSum += pos.lat;
-        lonSum += pos.lon;
-        count++;
+        latSum += pos.lat; lonSum += pos.lon; count++;
       }
 
       if (!userMovedMap && count > 0) map.setView([latSum / count, lonSum / count], map.getZoom());
 
-      // Update time label
+      // Time label
       let ts = new Date();
+      for (const shipId in positions) { if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; } }
+      document.getElementById('time-label').textContent =
+        `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
+    }
+
+    function updateSidebar() {
+      const boatList = document.getElementById('boat-list');
+      boatList.innerHTML = '';
+
       for (const shipId in positions) {
         const shipData = positions[shipId];
-        if (shipData.length > index) { ts = new Date(shipData[index].timestamp); break; }
+        if (!shipData.length) continue;
+        const pos = shipData[shipData.length - 1]; // latest
+
+        const div = document.createElement('div');
+        div.className = 'boat-item';
+        div.innerHTML = `${pos.name || shipId} ${pos.ghost ? '👻' : '🚢'}<br>Speed: ${pos.speed || 'N/A'} kn, Heading: ${pos.heading || 'N/A'}°`;
+        div.addEventListener('click', () => {
+          map.setView([pos.lat, pos.lon], 10);
+        });
+        boatList.appendChild(div);
       }
-      document.getElementById('time-label').textContent =
-        `${(ts.getMonth() + 1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
     }
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
