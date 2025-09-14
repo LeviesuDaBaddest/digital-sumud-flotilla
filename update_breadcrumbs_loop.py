@@ -75,54 +75,94 @@ def save_positions(fleet):
         json.dump(fleet, f, indent=2)
 
 def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
-    """
-    Move ghost with human-like pauses, subtle course corrections, and lag-adjusted speed.
-    """
+    """Move ghost realistically near the real ship, arcs, bursts, pauses, human-like"""
+
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "angle_offset": random.uniform(-math.pi, math.pi),
             "speed_multiplier": random.uniform(0.85, 1.15),
-            "arc_ticks": random.randint(20, 60),
-            "pause_ticks": 0
+            "arc_ticks": random.randint(15, 40),
+            "burst_wait": random.randint(5, 15),
+            "burst_active": False,
+            "pause_ticks": 0,
+            "drift_lat": 0,
+            "drift_lon": 0,
+            "course_correction": 0
         }
 
     state = GHOST_STATES[ghost_id]
 
-    # Random pause logic
+    # -----------------
+    # Pause & small drift
+    # -----------------
     if state["pause_ticks"] > 0:
-        speed_factor = 0.2
         state["pause_ticks"] -= 1
-    elif random.random() < 0.03:
-        state["pause_ticks"] = random.randint(5, 15)
-        speed_factor = 0.2
-    else:
-        speed_factor = 1.0
+        return last_lat + state["drift_lat"], last_lon + state["drift_lon"]
 
-    # Arc movement or convergence
+    if random.random() < 0.02 and state["pause_ticks"] == 0:
+        state["pause_ticks"] = random.randint(2, 5)
+        state["drift_lat"] = random.uniform(-0.00001, 0.00001)
+        state["drift_lon"] = random.uniform(-0.00001, 0.00001)
+
+    # -----------------
+    # Distance to real ship
+    # -----------------
+    delta_lat_real = real_lat - last_lat
+    delta_lon_real = real_lon - last_lon
+    distance_to_real = math.hypot(delta_lat_real, delta_lon_real)
+
+    # -----------------
+    # Burst if slightly behind
+    # -----------------
+    MIN_DISTANCE = 0.00003
+    MAX_DISTANCE = 0.00012
+    if not state["burst_active"] and state["burst_wait"] <= 0 and MIN_DISTANCE < distance_to_real < MAX_DISTANCE and random.random() < 0.35:
+        state["burst_active"] = True
+        state["burst_ticks"] = random.randint(3, 7)
+        state["speed_multiplier"] *= random.uniform(1.2, 1.35)
+        state["burst_wait"] = random.randint(15, 25)
+    else:
+        state["burst_wait"] -= 1
+
+    # -----------------
+    # Arc movement close to ship
+    # -----------------
     if state["arc_ticks"] > 0:
-        radius = 0.0004 + random.uniform(0, 0.0003)
-        state["angle_offset"] += random.uniform(-0.08, 0.08)
-        target_lat = real_lat + radius * math.sin(state["angle_offset"])
-        target_lon = real_lon + radius * math.cos(state["angle_offset"])
+        radius = 0.00008 + random.uniform(0, 0.00004)
+        state["angle_offset"] += random.uniform(-0.05, 0.05)
+        state["course_correction"] = random.uniform(-0.00001, 0.00001)
+        target_lat = real_lat + radius * math.sin(state["angle_offset"]) + state["drift_lat"] + state["course_correction"]
+        target_lon = real_lon + radius * math.cos(state["angle_offset"]) + state["drift_lon"] + state["course_correction"]
         state["arc_ticks"] -= 1
     else:
-        target_lat = real_lat + random.uniform(-0.00005, 0.00005)
-        target_lon = real_lon + random.uniform(-0.00005, 0.00005)
-        state["arc_ticks"] = random.randint(20, 60)
+        target_lat = real_lat + random.uniform(-0.000015, 0.000015) + state["drift_lat"]
+        target_lon = real_lon + random.uniform(-0.000015, 0.000015) + state["drift_lon"]
+        state["arc_ticks"] = random.randint(15, 40)
 
-    # Move toward target
+    # -----------------
+    # Move vector
+    # -----------------
     delta_lat = target_lat - last_lat
     delta_lon = target_lon - last_lon
     distance = math.sqrt(delta_lat**2 + delta_lon**2)
     if distance == 0:
         distance = 1e-6
 
-    lag_factor = min(distance / 0.0003, 2.0)
-    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"] * speed_factor * lag_factor
+    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"]
+
+    if state.get("burst_active", False):
+        state["burst_ticks"] -= 1
+        if state["burst_ticks"] <= 0:
+            state["burst_active"] = False
+            state["speed_multiplier"] = random.uniform(0.85, 1.15)
+
     move_lat = (delta_lat / distance) * speed
     move_lon = (delta_lon / distance) * speed
 
-    return last_lat + move_lat, last_lon + move_lon
+    new_lat = last_lat + move_lat
+    new_lon = last_lon + move_lon
+
+    return new_lat, new_lon
 
 def generate_or_update_ghosts(real_lat, real_lon, fleet):
     for i in range(1, NUM_GHOSTS + 1):
@@ -146,14 +186,13 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             "dot": True
         })
 
-        MAX_BREADCRUMBS = 50
-        if len(fleet[ghost_id]) > MAX_BREADCRUMBS:
-            fleet[ghost_id].pop(0)
+        # Keep all breadcrumbs, no limit
 
     return fleet
 
 def append_positions(real_lat, real_lon):
     fleet = load_positions()
+
     real_point = {
         "lat": real_lat,
         "lon": real_lon,
@@ -164,10 +203,6 @@ def append_positions(real_lat, real_lon):
     if REAL_SHIP_ID not in fleet:
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
-
-    MAX_REAL_HISTORY = 50
-    if len(fleet[REAL_SHIP_ID]) > MAX_REAL_HISTORY:
-        fleet[REAL_SHIP_ID].pop(0)
 
     fleet = generate_or_update_ghosts(real_lat, real_lon, fleet)
     save_positions(fleet)
@@ -194,6 +229,5 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
 
 
