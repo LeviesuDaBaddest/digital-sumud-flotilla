@@ -76,54 +76,58 @@ def save_positions(fleet):
 
 def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     """
-    Move ghost in a wide, human-like arc around the real ship, slowly converging back.
+    Move ghost with human-like pauses, subtle course corrections, and lag-adjusted speed.
     """
-    # Initialize ghost state
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "angle_offset": random.uniform(-math.pi, math.pi),
             "speed_multiplier": random.uniform(0.85, 1.15),
-            "arc_ticks": random.randint(20, 60)
+            "arc_ticks": random.randint(20, 60),
+            "pause_ticks": 0
         }
 
     state = GHOST_STATES[ghost_id]
 
-    # Wide arc movement
+    # Random pause logic
+    if state["pause_ticks"] > 0:
+        speed_factor = 0.2
+        state["pause_ticks"] -= 1
+    elif random.random() < 0.03:
+        state["pause_ticks"] = random.randint(5, 15)
+        speed_factor = 0.2
+    else:
+        speed_factor = 1.0
+
+    # Arc movement or convergence
     if state["arc_ticks"] > 0:
-        # rotate around real ship
         radius = 0.0004 + random.uniform(0, 0.0003)
-        state["angle_offset"] += random.uniform(-0.1, 0.1)  # subtle turn
+        state["angle_offset"] += random.uniform(-0.08, 0.08)
         target_lat = real_lat + radius * math.sin(state["angle_offset"])
         target_lon = real_lon + radius * math.cos(state["angle_offset"])
         state["arc_ticks"] -= 1
     else:
-        # converge slowly back to real ship
         target_lat = real_lat + random.uniform(-0.00005, 0.00005)
         target_lon = real_lon + random.uniform(-0.00005, 0.00005)
-        # reset arc for next fan-out
         state["arc_ticks"] = random.randint(20, 60)
 
-    # Vector to target
+    # Move toward target
     delta_lat = target_lat - last_lat
     delta_lon = target_lon - last_lon
     distance = math.sqrt(delta_lat**2 + delta_lon**2)
     if distance == 0:
         distance = 1e-6
 
-    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"]
+    lag_factor = min(distance / 0.0003, 2.0)
+    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"] * speed_factor * lag_factor
     move_lat = (delta_lat / distance) * speed
     move_lon = (delta_lon / distance) * speed
 
-    new_lat = last_lat + move_lat
-    new_lon = last_lon + move_lon
-
-    return new_lat, new_lon
+    return last_lat + move_lat, last_lon + move_lon
 
 def generate_or_update_ghosts(real_lat, real_lon, fleet):
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
         if ghost_id not in fleet or len(fleet[ghost_id]) == 0:
-            # spawn close to real ship
             offset_lat = (random.random() - 0.5) * 0.005
             offset_lon = (random.random() - 0.5) * 0.005
             last_lat, last_lon = real_lat + offset_lat, real_lon + offset_lon
@@ -142,7 +146,6 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             "dot": True
         })
 
-        # Limit breadcrumbs
         MAX_BREADCRUMBS = 50
         if len(fleet[ghost_id]) > MAX_BREADCRUMBS:
             fleet[ghost_id].pop(0)
@@ -151,7 +154,6 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
 
 def append_positions(real_lat, real_lon):
     fleet = load_positions()
-
     real_point = {
         "lat": real_lat,
         "lon": real_lon,
