@@ -36,6 +36,7 @@
     }
     .live-marker { background: limegreen; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; animation: flash 1s infinite; }
     .archive-marker { background: limegreen; width: 14px; height: 14px; border-radius: 50%; border: 2px solid darkgreen; }
+    .ghost-marker { background: orange; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; }
   </style>
 </head>
 <body>
@@ -82,9 +83,9 @@
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    let breadcrumbLayer = null;
-    let marker = null;
-    let positions = [];
+    let breadcrumbLayers = {};
+    let markers = {};
+    let fleetPositions = {};
     let currentFile = 'positions.json';
     let userMovedMap = false;
 
@@ -92,67 +93,84 @@
 
     async function loadPositions(autoUpdate = false) {
       const res = await fetch(currentFile + '?t=' + Date.now());
-      const newPositions = await res.json();
-      if (!newPositions || newPositions.length === 0) return;
+      const newFleet = await res.json();
+      if (!newFleet) return;
 
       const slider = document.getElementById('timeSlider');
-      const atEndBefore = parseInt(slider.value) === positions.length - 1;
 
-      positions = newPositions;
-      slider.max = positions.length - 1;
-
-      if (!autoUpdate || atEndBefore) {
-        slider.value = positions.length - 1;
+      let allPoints = [];
+      for (const shipId in newFleet) {
+        allPoints = allPoints.concat(newFleet[shipId]);
       }
+      allPoints.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      slider.max = allPoints.length - 1;
+      const atEndBefore = parseInt(slider.value) === allPoints.length - 1;
+      if (!autoUpdate || atEndBefore) slider.value = allPoints.length - 1;
+
+      fleetPositions = newFleet;
 
       const dateRange = document.getElementById('date-range');
       if (currentFile.includes('archive')) {
-        const first = new Date(positions[0].timestamp);
-        const last = new Date(positions[positions.length - 1].timestamp);
+        const first = new Date(allPoints[0].timestamp);
+        const last = new Date(allPoints[allPoints.length - 1].timestamp);
         dateRange.style.display = 'block';
         dateRange.textContent = `📅 ${first.toLocaleDateString()} → ${last.toLocaleDateString()}`;
       } else {
         dateRange.style.display = 'none';
       }
+
       updateMap(parseInt(slider.value));
     }
 
     function updateMap(index) {
-      if (!positions.length) return;
-      const partial = positions.slice(0, index + 1);
-
-      if (breadcrumbLayer) map.removeLayer(breadcrumbLayer);
-      if (marker) map.removeLayer(marker);
+      for (const shipId in markers) {
+        markers[shipId].forEach(m => map.removeLayer(m));
+      }
+      for (const shipId in breadcrumbLayers) {
+        map.removeLayer(breadcrumbLayers[shipId]);
+      }
+      markers = {};
+      breadcrumbLayers = {};
 
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
       const isArchive = currentFile.includes('archive');
 
-      if (showBreadcrumbs && partial.length > 1) {
-        const latlngs = partial.map(p => [p.lat, p.lon]);
-        breadcrumbLayer = L.polyline(latlngs, {
-          color: isArchive ? 'darkgreen' : 'limegreen',
-          weight: 2
-        }).addTo(map);
+      for (const shipId in fleetPositions) {
+        const points = fleetPositions[shipId].slice(0, index + 1);
+        if (!points.length) continue;
+
+        if (showBreadcrumbs && points.length > 1) {
+          const latlngs = points.map(p => [p.lat, p.lon]);
+          breadcrumbLayers[shipId] = L.polyline(latlngs, {
+            color: points[0].ghost ? 'orange' : (isArchive ? 'darkgreen' : 'limegreen'),
+            weight: 2
+          }).addTo(map);
+        }
+
+        const current = points[points.length - 1];
+        const iconClass = current.ghost ? 'ghost-marker' : (isArchive ? 'archive-marker' : 'live-marker');
+        markers[shipId] = [
+          L.marker([current.lat, current.lon], {
+            icon: L.divIcon({ className: iconClass })
+          }).addTo(map)
+        ];
       }
 
-      const current = positions[index];
-      marker = L.marker([current.lat, current.lon], {
-        icon: L.divIcon({
-          className: isArchive ? 'archive-marker' : 'live-marker'
-        })
-      }).addTo(map);
-
-      if (isArchive && index === positions.length - 1) {
-        marker.bindPopup("Hope (26/07/2025)").openPopup();
+      const realShipId = 'al_awda';
+      const realShipPoints = fleetPositions[realShipId] || [];
+      if (!userMovedMap && realShipPoints.length) {
+        const last = realShipPoints[Math.min(index, realShipPoints.length - 1)];
+        map.setView([last.lat, last.lon], map.getZoom());
       }
 
-      if (!userMovedMap) {
-        map.setView([current.lat, current.lon], map.getZoom());
+      let allPoints = [];
+      for (const shipId in fleetPositions) allPoints = allPoints.concat(fleetPositions[shipId].slice(0, index + 1));
+      allPoints.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      if (allPoints.length) {
+        const ts = new Date(allPoints[allPoints.length - 1].timestamp);
+        document.getElementById('time-label').textContent =
+          `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
       }
-
-      const ts = new Date(current.timestamp);
-      document.getElementById('time-label').textContent =
-        `${(ts.getMonth() + 1).toString().padStart(2, '0')}/${ts.getDate().toString().padStart(2, '0')} ${ts.getHours().toString().padStart(2, '0')}:${ts.getMinutes().toString().padStart(2, '0')}`;
     }
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
@@ -160,10 +178,7 @@
     document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
-    // Initial load
     loadPositions();
-
-    // Auto-refresh every 30 seconds
     setInterval(() => loadPositions(true), 30000);
   </script>
 </body>

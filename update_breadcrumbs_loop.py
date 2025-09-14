@@ -4,19 +4,21 @@ import time
 import subprocess
 import os
 import random
+import math
 
 # ----------------------
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 15
-GHOST_OFFSET_MAX = 0.02  # Max lat/lon offset from real ship
+GHOST_MAX_SPEED = 0.00005  # degrees per tick (adjust for realism)
 POSITIONS_FILE = "positions.json"
 REAL_SHIP_ID = "al_awda"
 
 # ----------------------
-# Helper functions
+# HELPER FUNCTIONS
 # ----------------------
 def read_position():
+    """Read real ship position from Sailaway NMEA"""
     print("⏳ Waiting for NMEA data from Sailaway...")
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,7 +29,6 @@ def read_position():
             lines = raw.splitlines()
             for line in lines:
                 line = line.strip()
-                print("📡 Got NMEA line:", line)
                 if line.startswith("$GPRMC"):
                     parts = line.split(",")
                     if len(parts) < 7:
@@ -66,39 +67,55 @@ def save_positions(fleet):
     with open(POSITIONS_FILE, "w") as f:
         json.dump(fleet, f, indent=2)
 
-def generate_ghosts(real_lat, real_lon, existing_fleet):
-    ghosts = {}
+def move_ghost(last_lat, last_lon):
+    """Apply a small movement vector to simulate sailing drift"""
+    angle = random.uniform(0, 2*math.pi)  # random heading
+    speed = random.uniform(0, GHOST_MAX_SPEED)
+    new_lat = last_lat + math.cos(angle) * speed
+    new_lon = last_lon + math.sin(angle) * speed
+    return new_lat, new_lon
+
+def generate_or_update_ghosts(real_lat, real_lon, fleet):
+    """Generate new ghosts if missing, otherwise move them smoothly"""
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
-        offset_lat = (random.random() - 0.5) * GHOST_OFFSET_MAX
-        offset_lon = (random.random() - 0.5) * GHOST_OFFSET_MAX
-        ghost_point = {
-            "lat": real_lat + offset_lat,
-            "lon": real_lon + offset_lon,
+        if ghost_id not in fleet:
+            # spawn near real ship initially
+            offset_lat = (random.random() - 0.5) * 0.01
+            offset_lon = (random.random() - 0.5) * 0.01
+            last_lat, last_lon = real_lat + offset_lat, real_lon + offset_lon
+            fleet[ghost_id] = []
+        else:
+            last_point = fleet[ghost_id][-1]
+            last_lat, last_lon = last_point["lat"], last_point["lon"]
+
+        new_lat, new_lon = move_ghost(last_lat, last_lon)
+        fleet[ghost_id].append({
+            "lat": new_lat,
+            "lon": new_lon,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "ghost": True
-        }
-        if ghost_id not in existing_fleet:
-            existing_fleet[ghost_id] = []
-        existing_fleet[ghost_id].append(ghost_point)
-    return existing_fleet
+            "ghost": True,
+            "dot": True
+        })
+    return fleet
 
 def append_positions(real_lat, real_lon):
     fleet = load_positions()
 
-    # Add real ship
+    # Real ship
     real_point = {
         "lat": real_lat,
         "lon": real_lon,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "ghost": False
+        "ghost": False,
+        "dot": True
     }
     if REAL_SHIP_ID not in fleet:
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
 
-    # Add ghosts
-    fleet = generate_ghosts(real_lat, real_lon, fleet)
+    # Ghost ships
+    fleet = generate_or_update_ghosts(real_lat, real_lon, fleet)
 
     save_positions(fleet)
     print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to positions.json")
@@ -124,4 +141,5 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print("⏲️ Sleeping 15 minutes...")
         time.sleep(900)
+
 
