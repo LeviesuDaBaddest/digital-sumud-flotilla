@@ -10,10 +10,16 @@ import math
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 15
-GHOST_MAX_SPEED = 0.0005  # faster for visible movement
+BASE_SPEED = 0.00045       # base movement per tick
+SPEED_VARIATION = 0.0001   # max additional speed variation
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
-UPDATE_INTERVAL = 15  # seconds, for testing (change back to 900 for 15 min)
+UPDATE_INTERVAL = 15  # seconds for testing
+
+# ----------------------
+# GLOBAL STATE
+# ----------------------
+GHOST_STATES = {}  # track per-ghost drift and drift ticks
 
 # ----------------------
 # HELPER FUNCTIONS
@@ -68,20 +74,69 @@ def save_positions(fleet):
     with open(POSITIONS_FILE, "w") as f:
         json.dump(fleet, f, indent=2)
 
-def move_ghost(last_lat, last_lon):
-    """Apply a small movement vector to simulate sailing drift"""
-    angle = random.uniform(0, 2*math.pi)  # random heading
-    speed = random.uniform(0, GHOST_MAX_SPEED)
-    new_lat = last_lat + math.cos(angle) * speed
-    new_lon = last_lon + math.sin(angle) * speed
+def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
+    """
+    Move ghost toward real ship formation, with fan-out and variable speed.
+    """
+    # Initialize ghost state if missing
+    if ghost_id not in GHOST_STATES:
+        GHOST_STATES[ghost_id] = {
+            "drift_lat": 0,
+            "drift_lon": 0,
+            "drift_ticks": 0,
+            "speed_multiplier": random.uniform(0.85, 1.15)  # subtle speed variation
+        }
+
+    state = GHOST_STATES[ghost_id]
+
+    # Occasionally start a new drift
+    if state["drift_ticks"] == 0 and random.random() < 0.05:
+        # Wider fan-out offsets
+        state["drift_lat"] = random.uniform(-0.00025, 0.00025)
+        state["drift_lon"] = random.uniform(-0.00025, 0.00025)
+        state["drift_ticks"] = random.randint(10, 35)
+
+    # Formation offsets
+    formation_offsets = [
+        (0.0001, 0), (-0.0001, 0), (0, 0.0001), (0, -0.0001),
+        (0.00007, 0.00007), (-0.00007, -0.00007), (0.00005, -0.00005),
+        (-0.00005, 0.00005)
+    ]
+    offset_lat, offset_lon = formation_offsets[ghost_index % len(formation_offsets)]
+
+    # Target = real ship + formation offset + drift
+    target_lat = real_lat + offset_lat + state["drift_lat"]
+    target_lon = real_lon + offset_lon + state["drift_lon"]
+
+    # Vector to target
+    delta_lat = target_lat - last_lat
+    delta_lon = target_lon - last_lon
+    distance = math.sqrt(delta_lat**2 + delta_lon**2)
+    if distance == 0:
+        distance = 1e-6
+
+    # Move toward target with speed variation
+    speed = (BASE_SPEED + random.uniform(0, SPEED_VARIATION)) * state["speed_multiplier"]
+    move_lat = (delta_lat / distance) * speed
+    move_lon = (delta_lon / distance) * speed
+
+    new_lat = last_lat + move_lat
+    new_lon = last_lon + move_lon
+
+    # Decrease drift ticks or reset
+    if state["drift_ticks"] > 0:
+        state["drift_ticks"] -= 1
+    else:
+        state["drift_lat"] = 0
+        state["drift_lon"] = 0
+
     return new_lat, new_lon
 
 def generate_or_update_ghosts(real_lat, real_lon, fleet):
-    """Generate new ghosts if missing, otherwise move them smoothly"""
+    """Generate or move ghosts toward real ship formation"""
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
         if ghost_id not in fleet or len(fleet[ghost_id]) == 0:
-            # spawn near real ship initially
             offset_lat = (random.random() - 0.5) * 0.01
             offset_lon = (random.random() - 0.5) * 0.01
             last_lat, last_lon = real_lat + offset_lat, real_lon + offset_lon
@@ -90,7 +145,9 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             last_point = fleet[ghost_id][-1]
             last_lat, last_lon = last_point["lat"], last_point["lon"]
 
-        new_lat, new_lon = move_ghost(last_lat, last_lon)
+        # Move with fan-out, variable speed, and drift
+        new_lat, new_lon = move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, i-1)
+
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
@@ -99,7 +156,7 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             "dot": True
         })
 
-        # Optional: limit breadcrumb history
+        # Limit breadcrumb history
         MAX_BREADCRUMBS = 50
         if len(fleet[ghost_id]) > MAX_BREADCRUMBS:
             fleet[ghost_id].pop(0)
@@ -121,7 +178,7 @@ def append_positions(real_lat, real_lon):
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
 
-    # Optional: limit real ship history
+    # Limit real ship history
     MAX_REAL_HISTORY = 50
     if len(fleet[REAL_SHIP_ID]) > MAX_REAL_HISTORY:
         fleet[REAL_SHIP_ID].pop(0)
@@ -153,6 +210,5 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
 
 
