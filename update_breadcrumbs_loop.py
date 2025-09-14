@@ -10,11 +10,12 @@ import math
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 15
-BASE_SPEED = 0.000032       # base movement per tick (~7 knots)
-SPEED_VARIATION = 0.15      # ±15% variation
+UPDATE_INTERVAL = 60  # seconds
+BASE_SPEED_PER_SECOND = 0.000032  # ~7 knots per second
+BASE_SPEED = BASE_SPEED_PER_SECOND * UPDATE_INTERVAL  # scale to update interval
+SPEED_VARIATION = 0.12  # ±12% variation
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
-UPDATE_INTERVAL = 60  # seconds
 
 # ----------------------
 # GLOBAL STATE
@@ -109,10 +110,10 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     # Burst if slightly behind
     MIN_DISTANCE = 0.00003
     MAX_DISTANCE = 0.00012
-    if not state["burst_active"] and state["burst_wait"] <= 0 and MIN_DISTANCE < distance_to_real < MAX_DISTANCE and random.random() < 0.35:
+    if not state["burst_active"] and state["burst_wait"] <= 0 and MIN_DISTANCE < distance_to_real < MAX_DISTANCE and random.random() < 0.4:
         state["burst_active"] = True
-        state["burst_ticks"] = random.randint(3, 7)
-        state["speed_multiplier"] *= random.uniform(1.2, 1.35)
+        state["burst_ticks"] = random.randint(4, 8)
+        state["speed_multiplier"] *= random.uniform(1.2, 1.4)
         state["burst_wait"] = random.randint(15, 25)
     else:
         state["burst_wait"] -= 1
@@ -137,7 +138,7 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     if distance == 0:
         distance = 1e-6
 
-    # Natural ghost speed around 7 knots with variation
+    # Ghost speed scaled to update interval
     speed = BASE_SPEED * state["speed_multiplier"] * random.uniform(1 - SPEED_VARIATION, 1 + SPEED_VARIATION)
 
     if state.get("burst_active", False):
@@ -162,8 +163,8 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
 def generate_or_update_ghosts(real_lat, real_lon, fleet):
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
-        
-        # Initialize ghost array only if it doesn't exist
+
+        # Initialize ghost array if it doesn't exist
         if ghost_id not in fleet:
             fleet[ghost_id] = []
 
@@ -229,7 +230,6 @@ if __name__ == "__main__":
             print("⚠️ No valid position this cycle.")
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
 
 
 
