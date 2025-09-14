@@ -14,7 +14,7 @@ BASE_SPEED = 0.0004       # base movement per tick
 SPEED_VARIATION = 0.00015
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
-UPDATE_INTERVAL = 180  # seconds
+UPDATE_INTERVAL = 60  # seconds
 
 # ----------------------
 # GLOBAL STATE
