@@ -28,25 +28,9 @@
     #time-label { display: block; font-size: 14px; margin-top: 5px; }
     #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
 
-    /* Responsive adjustments */
-    @media screen and (max-width: 1024px) {
-      #map { width: 100%; height: calc(100% - 150px); }
-      #slider-container { width: 100%; position: relative; bottom: 0; padding: 5px; }
-    }
-
-    @media screen and (max-width: 768px) {
-      body { overflow: auto; }
-      #sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 999; width: 250px; }
-      #sidebar.open { transform: translateX(0); }
-      #map { width: 100%; height: 400px; float: none; }
-      #slider-container { width: 100%; position: relative; bottom: 0; padding: 5px; }
-      #hamburger { display: block; }
-    }
-
-    @media screen and (max-height: 500px) {
-      #map { height: 300px; }
-      #slider-container { height: 60px; }
-    }
+    @media screen and (max-width: 1024px) { #map { width: 100%; height: calc(100% - 150px); } #slider-container { width: 100%; position: relative; bottom: 0; padding: 5px; } }
+    @media screen and (max-width: 768px) { body { overflow: auto; } #sidebar { position: absolute; left: 0; top: 0; bottom: 0; transform: translateX(-100%); z-index: 999; width: 250px; } #sidebar.open { transform: translateX(0); } #map { width: 100%; height: 400px; float: none; } #slider-container { width: 100%; position: relative; bottom: 0; padding: 5px; } #hamburger { display: block; } }
+    @media screen and (max-height: 500px) { #map { height: 300px; } #slider-container { height: 60px; } }
   </style>
 </head>
 <body>
@@ -96,16 +80,15 @@
     const map = L.map('map').setView([32.6, 28.9], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
-    let markersLayer = L.layerGroup().addTo(map);
     let positions = {};
     let userMovedMap = false;
     const boatDivs = {};
     const boatMarkers = {};
-    const animationDuration = 1000; // ms
+    const animationDuration = 1000;
 
     map.on('movestart', () => { userMovedMap = true; });
 
-    async function loadPositions(autoUpdate = false) {
+    async function loadPositions(autoUpdate=false) {
       const res = await fetch('fleet_positions.json?t=' + Date.now());
       const newPositions = await res.json();
       if (!newPositions) return;
@@ -124,30 +107,27 @@
     function moveMarkerSmooth(marker, fromLatLng, toLatLng, duration) {
       const start = performance.now();
       function animate(time) {
-        const progress = Math.min((time - start) / duration, 1);
-        const lat = fromLatLng[0] + (toLatLng[0] - fromLatLng[0]) * progress;
-        const lng = fromLatLng[1] + (toLatLng[1] - fromLatLng[1]) * progress;
+        const progress = Math.min((time - start)/duration, 1);
+        const lat = fromLatLng.lat + (toLatLng[0] - fromLatLng.lat) * progress;
+        const lng = fromLatLng.lng + (toLatLng[1] - fromLatLng.lng) * progress;
         marker.setLatLng([lat, lng]);
-        if (progress < 1) requestAnimationFrame(animate);
+        if(progress < 1) requestAnimationFrame(animate);
       }
       requestAnimationFrame(animate);
     }
 
     function highlightBoat(shipId) {
-      for (const id in boatDivs) {
-        boatDivs[id].classList.toggle('active', id === shipId);
-      }
+      for (const id in boatDivs) boatDivs[id].classList.toggle('active', id === shipId);
     }
 
     function updateMap(index) {
-      markersLayer.clearLayers();
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
-      let latSum = 0, lonSum = 0, count = 0;
+      let latSum=0, lonSum=0, count=0;
 
-      for (const shipId in positions) {
+      for(const shipId in positions){
         const shipData = positions[shipId];
-        if (!shipData.length) continue;
-        const pos = shipData[Math.min(index, shipData.length - 1)];
+        if(!shipData.length) continue;
+        const pos = shipData[Math.min(index, shipData.length-1)];
 
         const arrowHtml = `
           <div style="
@@ -155,52 +135,52 @@
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid ${pos.ghost ? '#475DD1' : '#00008b'};
-            transform: rotate(${pos.heading || 0}deg);
+            border-bottom: 12px solid ${pos.ghost?'#475DD1':'#00008b'};
+            transform: rotate(${pos.heading||0}deg);
             transform-origin: center;
           "></div>
         `;
 
-        if (boatMarkers[shipId]) {
-          moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat, pos.lon], animationDuration);
+        if(boatMarkers[shipId]){
+          moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat,pos.lon], animationDuration);
+          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html:arrowHtml, iconAnchor:[6,6]}));
         } else {
-          boatMarkers[shipId] = L.marker([pos.lat, pos.lon], {
-            icon: L.divIcon({ className: '', html: arrowHtml, iconAnchor: [6, 6] })
-          }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
+          boatMarkers[shipId] = L.marker([pos.lat,pos.lon],{icon:L.divIcon({ className:'', html:arrowHtml, iconAnchor:[6,6] })}).addTo(map)
+            .on('click',()=>highlightBoat(shipId));
         }
 
-        if (showBreadcrumbs && shipData.length > 1) {
-          const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
-          L.polyline(trail, { color: pos.ghost ? '#475DD1' : '#00008b', weight: 2 }).addTo(markersLayer);
+        if(showBreadcrumbs && shipData.length>1){
+          const trail = shipData.slice(0,Math.min(index+1, shipData.length)).map(p=>[p.lat,p.lon]);
+          L.polyline(trail,{color: pos.ghost?'#475DD1':'#00008b',weight:2}).addTo(map);
         }
 
         latSum += pos.lat; lonSum += pos.lon; count++;
       }
 
-      if (!userMovedMap && count > 0) map.setView([latSum / count, lonSum / count], map.getZoom());
+      if(!userMovedMap && count>0) map.setView([latSum/count, lonSum/count], map.getZoom());
 
-      let ts = new Date();
-      for (const shipId in positions) { if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; } }
-      document.getElementById('time-label').textContent =
+      let ts=new Date();
+      for(const shipId in positions){ if(positions[shipId].length>index){ ts=new Date(positions[shipId][index].timestamp); break; } }
+      document.getElementById('time-label').textContent=
         `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
     }
 
-    function updateSidebar() {
+    function updateSidebar(){
       const boatList = document.getElementById('boat-list');
-      boatList.innerHTML = '';
-      for (const shipId in positions) {
+      boatList.innerHTML='';
+      for(const shipId in positions){
         const shipData = positions[shipId];
-        if (!shipData.length) continue;
-        const pos = shipData[shipData.length - 1];
+        if(!shipData.length) continue;
+        const pos = shipData[shipData.length-1];
 
         const div = document.createElement('div');
-        div.className = 'boat-item';
-        div.innerHTML = `${pos.name || shipId}<br>Speed: ${pos.speed || 'N/A'} kn, Heading: ${pos.heading || 'N/A'}°`;
+        div.className='boat-item';
+        div.innerHTML=`${pos.name||shipId}<br>Speed: ${pos.speed||'N/A'} kn, Heading: ${pos.heading||'N/A'}°`;
 
-        boatDivs[shipId] = div;
+        boatDivs[shipId]=div;
 
-        div.addEventListener('click', () => {
-          map.setView([pos.lat, pos.lon], 10);
+        div.addEventListener('click',()=>{
+          map.setView([pos.lat,pos.lon],10);
           highlightBoat(shipId);
         });
 
@@ -208,12 +188,12 @@
       }
     }
 
-    document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
-    document.getElementById('breadcrumbsToggle').addEventListener('change', () => updateMap(parseInt(document.getElementById('timeSlider').value)));
-    document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+    document.getElementById('timeSlider').addEventListener('input', e=>updateMap(parseInt(e.target.value)));
+    document.getElementById('breadcrumbsToggle').addEventListener('change',()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
+    document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
 
     loadPositions();
-    setInterval(() => loadPositions(true), 60000);
+    setInterval(()=>loadPositions(true),60000);
   </script>
 </body>
 </html>
