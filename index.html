@@ -63,10 +63,6 @@
       <p>Whenever a real flotilla mission fails or is intercepted, we reset our virtual voyage and set sail again, aligning our start with the next launch. This ensures the world remains aware of the ongoing struggle to break the siege on Gaza.</p>
       <p>Learn more about the real missions at the <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a>.</p>
     </details>
-    <select id="archive-select">
-      <option value="fleet_positions.json">🌊 Virtual Al Awda Fleet (Live)</option>
-      <option value="hope_archive.json">📜 Hope Archive</option>
-    </select>
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
   </div>
   <div id="map"></div>
@@ -94,41 +90,14 @@
       const newPositions = await res.json();
       if (!newPositions) return;
 
+      positions = Array.isArray(newPositions) ? { fleet: newPositions } : newPositions;
+
       const slider = document.getElementById('timeSlider');
-      const atEndBefore = parseInt(slider.value) === Object.keys(positions).length - 1;
-
-      // Support array archive format too
-      if (Array.isArray(newPositions)) {
-        positions = { archive: newPositions };
-      } else {
-        positions = newPositions;
-      }
-
-      // Find the longest ship trail to set slider max
       let maxLength = 0;
-      for (const shipId in positions) {
-        maxLength = Math.max(maxLength, positions[shipId].length);
-      }
+      for (const shipId in positions) maxLength = Math.max(maxLength, positions[shipId].length);
       slider.max = maxLength > 0 ? maxLength - 1 : 0;
 
-      if (!autoUpdate || atEndBefore) {
-        slider.value = slider.max;
-      }
-
-      const dateRange = document.getElementById('date-range');
-      if (currentFile.includes('archive') && Object.keys(positions).length) {
-        const shipData = positions[Object.keys(positions)[0]];
-        if (shipData.length > 0) {
-          const first = new Date(shipData[0].timestamp);
-          const last = new Date(shipData[shipData.length - 1].timestamp);
-          dateRange.style.display = 'block';
-          dateRange.textContent = `📅 ${first.toLocaleDateString()} → ${last.toLocaleDateString()}`;
-        } else {
-          dateRange.style.display = 'none';
-        }
-      } else {
-        dateRange.style.display = 'none';
-      }
+      if (!autoUpdate) slider.value = slider.max;
 
       updateMap(parseInt(slider.value));
     }
@@ -145,22 +114,9 @@
         if (shipData.length === 0) continue;
         const pos = shipData[Math.min(index, shipData.length - 1)];
 
-        // 🔧 Clean marker drawing
-        let markerHtml = "";
-        if (currentFile.includes('archive')) {
-          const ts = new Date(pos.timestamp);
-          const label = `Hope Archived – ${ts.toLocaleDateString()}`;
-          markerHtml = `
-            <div style="color:darkgreen; font-size:12px; text-align:center; margin-bottom:2px;">
-              ${label}
-            </div>
-            <div style="background:darkgreen; width:14px; height:14px; border-radius:50%; border:2px solid #003300; margin:0 auto;"></div>
-          `;
-        } else if (pos.ghost) {
-          markerHtml = `<div class="ghost-marker"></div>`;
-        } else {
-          markerHtml = `<div class="live-marker"></div>`;
-        }
+        const markerHtml = pos.ghost
+          ? '<div class="ghost-marker"></div>'
+          : '<div class="live-marker"></div>';
 
         L.marker([pos.lat, pos.lon], {
           icon: L.divIcon({
@@ -170,10 +126,9 @@
           })
         }).addTo(markersLayer);
 
-        // Draw breadcrumbs for this ship
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
-          L.polyline(trail, { color: pos.ghost ? 'limegreen' : (currentFile.includes('archive') ? 'darkgreen' : 'cyan'), weight: 2 }).addTo(markersLayer);
+          L.polyline(trail, { color: pos.ghost ? 'limegreen' : 'cyan', weight: 2 }).addTo(markersLayer);
         }
 
         latSum += pos.lat;
@@ -181,9 +136,7 @@
         count++;
       }
 
-      if (!userMovedMap && count > 0) {
-        map.setView([latSum / count, lonSum / count], map.getZoom());
-      }
+      if (!userMovedMap && count > 0) map.setView([latSum / count, lonSum / count], map.getZoom());
 
       // Update time label
       let ts = new Date();
@@ -197,7 +150,6 @@
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
     document.getElementById('breadcrumbsToggle').addEventListener('change', () => updateMap(parseInt(document.getElementById('timeSlider').value)));
-    document.getElementById('archive-select').addEventListener('change', e => { currentFile = e.target.value; loadPositions(); });
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
     loadPositions();
