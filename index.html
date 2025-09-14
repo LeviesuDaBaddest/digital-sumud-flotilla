@@ -36,7 +36,6 @@
     }
     .live-marker { background: limegreen; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; animation: flash 1s infinite; }
     .ghost-marker { background: limegreen; width: 12px; height: 12px; border-radius: 50%; border: 2px solid darkgreen; opacity: 0.8; }
-    .archive-marker { background: darkgreen; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #003300; }
   </style>
 </head>
 <body>
@@ -98,14 +97,14 @@
       const slider = document.getElementById('timeSlider');
       const atEndBefore = parseInt(slider.value) === Object.keys(positions).length - 1;
 
-      // Handle both fleet (object) and archive (array)
+      // Support array archive format too
       if (Array.isArray(newPositions)) {
         positions = { archive: newPositions };
       } else {
         positions = newPositions;
       }
 
-      // Find longest trail
+      // Find the longest ship trail to set slider max
       let maxLength = 0;
       for (const shipId in positions) {
         maxLength = Math.max(maxLength, positions[shipId].length);
@@ -146,27 +145,35 @@
         if (shipData.length === 0) continue;
         const pos = shipData[Math.min(index, shipData.length - 1)];
 
-        // Decide marker type
-        let markerClass = pos.ghost ? 'ghost-marker' : 'live-marker';
-        let label = "";
-
+        // 🔧 Clean marker drawing
+        let markerHtml = "";
         if (currentFile.includes('archive')) {
-          markerClass = 'archive-marker';
           const ts = new Date(pos.timestamp);
-          label = `Hope Archived – ${ts.toLocaleDateString()}`;
+          const label = `Hope Archived – ${ts.toLocaleDateString()}`;
+          markerHtml = `
+            <div style="color:darkgreen; font-size:12px; text-align:center; margin-bottom:2px;">
+              ${label}
+            </div>
+            <div style="background:darkgreen; width:14px; height:14px; border-radius:50%; border:2px solid #003300; margin:0 auto;"></div>
+          `;
+        } else if (pos.ghost) {
+          markerHtml = `<div class="ghost-marker"></div>`;
+        } else {
+          markerHtml = `<div class="live-marker"></div>`;
         }
 
         L.marker([pos.lat, pos.lon], {
           icon: L.divIcon({
-            className: markerClass,
-            html: label ? `<div style="color:darkgreen; font-size:12px; text-align:center; margin-bottom:2px;">${label}</div><div class="${markerClass}"></div>` : "",
+            className: "",
+            html: markerHtml,
             iconAnchor: [8, 16]
           })
         }).addTo(markersLayer);
 
+        // Draw breadcrumbs for this ship
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
-          L.polyline(trail, { color: pos.ghost ? 'limegreen' : 'darkgreen', weight: 2 }).addTo(markersLayer);
+          L.polyline(trail, { color: pos.ghost ? 'limegreen' : (currentFile.includes('archive') ? 'darkgreen' : 'cyan'), weight: 2 }).addTo(markersLayer);
         }
 
         latSum += pos.lat;
@@ -178,6 +185,7 @@
         map.setView([latSum / count, lonSum / count], map.getZoom());
       }
 
+      // Update time label
       let ts = new Date();
       for (const shipId in positions) {
         const shipData = positions[shipId];
