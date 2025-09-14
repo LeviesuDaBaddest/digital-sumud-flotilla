@@ -10,9 +10,10 @@ import math
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 15
-GHOST_MAX_SPEED = 0.00005  # degrees per tick (adjust for realism)
+GHOST_MAX_SPEED = 0.0005  # faster for visible movement
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
+UPDATE_INTERVAL = 15  # seconds, for testing (change back to 900 for 15 min)
 
 # ----------------------
 # HELPER FUNCTIONS
@@ -79,7 +80,7 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
     """Generate new ghosts if missing, otherwise move them smoothly"""
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
-        if ghost_id not in fleet:
+        if ghost_id not in fleet or len(fleet[ghost_id]) == 0:
             # spawn near real ship initially
             offset_lat = (random.random() - 0.5) * 0.01
             offset_lon = (random.random() - 0.5) * 0.01
@@ -97,6 +98,12 @@ def generate_or_update_ghosts(real_lat, real_lon, fleet):
             "ghost": True,
             "dot": True
         })
+
+        # Optional: limit breadcrumb history
+        MAX_BREADCRUMBS = 50
+        if len(fleet[ghost_id]) > MAX_BREADCRUMBS:
+            fleet[ghost_id].pop(0)
+
     return fleet
 
 def append_positions(real_lat, real_lon):
@@ -114,11 +121,16 @@ def append_positions(real_lat, real_lon):
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
 
+    # Optional: limit real ship history
+    MAX_REAL_HISTORY = 50
+    if len(fleet[REAL_SHIP_ID]) > MAX_REAL_HISTORY:
+        fleet[REAL_SHIP_ID].pop(0)
+
     # Ghost ships
     fleet = generate_or_update_ghosts(real_lat, real_lon, fleet)
 
     save_positions(fleet)
-    print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to positions.json")
+    print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to {POSITIONS_FILE}")
 
 def push_to_git():
     subprocess.run(["git", "add", "-A"])
@@ -139,7 +151,8 @@ if __name__ == "__main__":
             push_to_git()
         else:
             print("⚠️ No valid position this cycle.")
-        print("⏲️ Sleeping 15 minutes...")
-        time.sleep(900)
+        print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
+        time.sleep(UPDATE_INTERVAL)
+
 
 
