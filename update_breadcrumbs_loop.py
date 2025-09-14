@@ -76,7 +76,6 @@ def save_positions(fleet):
 
 def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     """Move ghost realistically near the real ship, arcs, bursts, pauses, human-like"""
-
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "angle_offset": random.uniform(-math.pi, math.pi),
@@ -92,9 +91,7 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
 
     state = GHOST_STATES[ghost_id]
 
-    # -----------------
     # Pause & small drift
-    # -----------------
     if state["pause_ticks"] > 0:
         state["pause_ticks"] -= 1
         return last_lat + state["drift_lat"], last_lon + state["drift_lon"]
@@ -104,16 +101,12 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
         state["drift_lat"] = random.uniform(-0.00001, 0.00001)
         state["drift_lon"] = random.uniform(-0.00001, 0.00001)
 
-    # -----------------
     # Distance to real ship
-    # -----------------
     delta_lat_real = real_lat - last_lat
     delta_lon_real = real_lon - last_lon
     distance_to_real = math.hypot(delta_lat_real, delta_lon_real)
 
-    # -----------------
     # Burst if slightly behind
-    # -----------------
     MIN_DISTANCE = 0.00003
     MAX_DISTANCE = 0.00012
     if not state["burst_active"] and state["burst_wait"] <= 0 and MIN_DISTANCE < distance_to_real < MAX_DISTANCE and random.random() < 0.35:
@@ -124,9 +117,7 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
     else:
         state["burst_wait"] -= 1
 
-    # -----------------
     # Arc movement close to ship
-    # -----------------
     if state["arc_ticks"] > 0:
         radius = 0.00008 + random.uniform(0, 0.00004)
         state["angle_offset"] += random.uniform(-0.05, 0.05)
@@ -139,9 +130,7 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
         target_lon = real_lon + random.uniform(-0.000015, 0.000015) + state["drift_lon"]
         state["arc_ticks"] = random.randint(15, 40)
 
-    # -----------------
     # Move vector
-    # -----------------
     delta_lat = target_lat - last_lat
     delta_lon = target_lon - last_lon
     distance = math.sqrt(delta_lat**2 + delta_lon**2)
@@ -173,17 +162,24 @@ def move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, ghost_index):
 def generate_or_update_ghosts(real_lat, real_lon, fleet):
     for i in range(1, NUM_GHOSTS + 1):
         ghost_id = f"ghost_{i}"
-        if ghost_id not in fleet or len(fleet[ghost_id]) == 0:
+        
+        # Initialize ghost array only if it doesn't exist
+        if ghost_id not in fleet:
+            fleet[ghost_id] = []
+
+        # Get last position or random offset near real ship
+        if len(fleet[ghost_id]) == 0:
             offset_lat = (random.random() - 0.5) * 0.005
             offset_lon = (random.random() - 0.5) * 0.005
             last_lat, last_lon = real_lat + offset_lat, real_lon + offset_lon
-            fleet[ghost_id] = []
         else:
             last_point = fleet[ghost_id][-1]
             last_lat, last_lon = last_point["lat"], last_point["lon"]
 
+        # Move ghost
         new_lat, new_lon = move_ghost(last_lat, last_lon, real_lat, real_lon, ghost_id, i-1)
 
+        # Append new point (keep all breadcrumbs)
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
