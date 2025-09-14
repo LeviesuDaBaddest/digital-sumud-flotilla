@@ -11,7 +11,7 @@ import math
 # ----------------------
 NUM_GHOSTS = 15
 GHOST_MAX_SPEED = 0.00005  # degrees per tick (adjust for realism)
-POSITIONS_FILE = "positions.json"
+POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
 
 # ----------------------
