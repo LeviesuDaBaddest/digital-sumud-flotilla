@@ -16,6 +16,7 @@
     .flashing-dot { display: inline-block; width: 10px; height: 10px; background: limegreen; border-radius: 50%; animation: flash 1s infinite; vertical-align: middle; }
     @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     .section { margin-top: 15px; background: #222; border-radius: 6px; overflow: hidden; }
+    .section.summary-highlight { background-color: #330000; color: #ff8080; font-weight: bold; }
     .section summary { padding: 8px 10px; cursor: pointer; background: #333; }
     .section p { padding: 5px 10px; margin: 0; }
     label { display: block; margin-top: 15px; text-align: center; font-size: 14px; }
@@ -47,6 +48,7 @@
         Shireen Abu Akleh Hind Rajab Refaat Alareer Razan Al-Najjar Mohammed Al-Durra Ahmad Abu Hussein Wael Dahdouh's Family Iman Hejjo Layan Hamadeh Thousands of Martyrs of Palestine
       </div>
     </div>
+
     <details class="section">
       <summary>Martyr Poems & Quotes</summary>
       <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
@@ -56,12 +58,18 @@
       <p><b>Ghada Al-Najjar:</b> "Our roots are deep in this land. Even if they burn our olive trees, we will replant them with our blood."</p>
       <p><b>Mohammed Al-Durra:</b> "I am only a child, but I carry the dreams of my people on my shoulders."</p>
     </details>
-    <details class="section">
-      <summary>Why This Flotilla Sails</summary>
-      <p>The <b>Virtual Voyage To Gaza </b> was created to echo the mission of real-world flotillas sailing towards Gaza. When physical Freedom Flotilla missions face delays or are stopped, the digital world continues to sail in solidarity, keeping their spirit alive online.</p>
-      <p>Whenever a real flotilla mission fails or is intercepted, we reset our virtual voyage and set sail again, aligning our start with the next launch. This ensures the world remains aware of the ongoing struggle to break the siege on Gaza.</p>
-      <p>Learn more about the real missions at the <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a>.</p>
+
+    <details class="section summary-highlight">
+      <summary>What is the Virtual Voyage To Gaza?</summary>
+      <p>The <b>Virtual Voyage To Gaza</b> turns gaming into action. When real-world flotillas are blocked, we sail digitally to raise awareness and challenge complicity.</p>
+      <p>Players around the world join this mission to show solidarity, keep the struggle visible, and amplify the voices of Gaza. Every click, every virtual sail counts.</p>
+      <p>Learn about the real missions here: 
+        <a href="https://freedomflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Freedom Flotilla Coalition</a> and 
+        <a href="https://globalsumudflotilla.org" target="_blank" style="color: #ff8080; text-decoration: underline;">Global Sumud Flotilla</a>.
+      </p>
+      <p><b>Sail, speak out, and make a stand for Gaza! Even the digital world hasn’t forgotten and will not forgive Crimes against Humanity.</b></p>
     </details>
+
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
     <div id="boat-list"></div>
   </div>
@@ -80,7 +88,7 @@
     let markersLayer = L.layerGroup().addTo(map);
     let positions = {};
     let userMovedMap = false;
-    const boatDivs = {}; // store sidebar divs for highlighting
+    const boatDivs = {};
     map.on('movestart', () => { userMovedMap = true; });
 
     async function loadPositions(autoUpdate = false) {
@@ -130,7 +138,7 @@
         L.marker([pos.lat, pos.lon], {
           icon: L.divIcon({ className: '', html: arrowHtml, iconAnchor: [6, 6] })
         }).addTo(markersLayer)
-          .on('click', () => highlightBoat(shipId)); // highlight on click
+          .on('click', () => highlightBoat(shipId));
 
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
@@ -160,7 +168,7 @@
         div.className = 'boat-item';
         div.innerHTML = `${pos.name || shipId}<br>Speed: ${pos.speed || 'N/A'} kn, Heading: ${pos.heading || 'N/A'}°`;
 
-        boatDivs[shipId] = div; // store reference
+        boatDivs[shipId] = div;
 
         div.addEventListener('click', () => {
           map.setView([pos.lat, pos.lon], 10);
