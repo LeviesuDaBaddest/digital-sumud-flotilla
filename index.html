@@ -34,7 +34,7 @@
       height: 0;
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
-      border-top: 16px solid;
+      border-bottom: 16px solid;
       border-radius: 2px; /* makes edges smoother */
       filter: drop-shadow(0 0 2px white); /* thin white border/glow */
     }
@@ -132,9 +132,9 @@
 
     function createArrowHTML(color, heading) {
       return `<div class="ship-arrow" style="
-        border-top-color:${color};
+        border-bottom-color:${color};
         transform: rotate(${heading}deg);
-        transform-origin: 8px 0px;
+        transform-origin: 8px 16px;
       "></div>`;
     }
 
@@ -150,15 +150,15 @@
 
         const color = pos.ghost ? '#475DD1' : '#00008b';
         const heading = pos.heading || 0;
-        const arrowHtml = createArrowHTML(color, heading - 90);
+        const arrowHtml = createArrowHTML(color, heading);
 
         if (boatMarkers[shipId]) {
           boatMarkers[shipId].setLatLng([pos.lat,pos.lon]);
-          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,0] }));
+          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,16] }));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         } else {
           boatMarkers[shipId] = L.marker([pos.lat,pos.lon], {
-            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,0] }),
+            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,16] }),
             color
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
@@ -216,3 +216,4 @@
   </script>
 </body>
 </html>
+
