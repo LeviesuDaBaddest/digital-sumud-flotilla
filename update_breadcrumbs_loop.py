@@ -9,9 +9,9 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-NUM_GHOSTS = 9                # Number of ghost ships
-UPDATE_INTERVAL = 60           # Seconds between updates
-SPEED_VARIATION = 0.08         # ±8% variation for ghost speed
+NUM_GHOSTS = 9  # 10 boats total including the real ship
+UPDATE_INTERVAL = 60  # seconds
+SPEED_VARIATION = 0.08  # ±8% variation
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
 
@@ -19,9 +19,8 @@ REAL_SHIP_ID = "al_awda"
 # CUSTOM GHOST NAMES
 # ----------------------
 GHOST_NAMES = [
-    "Ma’an", "Al Quds", "Voyage2Gaza", "Intifada III", 
-    "Humanity", "Olive Branch", "Gamers4Justice", 
-    "Hebron", "Khan Younis"
+    "Ma’an", "Al Quds", "Voyage2Gaza", "Intifada III",
+    "Humanity", "Olive Branch", "Gamers4Justice", "Hebron", "Khan Younis"
 ]
 
 # ----------------------
@@ -33,8 +32,7 @@ GHOST_STATES = {}
 # HELPER FUNCTIONS
 # ----------------------
 def read_position():
-    """Read real ship position from Sailaway NMEA (lat, lon, SOG, COG)."""
-    print("⏳ Waiting for NMEA data from Sailaway...")
+    """Read real ship position from Sailaway NMEA and return lat, lon, SOG, HDG."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", 10111))
@@ -44,28 +42,19 @@ def read_position():
             for line in raw.splitlines():
                 if line.startswith("$GPRMC"):
                     parts = line.split(",")
-                    if len(parts) < 9:
-                        continue
-                    try:
-                        # Latitude
-                        lat_deg = float(parts[3][:2])
-                        lat_min = float(parts[3][2:])
-                        lat = lat_deg + lat_min / 60.0
-                        if parts[4].upper() == "S":
-                            lat = -lat
-                        # Longitude
-                        lon_deg = float(parts[5][:3])
-                        lon_min = float(parts[5][3:])
-                        lon = lon_deg + lon_min / 60.0
-                        if parts[6].upper() == "W":
-                            lon = -lon
-                        # Speed & Course
-                        sog_knots = float(parts[7]) if parts[7] else 0.0
-                        cog_deg = float(parts[8]) if parts[8] else 0.0
-                        print(f"✅ Got position: {lat:.6f}, {lon:.6f} at {sog_knots:.2f} kn, {cog_deg:.1f}°")
-                        return lat, lon, sog_knots, cog_deg
-                    except Exception as e:
-                        print("❌ Error parsing GPRMC:", e)
+                    if len(parts) < 9: continue
+                    lat_raw, lat_dir = parts[3], parts[4]
+                    lon_raw, lon_dir = parts[5], parts[6]
+                    if not lat_raw or not lon_raw: continue
+
+                    lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
+                    lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
+                    if lat_dir.upper() == "S": lat = -lat
+                    if lon_dir.upper() == "W": lon = -lon
+
+                    sog = float(parts[7]) if parts[7] else 0.0
+                    hdg = float(parts[8]) if parts[8] else 0.0
+                    return lat, lon, sog, hdg
     except Exception as e:
         print("❌ NMEA read error:", e)
     return None, None, 0.0, 0.0
@@ -93,112 +82,94 @@ def compute_heading(lat1, lon1, lat2, lon2):
     return (heading + 360) % 360
 
 # ----------------------
-# RANDOM GHOST MOVEMENT
+# GHOST MOVEMENT
 # ----------------------
-def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet):
+def move_ghost(real_lat, real_lon, sog, hdg, ghost_id, fleet):
     if ghost_id not in GHOST_STATES:
-        # Spawn randomly within ~0.01° of the real ship
+        # random spawn offset
+        offset_lat = random.uniform(-0.01, 0.01)
+        offset_lon = random.uniform(-0.01, 0.01)
+        # random initial heading
+        ghost_hdg = random.uniform(0, 360)
         GHOST_STATES[ghost_id] = {
-            "offset_lat": random.uniform(-0.01, 0.01),
-            "offset_lon": random.uniform(-0.01, 0.01),
-            "swerve_phase": random.uniform(0, math.pi*2),
-            "swerve_amp": random.uniform(0.00005, 0.00012),
-            "swerve_speed": random.uniform(0.05, 0.15)
+            "offset_lat": offset_lat,
+            "offset_lon": offset_lon,
+            "hdg": ghost_hdg
         }
+
     state = GHOST_STATES[ghost_id]
+    speed_mult = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
+    dist_deg = sog * speed_mult * (UPDATE_INTERVAL / 3600) / 60  # nm to degrees
 
-    # Randomized speed
-    speed_mult = 1.0 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
-    ghost_speed = sog_knots * speed_mult
-
-    dist_nm = ghost_speed * (UPDATE_INTERVAL / 3600.0)
-    dist_deg = dist_nm / 60.0
-
-    # Swerve/drift motion
-    state["swerve_phase"] += state["swerve_speed"]
-    swerve_lat = math.sin(state["swerve_phase"]) * state["swerve_amp"]
-    swerve_lon = math.cos(state["swerve_phase"]) * state["swerve_amp"]
-
-    # Move roughly along real ship course
-    rad = math.radians(cog_deg)
+    # move along ghost heading
+    rad = math.radians(state["hdg"])
     delta_lat = dist_deg * math.cos(rad)
     delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat)))
 
-    new_lat = real_lat + state["offset_lat"] + delta_lat + swerve_lat
-    new_lon = real_lon + state["offset_lon"] + delta_lon + swerve_lon
+    new_lat = real_lat + state["offset_lat"] + delta_lat
+    new_lon = real_lon + state["offset_lon"] + delta_lon
 
-    # Heading based on last position
-    heading = cog_deg
+    # small random drift
+    new_lat += random.uniform(-0.0001, 0.0001)
+    new_lon += random.uniform(-0.0001, 0.0001)
+
+    # update heading smoothly toward movement
     if fleet.get(ghost_id) and len(fleet[ghost_id]) > 0:
         last = fleet[ghost_id][-1]
-        last_lat, last_lon = last["lat"], last["lon"]
-        if abs(new_lat - last_lat) > 1e-6 or abs(new_lon - last_lon) > 1e-6:
-            computed_heading = compute_heading(last_lat, last_lon, new_lat, new_lon)
-            last_heading = last.get("heading", computed_heading)
-            heading = (last_heading * 0.7 + computed_heading * 0.3) % 360
-        else:
-            heading = last.get("heading", cog_deg)
+        computed_hdg = compute_heading(last["lat"], last["lon"], new_lat, new_lon)
+        state["hdg"] = (state["hdg"]*0.7 + computed_hdg*0.3) % 360
 
-    return new_lat, new_lon, ghost_speed, heading
+    return new_lat, new_lon, sog*speed_mult, state["hdg"]
 
 # ----------------------
-# UPDATE ALL GHOSTS
+# GENERATE / UPDATE GHOSTS
 # ----------------------
-def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
-    for i in range(1, NUM_GHOSTS + 1):
+def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
+    for i in range(1, NUM_GHOSTS+1):
         ghost_id = f"ghost_{i}"
         ghost_name = GHOST_NAMES[(i-1) % len(GHOST_NAMES)]
+        if ghost_id not in fleet: fleet[ghost_id] = []
 
-        if ghost_id not in fleet:
-            fleet[ghost_id] = []
-
-        new_lat, new_lon, ghost_speed, heading = move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet)
-
+        new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id, fleet)
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "ghost": True,
             "name": ghost_name,
-            "speed": round(ghost_speed, 2),
-            "heading": round(heading, 1)
+            "speed": round(ghost_speed,2),
+            "heading": round(ghost_hdg,1)
         })
-
     return fleet
 
 # ----------------------
 # APPEND POSITIONS
 # ----------------------
-def append_positions(real_lat, real_lon, sog_knots, cog_deg):
+def append_positions(real_lat, real_lon, sog, hdg):
     fleet = load_positions()
 
-    # Real ship
-    real_point = {
+    fleet.setdefault(REAL_SHIP_ID, []).append({
         "lat": real_lat,
         "lon": real_lon,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "ghost": False,
         "name": "Al Awda",
-        "speed": round(sog_knots, 2),
-        "heading": round(cog_deg, 1)
-    }
-    fleet.setdefault(REAL_SHIP_ID, []).append(real_point)
+        "speed": round(sog,2),
+        "heading": round(hdg,1)
+    })
 
-    # Ghost ships
-    fleet = generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet)
-
+    fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
     save_positions(fleet)
-    print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to {POSITIONS_FILE}")
+    print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships.")
 
 # ----------------------
 # GIT PUSH
 # ----------------------
 def push_to_git():
-    subprocess.run(["git", "add", "-A"])
-    result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"])
-    if result.returncode != 0:
-        print("⚠️ Nothing to commit")
-    subprocess.run(["git", "push"])
+    subprocess.run(["git","add","-A"])
+    result = subprocess.run(["git","commit","-m","🛰️ Auto-update with heartbeat"])
+    if result.returncode != 0: print("⚠️ Nothing to commit")
+    subprocess.run(["git","push"])
     print("📤 Pushed to GitHub.")
 
 # ----------------------
@@ -206,13 +177,10 @@ def push_to_git():
 # ----------------------
 if __name__ == "__main__":
     while True:
-        lat, lon, sog, cog = read_position()
-        if lat and lon:
-            append_positions(lat, lon, sog, cog)
-            push_to_git()
-        else:
-            print("⚠️ No valid position this cycle.")
+        lat, lon, sog, hdg = read_position()
+        if lat and lon: append_positions(lat, lon, sog, hdg); push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
 
 
