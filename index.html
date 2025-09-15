@@ -28,6 +28,17 @@
     #time-label { display: block; font-size: 14px; margin-top: 5px; }
     #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
 
+    /* Arrow styling */
+    .ship-arrow {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 16px solid;
+      border-radius: 2px; /* makes edges smoother */
+      filter: drop-shadow(0 0 2px white); /* thin white border/glow */
+    }
+
     @media screen and (max-width: 1024px) {
       #map { width: 100%; height: calc(100% - 150px); }
       #slider-container { width: 100%; position: relative; bottom: 0; padding: 5px; }
@@ -120,14 +131,10 @@
     }
 
     function createArrowHTML(color, heading) {
-      // Tip of triangle stays on ship; rotates around tip
-      return `<div style="
-        width:0; height:0;
-        border-left:6px solid transparent;
-        border-right:6px solid transparent;
-        border-top:12px solid ${color};
+      return `<div class="ship-arrow" style="
+        border-top-color:${color};
         transform: rotate(${heading}deg);
-        transform-origin: 6px 0px;
+        transform-origin: 8px 0px;
       "></div>`;
     }
 
@@ -147,11 +154,11 @@
 
         if (boatMarkers[shipId]) {
           boatMarkers[shipId].setLatLng([pos.lat,pos.lon]);
-          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,0] }));
+          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,0] }));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         } else {
           boatMarkers[shipId] = L.marker([pos.lat,pos.lon], {
-            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,0] }),
+            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[8,0] }),
             color
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
