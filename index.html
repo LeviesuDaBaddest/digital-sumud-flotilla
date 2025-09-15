@@ -93,8 +93,8 @@
     const map = L.map('map').setView([32.6, 28.9], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
-    const markersLayer = L.layerGroup().addTo(map);       // boats
-    const breadcrumbsLayer = L.layerGroup().addTo(map);   // trails
+    const markersLayer = L.layerGroup().addTo(map);
+    const breadcrumbsLayer = L.layerGroup().addTo(map);
     let positions = {};
     let userMovedMap = false;
     const boatDivs = {};
@@ -138,7 +138,7 @@
     }
 
     function updateMap(index) {
-      breadcrumbsLayer.clearLayers();  // only clear trails
+      breadcrumbsLayer.clearLayers();
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
       let latSum = 0, lonSum = 0, count = 0;
 
@@ -153,13 +153,12 @@
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-bottom: 12px solid ${pos.ghost ? '#475DD1' : '#00008b'};
+            border-top: 12px solid ${pos.ghost ? '#475DD1' : '#00008b'};  /* arrow points up now */
             transform: rotate(${pos.heading || 0}deg);
             transform-origin: center;
           "></div>
         `;
 
-        // create or move marker
         if (boatMarkers[shipId]) {
           moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat, pos.lon], animationDuration);
         } else {
@@ -168,7 +167,6 @@
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
         }
 
-        // draw breadcrumbs
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
           L.polyline(trail, { color: pos.ghost ? '#475DD1' : '#00008b', weight: 2 }).addTo(breadcrumbsLayer);
@@ -217,3 +215,4 @@
   </script>
 </body>
 </html>
+
