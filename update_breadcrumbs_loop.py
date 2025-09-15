@@ -19,14 +19,14 @@ REAL_SHIP_ID = "al_awda"
 # CUSTOM GHOST NAMES
 # ----------------------
 GHOST_NAMES = [
-    "Ma’an", 
-    "Al Quds", 
-    "Voyage2Gaza", 
-    "Intifada III", 
-    "Humanity", 
-    "Olive Branch", 
-    "Gamers4Justice", 
-    "Hebron", 
+    "Ma’an",
+    "Al Quds",
+    "Voyage2Gaza",
+    "Intifada III",
+    "Humanity",
+    "Olive Branch",
+    "Gamers4Justice",
+    "Hebron",
     "Khan Younis"
 ]
 
@@ -110,13 +110,10 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet):
         idx = int(ghost_id.split("_")[1])
         row = (idx + 1) // 2
         side = -1 if idx % 2 == 0 else 1
-        spacing = 0.01 * row  # degrees offset (~1 km per row)
-
-        # Correct V-formation offset aligned with lead ship
-        angle_rad = math.radians(cog_deg)
-        offset_lat = -side * spacing * math.sin(angle_rad)
-        offset_lon = side * spacing * math.cos(angle_rad) / max(0.1, math.cos(math.radians(real_lat)))
-
+        spacing = 0.01 * row
+        angle_rad = math.radians(cog_deg + 90 * side)
+        offset_lat = math.cos(angle_rad) * spacing
+        offset_lon = math.sin(angle_rad) * spacing / max(0.1, math.cos(math.radians(real_lat)))
         GHOST_STATES[ghost_id] = {
             "offset_lat": offset_lat,
             "offset_lon": offset_lon,
@@ -131,13 +128,15 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet):
 
     if state["pause_ticks"] > 0:
         state["pause_ticks"] -= 1
-        return real_lat + state["offset_lat"], real_lon + state["offset_lon"], sog_knots, cog_deg
-
+        new_lat = real_lat + state["offset_lat"]
+        new_lon = real_lon + state["offset_lon"]
+        return new_lat, new_lon, sog_knots, cog_deg
     if random.random() < 0.02:
         state["pause_ticks"] = random.randint(2, 5)
 
     speed_mult = 1.0 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
     ghost_speed = sog_knots * speed_mult
+
     dist_nm = ghost_speed * (UPDATE_INTERVAL / 3600.0)
     dist_deg = dist_nm / 60.0
 
@@ -167,17 +166,19 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet):
     state["offset_lat"] *= 0.95
     state["offset_lon"] *= 0.95
 
-    heading = cog_deg
+    # --- FIXED HEADING COMPUTATION ---
     if fleet.get(ghost_id) and len(fleet[ghost_id]) > 0:
         last = fleet[ghost_id][-1]
-        last_lat = last["lat"]
-        last_lon = last["lon"]
+        last_lat, last_lon = last["lat"], last["lon"]
         if abs(new_lat - last_lat) > 1e-6 or abs(new_lon - last_lon) > 1e-6:
             computed_heading = compute_heading(last_lat, last_lon, new_lat, new_lon)
             last_heading = last.get("heading", computed_heading)
             heading = (last_heading * 0.7 + computed_heading * 0.3) % 360
         else:
             heading = last.get("heading", cog_deg)
+    else:
+        # First ghost point: compute heading from real ship to ghost
+        heading = compute_heading(real_lat, real_lon, new_lat, new_lon)
 
     return new_lat, new_lon, ghost_speed, heading
 
@@ -209,6 +210,7 @@ def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
 # ----------------------
 def append_positions(real_lat, real_lon, sog_knots, cog_deg):
     fleet = load_positions()
+
     real_point = {
         "lat": real_lat,
         "lon": real_lon,
@@ -221,7 +223,9 @@ def append_positions(real_lat, real_lon, sog_knots, cog_deg):
     if REAL_SHIP_ID not in fleet:
         fleet[REAL_SHIP_ID] = []
     fleet[REAL_SHIP_ID].append(real_point)
+
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet)
+
     save_positions(fleet)
     print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships to {POSITIONS_FILE}")
 
