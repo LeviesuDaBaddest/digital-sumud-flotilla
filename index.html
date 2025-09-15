@@ -119,6 +119,18 @@
       updateSidebar();
     }
 
+    function createArrowHTML(color, heading) {
+      // Heading in degrees: 0 = north, triangle tip points forward
+      return `<div style="
+        width:0; height:0;
+        border-left:6px solid transparent;
+        border-right:6px solid transparent;
+        border-top:12px solid ${color};
+        transform: rotate(${heading}deg);
+        transform-origin:center;
+      "></div>`;
+    }
+
     function updateMap(index) {
       breadcrumbsLayer.clearLayers();
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
@@ -129,27 +141,21 @@
         if (!shipData.length) continue;
         const pos = shipData[Math.min(index, shipData.length - 1)];
 
-        // Create arrow HTML
         const color = pos.ghost ? '#475DD1' : '#00008b';
-        const arrowHtml = `<div style="
-          width:0; height:0;
-          border-left:6px solid transparent; border-right:6px solid transparent;
-          border-top:12px solid ${color};
-          transform: rotate(${pos.heading || 0}deg);
-          transform-origin:center;
-        "></div>`;
+        const heading = pos.heading || 0;
+        const arrowHtml = createArrowHTML(color, heading);
 
         if (boatMarkers[shipId]) {
-          // Directly update marker position and rotation for scrubber
+          // Smooth rotation
           boatMarkers[shipId].setLatLng([pos.lat,pos.lon]);
           boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,6] }));
-          boatHeading[boatMarkers[shipId]._leaflet_id] = pos.heading || 0;
+          boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         } else {
           boatMarkers[shipId] = L.marker([pos.lat,pos.lon], {
             icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,6] }),
             color
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
-          boatHeading[boatMarkers[shipId]._leaflet_id] = pos.heading || 0;
+          boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         }
 
         // Breadcrumbs
@@ -163,7 +169,7 @@
 
       if (!userMovedMap && count>0) map.setView([latSum/count, lonSum/count], map.getZoom());
 
-      // Update timestamp
+      // Timestamp
       let ts = new Date();
       for (const shipId in positions) {
         if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; }
@@ -206,4 +212,3 @@
   </script>
 </body>
 </html>
-
