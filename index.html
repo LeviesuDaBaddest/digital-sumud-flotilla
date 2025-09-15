@@ -120,14 +120,14 @@
     }
 
     function createArrowHTML(color, heading) {
-      // Heading in degrees: 0 = north, triangle tip points forward
+      // Tip of triangle stays on ship; rotates around tip
       return `<div style="
         width:0; height:0;
         border-left:6px solid transparent;
         border-right:6px solid transparent;
         border-top:12px solid ${color};
         transform: rotate(${heading}deg);
-        transform-origin:center;
+        transform-origin: 6px 0px;
       "></div>`;
     }
 
@@ -146,19 +146,17 @@
         const arrowHtml = createArrowHTML(color, heading);
 
         if (boatMarkers[shipId]) {
-          // Smooth rotation
           boatMarkers[shipId].setLatLng([pos.lat,pos.lon]);
-          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,6] }));
+          boatMarkers[shipId].setIcon(L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,0] }));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         } else {
           boatMarkers[shipId] = L.marker([pos.lat,pos.lon], {
-            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,6] }),
+            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor:[6,0] }),
             color
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
           boatHeading[boatMarkers[shipId]._leaflet_id] = heading;
         }
 
-        // Breadcrumbs
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index+1, shipData.length)).map(p => [p.lat,p.lon]);
           L.polyline(trail, { color, weight:2 }).addTo(breadcrumbsLayer);
@@ -169,7 +167,6 @@
 
       if (!userMovedMap && count>0) map.setView([latSum/count, lonSum/count], map.getZoom());
 
-      // Timestamp
       let ts = new Date();
       for (const shipId in positions) {
         if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; }
