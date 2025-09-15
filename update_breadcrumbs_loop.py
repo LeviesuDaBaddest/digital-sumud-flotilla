@@ -82,44 +82,35 @@ def compute_heading(lat1, lon1, lat2, lon2):
     return (heading + 360) % 360
 
 # ----------------------
-# GHOST MOVEMENT
+# GHOST MOVEMENT FOLLOWING REAL SHIP
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id, fleet):
     if ghost_id not in GHOST_STATES:
-        # random spawn offset
-        offset_lat = random.uniform(-0.01, 0.01)
-        offset_lon = random.uniform(-0.01, 0.01)
-        # random initial heading
-        ghost_hdg = random.uniform(0, 360)
-        GHOST_STATES[ghost_id] = {
-            "offset_lat": offset_lat,
-            "offset_lon": offset_lon,
-            "hdg": ghost_hdg
-        }
+        # random spawn offset (~500m)
+        offset_lat = random.uniform(-0.0045, 0.0045)
+        offset_lon = random.uniform(-0.0045, 0.0045)
+        GHOST_STATES[ghost_id] = {"offset_lat": offset_lat, "offset_lon": offset_lon}
 
     state = GHOST_STATES[ghost_id]
     speed_mult = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
     dist_deg = sog * speed_mult * (UPDATE_INTERVAL / 3600) / 60  # nm to degrees
 
-    # move along ghost heading
-    rad = math.radians(state["hdg"])
+    rad = math.radians(hdg)  # follow real ship heading
     delta_lat = dist_deg * math.cos(rad)
     delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat)))
 
+    # new position with formation offset
     new_lat = real_lat + state["offset_lat"] + delta_lat
     new_lon = real_lon + state["offset_lon"] + delta_lon
 
     # small random drift
-    new_lat += random.uniform(-0.0001, 0.0001)
-    new_lon += random.uniform(-0.0001, 0.0001)
+    new_lat += random.uniform(-0.00005, 0.00005)
+    new_lon += random.uniform(-0.00005, 0.00005)
 
-    # update heading smoothly toward movement
-    if fleet.get(ghost_id) and len(fleet[ghost_id]) > 0:
-        last = fleet[ghost_id][-1]
-        computed_hdg = compute_heading(last["lat"], last["lon"], new_lat, new_lon)
-        state["hdg"] = (state["hdg"]*0.7 + computed_hdg*0.3) % 360
+    # heading always same as real ship
+    ghost_hdg = hdg
 
-    return new_lat, new_lon, sog*speed_mult, state["hdg"]
+    return new_lat, new_lon, sog*speed_mult, ghost_hdg
 
 # ----------------------
 # GENERATE / UPDATE GHOSTS
@@ -178,7 +169,9 @@ def push_to_git():
 if __name__ == "__main__":
     while True:
         lat, lon, sog, hdg = read_position()
-        if lat and lon: append_positions(lat, lon, sog, hdg); push_to_git()
+        if lat and lon:
+            append_positions(lat, lon, sog, hdg)
+            push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
 
