@@ -150,7 +150,7 @@
 
         const color = pos.ghost ? '#475DD1' : '#00008b';
         const heading = pos.heading || 0;
-        const arrowHtml = createArrowHTML(color, heading);
+        const arrowHtml = createArrowHTML(color, heading - 90);
 
         if (boatMarkers[shipId]) {
           boatMarkers[shipId].setLatLng([pos.lat,pos.lon]);
