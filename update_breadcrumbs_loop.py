@@ -32,52 +32,66 @@ GHOST_STATES = {}
 # HELPER FUNCTIONS
 # ----------------------
 def read_position():
-    """Read real ship position from Sailaway NMEA and return lat, lon, SOG, HDG/COG."""
+    """Read real ship position from Sailaway NMEA and return lat, lon, SOG, HDG."""
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print("🔌 Connecting to Sailaway NMEA on localhost:10111...")
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", 10111))
-        print("✅ Connected! Listening for NMEA...")
         s.settimeout(10)
+        print("✅ Connected! Listening for NMEA...")
 
+        true_heading = None
         while True:
             raw = s.recv(1024).decode(errors="ignore")
-            if not raw:
-                print("⚠️ No data received...")
-                continue
-
             for line in raw.splitlines():
-                print("NMEA:", line)   # 👈 debug print all sentences
+                print("NMEA:", line)  # 👀 debug every sentence
 
-                # GPS + Course over Ground
-                if line.startswith("$GPRMC"):
+                # --- True heading from HDT (preferred) ---
+                if line.startswith("$HDT"):
+                    try:
+                        parts = line.split(",")
+                        if len(parts) > 1 and parts[1]:
+                            true_heading = float(parts[1])
+                            print(f"🧭 True Heading (HDT): {true_heading}")
+                    except:
+                        pass
+
+                # --- Magnetic/true heading from HDG (fallback) ---
+                elif line.startswith("$HDG"):
+                    try:
+                        parts = line.split(",")
+                        if len(parts) > 1 and parts[1]:
+                            true_heading = float(parts[1])
+                            print(f"🧭 Heading (HDG): {true_heading}")
+                    except:
+                        pass
+
+                # --- Position, speed, and COG from GPRMC ---
+                elif line.startswith("$GPRMC"):
                     parts = line.split(",")
                     if len(parts) < 9:
                         continue
-
                     lat_raw, lat_dir = parts[3], parts[4]
                     lon_raw, lon_dir = parts[5], parts[6]
                     if not lat_raw or not lon_raw:
                         continue
 
-                    # parse lat/lon from NMEA ddmm.mmmm
+                    # Parse lat/lon
                     lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
                     lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
                     if lat_dir.upper() == "S": lat = -lat
                     if lon_dir.upper() == "W": lon = -lon
 
-                    sog = float(parts[7]) if parts[7] else 0.0   # speed over ground
-                    cog = float(parts[8]) if parts[8] else 0.0   # course over ground
+                    # Speed and course over ground
+                    sog = float(parts[7]) if parts[7] else 0.0
+                    cog = float(parts[8]) if parts[8] else 0.0
 
-                    return lat, lon, sog, cog
+                    # Pick heading: prefer HDT/HDG, else use COG
+                    hdg = true_heading if true_heading is not None else cog
+                    print(f"📍 Position: {lat:.6f}, {lon:.6f} | SOG={sog:.2f} kn | HDG={hdg:.1f}")
 
-                # Heading True
-                if line.startswith("$HDT") or line.startswith("$HDG"):
-                    parts = line.split(",")
-                    if len(parts) > 1 and parts[1]:
-                        heading = float(parts[1])
-                        print("👉 Detected heading sentence:", heading)
-                        # Not returned yet — just showing debug
+                    return lat, lon, sog, hdg
+
     except Exception as e:
         print("❌ NMEA read error:", e)
 
@@ -119,7 +133,7 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id, fleet):
     speed_mult = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
     dist_deg = sog * speed_mult * (UPDATE_INTERVAL / 3600) / 60  # nm to degrees
 
-    rad = math.radians(hdg)  # follow real ship heading/COG
+    rad = math.radians(hdg)  # follow real ship heading
     delta_lat = dist_deg * math.cos(rad)
     delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat)))
 
@@ -191,6 +205,7 @@ def push_to_git():
 # MAIN LOOP
 # ----------------------
 if __name__ == "__main__":
+    print("🚀 Starting Digital Sumud Flotilla Tracker...")
     while True:
         lat, lon, sog, hdg = read_position()
         if lat and lon:
@@ -198,6 +213,7 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
 
 
 
