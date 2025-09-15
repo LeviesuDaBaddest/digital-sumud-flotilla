@@ -90,10 +90,20 @@ def save_positions(fleet):
     with open(POSITIONS_FILE, "w") as f:
         json.dump(fleet, f, indent=2)
 
+def compute_heading(lat1, lon1, lat2, lon2):
+    """Compute compass heading from point1 to point2 in degrees."""
+    dLon = math.radians(lon2 - lon1)
+    lat1 = math.radians(lat1)
+    lat2 = math.radians(lat2)
+    x = math.sin(dLon) * math.cos(lat2)
+    y = math.cos(lat1)*math.sin(lat2) - math.sin(lat1)*math.cos(lat2)*math.cos(dLon)
+    heading = math.degrees(math.atan2(x, y))
+    return (heading + 360) % 360
+
 # ----------------------
 # GHOST MOVEMENT
 # ----------------------
-def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
+def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet):
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "offset_lat": random.uniform(-0.02, 0.02),
@@ -113,7 +123,9 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
     # Pauses
     if state["pause_ticks"] > 0:
         state["pause_ticks"] -= 1
-        return real_lat + state["offset_lat"], real_lon + state["offset_lon"], sog_knots
+        new_lat = real_lat + state["offset_lat"]
+        new_lon = real_lon + state["offset_lon"]
+        return new_lat, new_lon, sog_knots, cog_deg
 
     if random.random() < 0.02:
         state["pause_ticks"] = random.randint(2, 5)
@@ -152,7 +164,14 @@ def move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id):
     new_lat = real_lat + state["offset_lat"] + delta_lat + drift_lat + swerve_lat
     new_lon = real_lon + state["offset_lon"] + delta_lon + drift_lon + swerve_lon
 
-    return new_lat, new_lon, ghost_speed
+    # Compute heading based on last position if exists
+    if fleet.get(ghost_id) and len(fleet[ghost_id]) > 0:
+        last = fleet[ghost_id][-1]
+        heading = compute_heading(last["lat"], last["lon"], new_lat, new_lon)
+    else:
+        heading = cog_deg
+
+    return new_lat, new_lon, ghost_speed, heading
 
 def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
     for i in range(1, NUM_GHOSTS + 1):
@@ -162,7 +181,7 @@ def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
         if ghost_id not in fleet:
             fleet[ghost_id] = []
 
-        new_lat, new_lon, ghost_speed = move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id)
+        new_lat, new_lon, ghost_speed, heading = move_ghost(real_lat, real_lon, sog_knots, cog_deg, ghost_id, fleet)
 
         fleet[ghost_id].append({
             "lat": new_lat,
@@ -171,7 +190,7 @@ def generate_or_update_ghosts(real_lat, real_lon, sog_knots, cog_deg, fleet):
             "ghost": True,
             "name": ghost_name,
             "speed": round(ghost_speed, 2),
-            "heading": round(cog_deg, 1)
+            "heading": round(heading, 1)
         })
 
     return fleet
