@@ -62,6 +62,15 @@
       "name": "Al Awda",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.8984,
+      "lon": 10.434761666666667,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_1": [
@@ -127,6 +136,15 @@
       "name": "Ma\u2019an",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.8926914069897,
+      "lon": 10.427192518849647,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_2": [
@@ -192,6 +210,15 @@
       "name": "Al Quds",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.91229222788492,
+      "lon": 10.414977184864913,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_3": [
@@ -257,6 +284,15 @@
       "name": "Voyage2Gaza",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.886554361865535,
+      "lon": 10.415069075692694,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Voyage2Gaza",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_4": [
@@ -322,6 +358,15 @@
       "name": "Intifada III",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.912085960046255,
+      "lon": 10.441579716053097,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Intifada III",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_5": [
@@ -387,6 +432,15 @@
       "name": "Humanity",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.885086735232164,
+      "lon": 10.433040423012825,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Humanity",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_6": [
@@ -452,6 +506,15 @@
       "name": "Olive Branch",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.902164357781345,
+      "lon": 10.420993598403566,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Olive Branch",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_7": [
@@ -517,6 +580,15 @@
       "name": "Gamers4Justice",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.88892077560536,
+      "lon": 10.43793409302666,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Gamers4Justice",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_8": [
@@ -582,6 +654,15 @@
       "name": "Hebron",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.88468668157238,
+      "lon": 10.438105776629046,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Hebron",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ],
   "ghost_9": [
@@ -647,6 +728,15 @@
       "name": "Khan Younis",
       "speed": 0.05,
       "heading": 212.6
+    },
+    {
+      "lat": 36.91500275424022,
+      "lon": 10.429385926463336,
+      "timestamp": "2025-09-15 01:13:19",
+      "ghost": true,
+      "name": "Khan Younis",
+      "speed": 0.04,
+      "heading": 211.2
     }
   ]
 }
