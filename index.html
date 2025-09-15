@@ -99,6 +99,7 @@
     let userMovedMap = false;
     const boatDivs = {};
     const boatMarkers = {};
+    const boatHeading = {};
     const animationDuration = 1000;
 
     map.on('movestart', () => { userMovedMap = true; });
@@ -131,6 +132,29 @@
       requestAnimationFrame(animate);
     }
 
+    function rotateArrowSmooth(marker, targetHeading) {
+      if (!boatHeading[marker._leaflet_id]) boatHeading[marker._leaflet_id] = targetHeading;
+      let current = boatHeading[marker._leaflet_id];
+      const diff = ((targetHeading - current + 540) % 360) - 180; // shortest rotation
+      const step = diff * 0.2; // smoothing factor
+      boatHeading[marker._leaflet_id] = current + step;
+
+      const html = marker.getElement().innerHTML;
+      marker.setIcon(L.divIcon({
+        className: '',
+        html: `<div style="
+          width: 0; height: 0;
+          border-left:6px solid transparent; border-right:6px solid transparent;
+          border-top:12px solid ${marker.options.color || '#00008b'};
+          transform: rotate(${boatHeading[marker._leaflet_id]}deg);
+          transform-origin:center;
+        "></div>`,
+        iconAnchor: [6,6]
+      }));
+
+      if (Math.abs(diff) > 0.5) requestAnimationFrame(() => rotateArrowSmooth(marker, targetHeading));
+    }
+
     function highlightBoat(shipId) {
       for (const id in boatDivs) {
         boatDivs[id].classList.toggle('active', id === shipId);
@@ -147,35 +171,33 @@
         if (!shipData.length) continue;
         const pos = shipData[Math.min(index, shipData.length - 1)];
 
-        const arrowHtml = `
-          <div style="
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 12px solid ${pos.ghost ? '#475DD1' : '#00008b'};  /* arrow points up now */
-            transform: rotate(${pos.heading || 0}deg);
-            transform-origin: center;
-          "></div>
-        `;
+        const arrowHtml = `<div style="
+          width: 0; height: 0;
+          border-left:6px solid transparent; border-right:6px solid transparent;
+          border-top:12px solid ${pos.ghost ? '#475DD1' : '#00008b'};
+          transform: rotate(${pos.heading || 0}deg);
+          transform-origin:center;
+        "></div>`;
 
         if (boatMarkers[shipId]) {
-          moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat, pos.lon], animationDuration);
+          moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat,pos.lon], animationDuration);
+          rotateArrowSmooth(boatMarkers[shipId], pos.heading || 0);
         } else {
-          boatMarkers[shipId] = L.marker([pos.lat, pos.lon], {
-            icon: L.divIcon({ className: '', html: arrowHtml, iconAnchor: [6, 6] })
+          boatMarkers[shipId] = L.marker([pos.lat,pos.lon], {
+            icon: L.divIcon({ className:'', html: arrowHtml, iconAnchor: [6,6] }),
+            color: pos.ghost ? '#475DD1' : '#00008b'
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
         }
 
         if (showBreadcrumbs && shipData.length > 1) {
-          const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
-          L.polyline(trail, { color: pos.ghost ? '#475DD1' : '#00008b', weight: 2 }).addTo(breadcrumbsLayer);
+          const trail = shipData.slice(0, Math.min(index+1, shipData.length)).map(p => [p.lat,p.lon]);
+          L.polyline(trail, { color: pos.ghost ? '#475DD1' : '#00008b', weight:2 }).addTo(breadcrumbsLayer);
         }
 
         latSum += pos.lat; lonSum += pos.lon; count++;
       }
 
-      if (!userMovedMap && count > 0) map.setView([latSum / count, lonSum / count], map.getZoom());
+      if (!userMovedMap && count>0) map.setView([latSum/count, lonSum/count], map.getZoom());
 
       let ts = new Date();
       for (const shipId in positions) { if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; } }
@@ -189,18 +211,14 @@
       for (const shipId in positions) {
         const shipData = positions[shipId];
         if (!shipData.length) continue;
-        const pos = shipData[shipData.length - 1];
+        const pos = shipData[shipData.length-1];
 
         const div = document.createElement('div');
-        div.className = 'boat-item';
-        div.innerHTML = `${pos.name || shipId}<br>Speed: ${pos.speed || 'N/A'} kn, Heading: ${pos.heading || 'N/A'}°`;
+        div.className='boat-item';
+        div.innerHTML=`${pos.name || shipId}<br>Speed: ${pos.speed || 'N/A'} kn, Heading: ${pos.heading || 'N/A'}°`;
 
         boatDivs[shipId] = div;
-
-        div.addEventListener('click', () => {
-          map.setView([pos.lat, pos.lon], 10);
-          highlightBoat(shipId);
-        });
+        div.addEventListener('click',()=>{ map.setView([pos.lat,pos.lon],10); highlightBoat(shipId); });
 
         boatList.appendChild(div);
       }
@@ -211,7 +229,7 @@
     document.getElementById('hamburger').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
 
     loadPositions();
-    setInterval(() => loadPositions(true), 60000);
+    setInterval(()=>loadPositions(true),60000);
   </script>
 </body>
 </html>
