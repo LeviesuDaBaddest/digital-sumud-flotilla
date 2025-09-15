@@ -1,0 +1,112 @@
+{
+  "al_awda": [
+    {
+      "lat": 36.84953,
+      "lon": 10.449363333333334,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_1": [
+    {
+      "lat": 36.8512226357068,
+      "lon": 10.448415389139866,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_2": [
+    {
+      "lat": 36.84671870451329,
+      "lon": 10.453353244243681,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_3": [
+    {
+      "lat": 36.84676702805292,
+      "lon": 10.449706604994283,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Voyage2Gaza",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_4": [
+    {
+      "lat": 36.84913408325596,
+      "lon": 10.44705870520699,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Intifada III",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_5": [
+    {
+      "lat": 36.84610304892881,
+      "lon": 10.447322879723483,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Humanity",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_6": [
+    {
+      "lat": 36.85167252253895,
+      "lon": 10.452709517879297,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Olive Branch",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_7": [
+    {
+      "lat": 36.85109258992332,
+      "lon": 10.453073322410896,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Gamers4Justice",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_8": [
+    {
+      "lat": 36.85168411763154,
+      "lon": 10.447389574202006,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Hebron",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "ghost_9": [
+    {
+      "lat": 36.851026916055616,
+      "lon": 10.445891564141812,
+      "timestamp": "2025-09-15 20:00:11",
+      "ghost": true,
+      "name": "Khan Younis",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ]
+}
