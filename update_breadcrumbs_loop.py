@@ -22,7 +22,7 @@ GHOST_NAMES = [
     "Ma’an", 
     "Al Quds", 
     "Voyage2Gaza", 
-    "Resistance", 
+    "Intifada III", 
     "Humanity", 
     "Olive Branch", 
     "Gamers4Justice", 
