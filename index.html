@@ -94,14 +94,14 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     const map = L.map('map').setView([32.6, 28.9], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
 
     let markersLayer = L.layerGroup().addTo(map);
     let positions = {};
     let userMovedMap = false;
     const boatDivs = {};
+    const boatMarkers = {};
+    const animationDuration = 1000;
 
     map.on('movestart', () => { userMovedMap = true; });
 
@@ -109,7 +109,6 @@
       const res = await fetch('fleet_positions.json?t=' + Date.now());
       const newPositions = await res.json();
       if (!newPositions) return;
-
       positions = Array.isArray(newPositions) ? { fleet: newPositions } : newPositions;
 
       const slider = document.getElementById('timeSlider');
@@ -120,6 +119,18 @@
 
       updateMap(parseInt(slider.value));
       updateSidebar();
+    }
+
+    function moveMarkerSmooth(marker, fromLatLng, toLatLng, duration) {
+      const start = performance.now();
+      function animate(time) {
+        const progress = Math.min((time - start) / duration, 1);
+        const lat = fromLatLng[0] + (toLatLng[0] - fromLatLng[0]) * progress;
+        const lng = fromLatLng[1] + (toLatLng[1] - fromLatLng[1]) * progress;
+        marker.setLatLng([lat, lng]);
+        if (progress < 1) requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
     }
 
     function highlightBoat(shipId) {
@@ -150,31 +161,26 @@
           "></div>
         `;
 
-        L.marker([pos.lat, pos.lon], {
-          icon: L.divIcon({ className: '', html: arrowHtml, iconAnchor: [6, 6] })
-        }).addTo(markersLayer)
-          .on('click', () => highlightBoat(shipId));
+        if (boatMarkers[shipId]) {
+          moveMarkerSmooth(boatMarkers[shipId], boatMarkers[shipId].getLatLng(), [pos.lat, pos.lon], animationDuration);
+        } else {
+          boatMarkers[shipId] = L.marker([pos.lat, pos.lon], {
+            icon: L.divIcon({ className: '', html: arrowHtml, iconAnchor: [6, 6] })
+          }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
+        }
 
         if (showBreadcrumbs && shipData.length > 1) {
           const trail = shipData.slice(0, Math.min(index + 1, shipData.length)).map(p => [p.lat, p.lon]);
           L.polyline(trail, { color: pos.ghost ? '#475DD1' : '#00008b', weight: 2 }).addTo(markersLayer);
         }
 
-        latSum += pos.lat;
-        lonSum += pos.lon;
-        count++;
+        latSum += pos.lat; lonSum += pos.lon; count++;
       }
 
       if (!userMovedMap && count > 0) map.setView([latSum / count, lonSum / count], map.getZoom());
 
       let ts = new Date();
-      for (const shipId in positions) {
-        if (positions[shipId].length > index) {
-          ts = new Date(positions[shipId][index].timestamp);
-          break;
-        }
-      }
-
+      for (const shipId in positions) { if (positions[shipId].length > index) { ts = new Date(positions[shipId][index].timestamp); break; } }
       document.getElementById('time-label').textContent =
         `${(ts.getMonth()+1).toString().padStart(2,'0')}/${ts.getDate().toString().padStart(2,'0')} ${ts.getHours().toString().padStart(2,'0')}:${ts.getMinutes().toString().padStart(2,'0')}`;
     }
