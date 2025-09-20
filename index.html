@@ -219,7 +219,70 @@
 
     loadPositions();
     setInterval(()=>loadPositions(true),60000);
-  </script>
+  
+// Static list of past flotillas that got close
+const pastFlotillas = [
+  {
+    name: "Madleen",
+    year: 2025,
+    lat: 32.0,
+    lon: 33.0,
+    status: "Intercepted ~100nm from Gaza, towed to Ashdod"
+  },
+  {
+    name: "Handala",
+    year: 2025,
+    lat: 32.3,
+    lon: 34.0,
+    status: "Intercepted ~50nm from Gaza, seized by Israeli navy"
+  },
+  {
+    name: "Marianne (Freedom Flotilla III)",
+    year: 2015,
+    lat: 32.5,
+    lon: 33.0,
+    status: "Boarded ~100nm from Gaza, diverted to Ashdod"
+  },
+  {
+    name: "Zaytouna-Oliva (Women’s Boat to Gaza)",
+    year: 2016,
+    lat: 31.6,
+    lon: 34.2,
+    status: "Intercepted ~14 miles outside Gaza coast"
+  },
+  {
+    name: "Spirit of Humanity",
+    year: 2009,
+    lat: 31.7,
+    lon: 34.3,
+    status: "Intercepted ~20nm off Gaza, seized and towed"
+  },
+  {
+    name: "Mavi Marmara",
+    year: 2010,
+    lat: 32.4,
+    lon: 33.6,
+    status: "Raided in international waters, casualties and diplomatic fallout"
+  }
+];
+
+function loadPastFlotillas() {
+  pastFlotillas.forEach(b => {
+    L.circleMarker([b.lat, b.lon], {
+      radius: 6,
+      color: "#ff8080",
+      fillColor: "#ff8080",
+      fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(`<b>${b.name} (${b.year})</b><br>${b.status}`);
+  });
+}
+
+// Run after map init
+loadPastFlotillas();
+
+</script>
 </body>
 </html>
 
