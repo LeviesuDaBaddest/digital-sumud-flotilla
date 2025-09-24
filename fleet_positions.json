@@ -179,6 +179,15 @@
       "name": "Al Awda",
       "speed": 8.26,
       "heading": 104.0
+    },
+    {
+      "lat": 31.78154,
+      "lon": 33.1137,
+      "timestamp": "2025-09-24 22:16:51",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 8.13,
+      "heading": 104.2
     }
   ],
   "ghost_1": [
@@ -361,6 +370,15 @@
       "name": "Ma\u2019an",
       "speed": 7.79,
       "heading": 104.0
+    },
+    {
+      "lat": 31.774796334241397,
+      "lon": 33.122631454737345,
+      "timestamp": "2025-09-24 22:16:51",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 8.41,
+      "heading": 104.2
     }
   ],
   "ghost_2": [
@@ -543,6 +561,15 @@
       "name": "Navaren",
       "speed": 7.61,
       "heading": 104.0
+    },
+    {
+      "lat": 31.779105297595525,
+      "lon": 33.1257875988095,
+      "timestamp": "2025-09-24 22:16:51",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 8.78,
+      "heading": 104.2
     }
   ]
 }
