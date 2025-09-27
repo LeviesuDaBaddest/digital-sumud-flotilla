@@ -119,35 +119,55 @@ def compute_heading(lat1, lon1, lat2, lon2):
     return (heading + 360) % 360
 
 # ----------------------
-# GHOST MOVEMENT FOLLOWING REAL SHIP
+# GHOST MOVEMENT FOLLOWING REAL SHIP (more natural)
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id, fleet):
     if ghost_id not in GHOST_STATES:
-        # random spawn offset (~500m)
-        offset_lat = random.uniform(-0.0045, 0.0045)
-        offset_lon = random.uniform(-0.0045, 0.0045)
-        GHOST_STATES[ghost_id] = {"offset_lat": offset_lat, "offset_lon": offset_lon}
+        # assign each ghost a stable formation bearing & distance (in nm)
+        rel_bearing = random.uniform(0, 360)   # degrees relative to ship
+        rel_distance = random.uniform(0.2, 0.8)  # between 0.2–0.8 nm
+        speed_bias = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
+        GHOST_STATES[ghost_id] = {
+            "rel_bearing": rel_bearing,
+            "rel_distance": rel_distance,
+            "speed_bias": speed_bias,
+            "heading_jitter": random.uniform(-5, 5)  # +/-5° wander
+        }
 
     state = GHOST_STATES[ghost_id]
-    speed_mult = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
-    dist_deg = sog * speed_mult * (UPDATE_INTERVAL / 3600) / 60  # nm to degrees
 
-    rad = math.radians(hdg)  # follow real ship heading
+    # gradually drift speed bias (small random walk)
+    state["speed_bias"] += random.uniform(-0.01, 0.01)
+    state["speed_bias"] = max(0.9, min(1.1, state["speed_bias"]))  # clamp 90–110%
+
+    # gradually drift heading jitter
+    state["heading_jitter"] += random.uniform(-0.5, 0.5)
+    state["heading_jitter"] = max(-15, min(15, state["heading_jitter"]))  # clamp
+
+    # ghost speed
+    ghost_speed = sog * state["speed_bias"]
+
+    # distance moved in this interval (nm → degrees lat/lon)
+    dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600) / 60  
+
+    # base movement direction = real ship heading + ghost’s jitter
+    move_heading = hdg + state["heading_jitter"]
+    rad = math.radians(move_heading)
+
     delta_lat = dist_deg * math.cos(rad)
     delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat)))
 
-    # new position with formation offset
-    new_lat = real_lat + state["offset_lat"] + delta_lat
-    new_lon = real_lon + state["offset_lon"] + delta_lon
+    # base ghost position relative to real ship
+    rel_rad = math.radians(hdg + state["rel_bearing"])
+    rel_lat = state["rel_distance"] * math.cos(rel_rad) / 60.0  # nm→deg
+    rel_lon = state["rel_distance"] * math.sin(rel_rad) / (60.0 * math.cos(math.radians(real_lat)))
 
-    # small random drift
-    new_lat += random.uniform(-0.00005, 0.00005)
-    new_lon += random.uniform(-0.00005, 0.00005)
+    new_lat = real_lat + rel_lat + delta_lat
+    new_lon = real_lon + rel_lon + delta_lon
 
-    # heading always same as real ship
-    ghost_hdg = hdg
+    ghost_hdg = (hdg + state["heading_jitter"]) % 360
 
-    return new_lat, new_lon, sog*speed_mult, ghost_hdg
+    return new_lat, new_lon, ghost_speed, ghost_hdg
 
 # ----------------------
 # GENERATE / UPDATE GHOSTS
@@ -212,8 +232,6 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
-
 
 
 
