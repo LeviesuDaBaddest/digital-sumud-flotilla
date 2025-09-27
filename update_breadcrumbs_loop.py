@@ -9,7 +9,7 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-NUM_GHOSTS = 2  # 3 boats total including the real ship
+NUM_GHOSTS = 4  # 3 boats total including the real ship
 UPDATE_INTERVAL = 300  # seconds
 SPEED_VARIATION = 0.08  # ±8% variation
 POSITIONS_FILE = "fleet_positions.json"
@@ -19,7 +19,7 @@ REAL_SHIP_ID = "al_awda"
 # CUSTOM GHOST NAMES
 # ----------------------
 GHOST_NAMES = [
-    "Ma’an", "Navaren"
+    "Ma’an", "Navaren", "Al Quds", "Ramallah"  
 ]
 
 # ----------------------
