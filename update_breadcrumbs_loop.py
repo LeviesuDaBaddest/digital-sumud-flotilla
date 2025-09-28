@@ -14,7 +14,7 @@ UPDATE_INTERVAL = 600  # seconds
 SPEED_VARIATION = 0.08
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
-PHASED_SPAWN_INTERVAL = 600  # seconds
+PHASED_SPAWN_INTERVAL = 600
 
 # ----------------------
 # CUSTOM GHOST NAMES
@@ -42,7 +42,6 @@ LAST_SPAWN_TIME = {}
 # HELPER FUNCTIONS
 # ----------------------
 def read_position():
-    """Read NMEA GPS position from local socket."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", 10111))
@@ -51,7 +50,10 @@ def read_position():
         while True:
             raw = s.recv(1024).decode(errors="ignore")
             for line in raw.splitlines():
-                if line.startswith("$HDT") or line.startswith("$HDG"):
+                if line.startswith("$HDT"):
+                    try: true_heading = float(line.split(",")[1])
+                    except: pass
+                elif line.startswith("$HDG"):
                     try: true_heading = float(line.split(",")[1])
                     except: pass
                 elif line.startswith("$GPRMC"):
@@ -77,7 +79,8 @@ def load_positions():
         try:
             with open(POSITIONS_FILE, "r") as f:
                 return json.load(f)
-        except: return {}
+        except:
+            return {}
     return {}
 
 def save_positions(fleet):
@@ -94,11 +97,10 @@ def haversine_nm(lat1, lon1, lat2, lon2):
     return R_nm * c
 
 # ----------------------
-# GHOST MOVEMENT (realistic sea behavior)
+# GHOST MOVEMENT (realistic, leaves breadcrumbs)
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     if ghost_id not in GHOST_STATES:
-        # initial offsets and small variation per ghost
         GHOST_STATES[ghost_id] = {
             "rel_bearing": random.uniform(0, 360),
             "rel_distance": random.uniform(0.1, 0.8),
@@ -106,12 +108,11 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
             "heading_jitter": random.uniform(-5, 5),
             "current_nudge": random.uniform(-0.02, 0.02)
         }
-    state = GHOST_STATES[ghost_id]
 
-    # gently vary speed
+    state = GHOST_STATES[ghost_id]
+    # gentle variations
     state["speed_bias"] += random.uniform(-0.01, 0.01)
     state["speed_bias"] = max(0.85, min(1.15, state["speed_bias"]))
-    # heading drift like sea currents
     state["heading_jitter"] += random.uniform(-0.5, 0.5)
     state["heading_jitter"] = max(-15, min(15, state["heading_jitter"]))
     state["current_nudge"] += random.uniform(-0.005, 0.005)
@@ -136,10 +137,47 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     return new_lat, new_lon, ghost_speed, ghost_hdg
 
 # ----------------------
+# SPAWN / GENERATE GHOSTS
+# ----------------------
+def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
+    # original ghosts
+    for i in range(1, NUM_GHOSTS+1):
+        ghost_id = f"ghost_{i}"
+        ghost_name = GHOST_NAMES[(i-1) % len(GHOST_NAMES)]
+        fleet.setdefault(ghost_id, [])
+        new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
+        fleet[ghost_id].append({
+            "lat": new_lat,
+            "lon": new_lon,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "ghost": True,
+            "name": ghost_name,
+            "speed": round(ghost_speed,2),
+            "heading": round(ghost_hdg,1)
+        })
+
+    # phased ghosts (ensure all leave breadcrumbs)
+    for point_name, queue in PHASED_SPAWN_QUEUE.items():
+        for ship in queue:
+            ghost_id = ship["id"]
+            ship_name = ship["name"]
+            fleet.setdefault(ghost_id, [])
+            new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
+            fleet[ghost_id].append({
+                "lat": new_lat,
+                "lon": new_lon,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "ghost": True,
+                "name": ship_name,
+                "speed": round(ghost_speed,2),
+                "heading": round(ghost_hdg,1)
+            })
+    return fleet
+
+# ----------------------
 # SPAWN SINGLE SHIP NEAR REAL SHIP
 # ----------------------
 def spawn_single_ship(origin_lat, origin_lon, fleet, ghost_id, ship_name):
-    """Spawn ship and immediately add to active fleet with breadcrumbs."""
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "rel_bearing": random.uniform(0, 360),
@@ -148,6 +186,7 @@ def spawn_single_ship(origin_lat, origin_lon, fleet, ghost_id, ship_name):
             "heading_jitter": random.uniform(-5, 5),
             "current_nudge": random.uniform(-0.02, 0.02)
         }
+
     state = GHOST_STATES[ghost_id]
     rel_rad = math.radians(state["rel_bearing"])
     rel_lat = state["rel_distance"] * math.cos(rel_rad) / 60.0
@@ -164,45 +203,6 @@ def spawn_single_ship(origin_lat, origin_lon, fleet, ghost_id, ship_name):
         "speed": 0.0,
         "heading": 0.0
     })
-
-# ----------------------
-# GENERATE OR UPDATE GHOSTS
-# ----------------------
-def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
-    # Move original ghosts
-    for i in range(1, NUM_GHOSTS+1):
-        ghost_id = f"ghost_{i}"
-        ghost_name = GHOST_NAMES[(i-1) % len(GHOST_NAMES)]
-        fleet.setdefault(ghost_id, [])
-        new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
-        fleet[ghost_id].append({
-            "lat": new_lat,
-            "lon": new_lon,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "ghost": True,
-            "name": ghost_name,
-            "speed": round(ghost_speed, 2),
-            "heading": round(ghost_hdg, 1)
-        })
-
-    # Move phased ghosts
-    for queue in PHASED_SPAWN_QUEUE.values():
-        for ship in queue:
-            ghost_id = ship["id"]
-            ship_name = ship["name"]
-            fleet.setdefault(ghost_id, [])
-            new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
-            fleet[ghost_id].append({
-                "lat": new_lat,
-                "lon": new_lon,
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "ghost": True,
-                "name": ship_name,
-                "speed": round(ghost_speed, 2),
-                "heading": round(ghost_hdg, 1)
-            })
-
-    return fleet
 
 # ----------------------
 # PHASED RENDEZVOUS CHECK
@@ -236,8 +236,8 @@ def append_positions(real_lat, real_lon, sog, hdg):
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "ghost": False,
         "name": "Al Awda",
-        "speed": round(sog, 2),
-        "heading": round(hdg, 1)
+        "speed": round(sog,2),
+        "heading": round(hdg,1)
     })
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
     check_rendezvous(real_lat, real_lon, fleet)
@@ -248,11 +248,10 @@ def append_positions(real_lat, real_lon, sog, hdg):
 # GIT PUSH
 # ----------------------
 def push_to_git():
-    subprocess.run(["git", "add", "-A"])
-    result = subprocess.run(["git", "commit", "-m", "🛰️ Auto-update with heartbeat"])
-    if result.returncode != 0:
-        print("⚠️ Nothing to commit")
-    subprocess.run(["git", "push"])
+    subprocess.run(["git","add","-A"])
+    result = subprocess.run(["git","commit","-m","🛰️ Auto-update with heartbeat"])
+    if result.returncode != 0: print("⚠️ Nothing to commit")
+    subprocess.run(["git","push"])
     print("📤 Pushed to GitHub.")
 
 # ----------------------
@@ -267,5 +266,4 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
 
