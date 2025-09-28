@@ -97,6 +97,9 @@
     let userMovedMap = false;
     let highlightedTrail = null;
 
+    // phases for rocking drift
+    const driftPhases = {};
+
     map.on('movestart',()=>{userMovedMap=true;});
 
     async function loadPositions(autoUpdate=false){
@@ -136,6 +139,11 @@
         marker.bindTooltip(pos.name,{direction:'top',permanent:false});
         markersLayer.addLayer(marker);
         boatMarkers[shipId]=marker;
+
+        // store drift phase if needed
+        if(pos.speed < 0.5){
+          if(!driftPhases[shipId]) driftPhases[shipId] = Math.random()*Math.PI*2;
+        }
 
         if(showBreadcrumbs && past.length>1){
           const trail = past.map(p=>[p.lat,p.lon]);
@@ -204,6 +212,21 @@
     loadPastFlotillas();
     loadPositions().then(()=> refreshMapSize());
     setInterval(()=>loadPositions(true), 60000);
+
+    // --- rocking drift animation ---
+    setInterval(()=>{
+      const t = Date.now()/1000;
+      for(const shipId in boatMarkers){
+        const marker = boatMarkers[shipId];
+        if(!positions[shipId] || !positions[shipId].length) continue;
+        const pos = positions[shipId][positions[shipId].length-1];
+        if(pos.speed >= 0.5) continue; // only drifting ships
+        const phase = driftPhases[shipId] || 0;
+        const latOffset = 0.0001*Math.sin(t+phase);
+        const lonOffset = 0.0001*Math.cos(t*0.9+phase);
+        marker.setLatLng([pos.lat+latOffset,pos.lon+lonOffset]);
+      }
+    }, 500);
   </script>
 </body>
 </html>
