@@ -1529,6 +1529,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.626365,
+      "lon": 33.075365,
+      "timestamp": "2025-09-28 20:05:36",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3061,6 +3070,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 358.9
+    },
+    {
+      "lat": 34.6227549112557,
+      "lon": 33.07878695021785,
+      "timestamp": "2025-09-28 20:05:36",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 359.0
     }
   ],
   "ghost_2": [
@@ -4593,6 +4611,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 357.4
+    },
+    {
+      "lat": 34.62537143656742,
+      "lon": 33.061321877336674,
+      "timestamp": "2025-09-28 20:05:36",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 357.5
     }
   ],
   "ghost_3": [
@@ -5824,6 +5851,15 @@
       "lat": 34.622790191567724,
       "lon": 33.07758218408259,
       "timestamp": "2025-09-28 19:55:33",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 358.8
+    },
+    {
+      "lat": 34.62283185823439,
+      "lon": 33.07668218474403,
+      "timestamp": "2025-09-28 20:05:36",
       "ghost": true,
       "name": "Al Quds",
       "speed": 0.0,
@@ -7063,6 +7099,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 4.5
+    },
+    {
+      "lat": 34.61859754227307,
+      "lon": 33.07768876378238,
+      "timestamp": "2025-09-28 20:05:36",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 4.9
     }
   ],
   "cyprus_1": [
@@ -7105,6 +7150,17 @@
       "timestamp": "2025-09-28 19:55:33",
       "ghost": true,
       "name": "Brune",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "cyprus_5": [
+    {
+      "lat": 34.62756597414932,
+      "lon": 33.08571990231426,
+      "timestamp": "2025-09-28 20:05:36",
+      "ghost": true,
+      "name": "Inman",
       "speed": 0.0,
       "heading": 0.0
     }
