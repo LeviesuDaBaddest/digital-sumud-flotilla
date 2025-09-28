@@ -10,7 +10,7 @@ import math
 # CONFIG
 # ----------------------
 NUM_GHOSTS = 4  # El Arish ghosts
-UPDATE_INTERVAL = 300  # seconds
+UPDATE_INTERVAL = 600  # seconds
 SPEED_VARIATION = 0.08  # ±8% variation
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
@@ -237,7 +237,7 @@ def push_to_git():
 # MAIN LOOP
 # ----------------------
 if __name__ == "__main__":
-    print("🚀 Starting Digital Sumud Flotilla Tracker...")
+    print("🚀 Starting Virtual Voyage To Gaza Tracker...")
     while True:
         lat, lon, sog, hdg = read_position()
         if lat and lon:
