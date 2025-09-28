@@ -12,10 +12,18 @@
       background: black; color: white; font-family: Arial, sans-serif;
       overflow: hidden;
     }
-    #sidebar { width: 300px; background: #111; height: 100%; float: left; padding: 15px; box-sizing: border-box; overflow-y: auto; transition: transform 0.3s; z-index: 999; }
-    #map { height: 100%; width: calc(100% - 300px); float: right; transition: all 0.3s; min-height: 300px; }
-    #slider-container { width: calc(100% - 300px); height: 80px; background: #111; position: absolute; bottom: 0; right: 0; padding: 10px; box-sizing: border-box; text-align: center; transition: all 0.3s; z-index: 1001; }
-    #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
+    #sidebar {
+      width: 300px; background: #111; height: 100%; float: left; padding: 15px;
+      box-sizing: border-box; overflow-y: auto; transition: transform 0.3s; z-index: 999;
+    }
+    #map {
+      height: 100%; width: calc(100% - 300px); float: right; transition: all 0.3s; min-height: 300px;
+    }
+    #slider-container {
+      width: calc(100% - 300px); height: 80px; background: #111; position: absolute;
+      bottom: 0; right: 0; padding: 10px; box-sizing: border-box; text-align: center;
+      transition: all 0.3s; z-index: 1001;
+    }
     h1 { font-size: 18px; margin: 5px 0 5px; text-align: center; }
     h2 { font-size: 14px; margin: 0 0 10px; text-align: center; color: #ff8080; }
     .ticker-container { overflow: hidden; white-space: nowrap; border-top: 1px solid #333; border-bottom: 1px solid #333; margin-bottom: 10px; }
@@ -33,22 +41,11 @@
     .boat-item.active { background: #444; border-left: 4px solid #ff8080; }
 
     /* Cluster markers blue */
-    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
-      background-color: #1E90FF !important;
-    }
-    .marker-cluster div {
-      background-color: rgba(30,144,255,0.6) !important;
-      color: white !important;
-      border: 2px solid #1E90FF !important;
-    }
-
-    @media screen and (max-width: 1024px) { #map { width: 100%; height: calc(100% - 80px) !important; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 80px; padding: 5px; } }
-    @media screen and (max-width: 768px) { body { overflow: auto; } #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; } #sidebar.open { transform: translateX(0); } #map { width: 100%; height: 100vh !important; float: none; min-height: 300px; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; } #hamburger { display: block; } }
-    @media screen and (max-height: 500px) { #map { height: 300px; } #slider-container { height: 60px; } }
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: #1E90FF !important; }
+    .marker-cluster div { background-color: rgba(30,144,255,0.6) !important; color: white !important; border: 2px solid #1E90FF !important; }
   </style>
 </head>
 <body>
-  <button id="hamburger">☰</button>
   <div id="sidebar">
     <h1>Virtual Voyage To Gaza <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
@@ -183,19 +180,11 @@
       });
     }
 
-    function refreshMapSize(){
-      // Multiple timeouts for mobile to ensure map redraws
-      setTimeout(()=>{ map.invalidateSize(); }, 300);
-      setTimeout(()=>{ map.invalidateSize(); }, 600);
-      setTimeout(()=>{ map.invalidateSize(); }, 900);
-    }
+    function refreshMapSize(){ map.invalidateSize(); }
 
     window.addEventListener('resize', refreshMapSize);
     window.addEventListener('load', refreshMapSize);
-    document.getElementById('hamburger').addEventListener('click', ()=>{
-      document.getElementById('sidebar').classList.toggle('open');
-      refreshMapSize();
-    });
+
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
     document.getElementById('breadcrumbsToggle').addEventListener('change', ()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
 
