@@ -191,14 +191,19 @@
           continue;
         }
 
-        // Drift calculation
+        // Drift calculation (applies to all ships when nearly stationary)
         const pos = past[past.length - 1];
         const color = pos.ghost ? '#475DD1' : '#00008b';
         const timeOffset = scrubTime.getTime() / 60000; // minutes
-        let driftLat = 0.00005 * Math.sin(timeOffset + shipId.length);
-        let driftLon = 0.00005 * Math.cos(timeOffset + shipId.length);
-        let lat = pos.lat + (pos.speed < 0.5 ? driftLat : 0);
-        let lon = pos.lon + (pos.speed < 0.5 ? driftLon : 0);
+        let driftLat = 0, driftLon = 0;
+
+        if (pos.speed < 0.5) {
+          driftLat = 0.00005 * Math.sin(timeOffset + shipId.length);
+          driftLon = 0.00005 * Math.cos(timeOffset + shipId.length);
+        }
+
+        let lat = pos.lat + driftLat;
+        let lon = pos.lon + driftLon;
 
         // Marker
         if (boatMarkers[shipId]) {
