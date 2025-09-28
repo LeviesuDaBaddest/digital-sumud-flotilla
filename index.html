@@ -34,6 +34,7 @@
       width: calc(100% - 300px);
       float: right;
       transition: all 0.3s;
+      min-height: 300px; /* fallback so it's never 0 height */
     }
 
     #slider-container {
@@ -84,7 +85,7 @@
 
     /* Mobile adjustments */
     @media screen and (max-width: 1024px) {
-      #map { width: 100%; height: calc(100% - 80px); }
+      #map { width: 100%; height: calc(100% - 80px) !important; }
       #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 80px; padding: 5px; }
     }
 
@@ -92,7 +93,7 @@
       body { overflow: auto; }
       #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; }
       #sidebar.open { transform: translateX(0); }
-      #map { width: 100%; height: calc(100vh - 60px); float: none; }
+      #map { width: 100%; height: calc(100vh - 60px) !important; float: none; }
       #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; }
       #hamburger { display: block; }
     }
@@ -190,13 +191,20 @@
           continue;
         }
 
+        // Drift calculation
         const pos = past[past.length - 1];
         const color = pos.ghost ? '#475DD1' : '#00008b';
+        const timeOffset = scrubTime.getTime() / 60000; // minutes
+        let driftLat = 0.00005 * Math.sin(timeOffset + shipId.length);
+        let driftLon = 0.00005 * Math.cos(timeOffset + shipId.length);
+        let lat = pos.lat + (pos.speed < 0.5 ? driftLat : 0);
+        let lon = pos.lon + (pos.speed < 0.5 ? driftLon : 0);
 
+        // Marker
         if (boatMarkers[shipId]) {
-          boatMarkers[shipId].setLatLng([pos.lat, pos.lon]);
+          boatMarkers[shipId].setLatLng([lat, lon]);
         } else {
-          boatMarkers[shipId] = L.circleMarker([pos.lat, pos.lon], {
+          boatMarkers[shipId] = L.circleMarker([lat, lon], {
             radius: 6,
             color: color,
             fillColor: color,
@@ -204,12 +212,21 @@
           }).addTo(markersLayer).on('click', () => highlightBoat(shipId));
         }
 
+        // Breadcrumbs with drift applied
         if (showBreadcrumbs && past.length > 1) {
-          const trail = past.map(p => [p.lat, p.lon]);
+          const trail = past.map(p => {
+            let dLat = 0, dLon = 0;
+            if (p.speed < 0.5) {
+              const t = new Date(p.timestamp).getTime() / 60000;
+              dLat = 0.00005 * Math.sin(t + shipId.length);
+              dLon = 0.00005 * Math.cos(t + shipId.length);
+            }
+            return [p.lat + dLat, p.lon + dLon];
+          });
           L.polyline(trail, { color, weight: 2 }).addTo(breadcrumbsLayer);
         }
 
-        latSum += pos.lat; lonSum += pos.lon; count++;
+        latSum += lat; lonSum += lon; count++;
       }
 
       if (!userMovedMap && count > 0) {
@@ -262,9 +279,18 @@
       });
     }
 
+    // mobile/resize fix
+    function refreshMapSize() {
+      setTimeout(() => { map.invalidateSize(); }, 200);
+    }
+    window.addEventListener('resize', refreshMapSize);
+    document.getElementById('hamburger').addEventListener('click',()=>{ 
+      document.getElementById('sidebar').classList.toggle('open'); 
+      refreshMapSize();
+    });
+
     document.getElementById('timeSlider').addEventListener('input',e=>updateMap(parseInt(e.target.value)));
     document.getElementById('breadcrumbsToggle').addEventListener('change',()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
-    document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
 
     loadPastFlotillas();
     loadPositions();
