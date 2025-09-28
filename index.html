@@ -109,6 +109,7 @@
       let latSum=0, lonSum=0, count=0, scrubTime=null;
 
       for(const shipId in positions){if(positions[shipId].length>index){scrubTime=new Date(positions[shipId][index].timestamp); break;}}
+
       if(!scrubTime) return;
 
       for(const shipId in positions){
@@ -183,16 +184,24 @@
       });
     }
 
-    function refreshMapSize(){setTimeout(()=>{map.invalidateSize();},200);}
-    window.addEventListener('resize',refreshMapSize);
-    window.addEventListener('load',refreshMapSize);
-    document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('sidebar').classList.toggle('open');refreshMapSize();});
-    document.getElementById('timeSlider').addEventListener('input',e=>updateMap(parseInt(e.target.value)));
-    document.getElementById('breadcrumbsToggle').addEventListener('change',()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
+    function refreshMapSize(){
+      // Multiple timeouts for mobile to ensure map redraws
+      setTimeout(()=>{ map.invalidateSize(); }, 300);
+      setTimeout(()=>{ map.invalidateSize(); }, 600);
+    }
+
+    window.addEventListener('resize', refreshMapSize);
+    window.addEventListener('load', refreshMapSize);
+    document.getElementById('hamburger').addEventListener('click', ()=>{
+      document.getElementById('sidebar').classList.toggle('open');
+      refreshMapSize();
+    });
+    document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
+    document.getElementById('breadcrumbsToggle').addEventListener('change', ()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
 
     loadPastFlotillas();
-    loadPositions();
-    setInterval(()=>loadPositions(true),60000);
+    loadPositions().then(()=> refreshMapSize());
+    setInterval(()=>loadPositions(true), 60000);
   </script>
 </body>
 </html>
