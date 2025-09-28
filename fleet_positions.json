@@ -1727,6 +1727,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.62428,
+      "lon": 33.0794,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3457,6 +3466,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 359.5
+    },
+    {
+      "lat": 34.610490729250515,
+      "lon": 33.084661472548134,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 359.2
     }
   ],
   "ghost_2": [
@@ -5187,6 +5205,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 359.0
+    },
+    {
+      "lat": 34.643978830521,
+      "lon": 33.09043464310281,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 358.6
     }
   ],
   "ghost_3": [
@@ -6616,6 +6643,15 @@
       "lat": 34.61569940312477,
       "lon": 33.06161554822031,
       "timestamp": "2025-09-28 21:29:33",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 357.7
+    },
+    {
+      "lat": 34.61123038773146,
+      "lon": 33.057146532827,
+      "timestamp": "2025-09-28 21:39:36",
       "ghost": true,
       "name": "Al Quds",
       "speed": 0.0,
@@ -8053,6 +8089,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 1.6
+    },
+    {
+      "lat": 34.63984167368742,
+      "lon": 33.107687399847464,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 1.5
     }
   ],
   "cyprus_1": [
@@ -8212,6 +8257,24 @@
       "name": "Argo",
       "speed": 0.0,
       "heading": 359.1
+    },
+    {
+      "lat": 34.606105931200645,
+      "lon": 33.06369025216231,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 0.0,
+      "heading": 359.4
+    },
+    {
+      "lat": 34.609384421161764,
+      "lon": 33.06557028575451,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 0.49,
+      "heading": 359.0
     }
   ],
   "cyprus_4": [
@@ -8232,6 +8295,15 @@
       "name": "Brune",
       "speed": 0.0,
       "heading": 3.6
+    },
+    {
+      "lat": 34.63468226315008,
+      "lon": 33.077631285141365,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 0.0,
+      "heading": 4.1
     }
   ],
   "cyprus_5": [
@@ -8252,6 +8324,15 @@
       "name": "Inman",
       "speed": 0.0,
       "heading": 3.7
+    },
+    {
+      "lat": 34.59997260407446,
+      "lon": 33.060258265581524,
+      "timestamp": "2025-09-28 21:39:36",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 0.0,
+      "heading": 3.6
     }
   ]
 }
