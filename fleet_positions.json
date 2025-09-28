@@ -1574,6 +1574,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.626236666666664,
+      "lon": 33.075365,
+      "timestamp": "2025-09-28 20:35:10",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3151,6 +3160,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 4.1
+    },
+    {
+      "lat": 34.625921472132404,
+      "lon": 33.07658392587087,
+      "timestamp": "2025-09-28 20:35:10",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 0.3
     }
   ],
   "ghost_2": [
@@ -4728,6 +4746,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 2.0
+    },
+    {
+      "lat": 34.63150017567583,
+      "lon": 33.09439666156153,
+      "timestamp": "2025-09-28 20:35:10",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 0.3
     }
   ],
   "ghost_3": [
@@ -6008,6 +6035,15 @@
       "name": "Al Quds",
       "speed": 0.0,
       "heading": 359.2
+    },
+    {
+      "lat": 34.61743704598596,
+      "lon": 33.069706917659374,
+      "timestamp": "2025-09-28 20:35:10",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 4.7
     }
   ],
   "ghost_4": [
@@ -7288,6 +7324,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 358.4
+    },
+    {
+      "lat": 34.647081712623255,
+      "lon": 33.07759515796463,
+      "timestamp": "2025-09-28 20:35:10",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 4.7
     }
   ],
   "cyprus_1": [
@@ -7322,6 +7367,15 @@
       "lat": 34.625333588027836,
       "lon": 33.07829264651636,
       "timestamp": "2025-09-28 20:25:11",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 0.0,
+      "heading": 0.0
+    },
+    {
+      "lat": 34.628841785000375,
+      "lon": 33.07782564803061,
+      "timestamp": "2025-09-28 20:35:10",
       "ghost": true,
       "name": "Gaza City",
       "speed": 0.0,
