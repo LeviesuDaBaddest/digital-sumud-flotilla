@@ -1772,6 +1772,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.62428,
+      "lon": 33.0794,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3547,6 +3556,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 357.2
+    },
+    {
+      "lat": 34.62534736347282,
+      "lon": 33.08362283792129,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 356.8
     }
   ],
   "ghost_2": [
@@ -5322,6 +5340,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 2.4
+    },
+    {
+      "lat": 34.6019746056211,
+      "lon": 33.06831335034131,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 2.5
     }
   ],
   "ghost_3": [
@@ -6800,6 +6827,15 @@
       "name": "Al Quds",
       "speed": 0.0,
       "heading": 1.2
+    },
+    {
+      "lat": 34.61443529094666,
+      "lon": 33.08332683719576,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 1.3
     }
   ],
   "ghost_4": [
@@ -8278,6 +8314,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 356.7
+    },
+    {
+      "lat": 34.63179238864026,
+      "lon": 33.08557515148288,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 356.2
     }
   ],
   "cyprus_1": [
@@ -8630,6 +8675,24 @@
       "name": "Inman",
       "speed": 0.0,
       "heading": 359.3
+    },
+    {
+      "lat": 34.61391925347082,
+      "lon": 33.05573561085176,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 0.0,
+      "heading": 359.2
+    },
+    {
+      "lat": 34.61398147259447,
+      "lon": 33.05434771971773,
+      "timestamp": "2025-09-29 00:23:51",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 0.51,
+      "heading": 358.8
     }
   ]
 }
