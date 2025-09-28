@@ -93,7 +93,7 @@
       body { overflow: auto; }
       #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; }
       #sidebar.open { transform: translateX(0); }
-      #map { width: 100%; height: calc(100vh - 60px) !important; float: none; }
+      #map { width: 100%; height: 100vh !important; float: none; } /* force vh on mobile */
       #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; }
       #hamburger { display: block; }
     }
@@ -284,6 +284,7 @@
       setTimeout(() => { map.invalidateSize(); }, 200);
     }
     window.addEventListener('resize', refreshMapSize);
+    window.addEventListener('load', refreshMapSize);
     document.getElementById('hamburger').addEventListener('click',()=>{ 
       document.getElementById('sidebar').classList.toggle('open'); 
       refreshMapSize();
@@ -298,4 +299,3 @@
   </script>
 </body>
 </html>
-
