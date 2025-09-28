@@ -32,6 +32,16 @@
     .boat-item:hover { background: #333; }
     .boat-item.active { background: #444; border-left: 4px solid #ff8080; }
 
+    /* Cluster markers blue */
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+      background-color: #1E90FF !important;
+    }
+    .marker-cluster div {
+      background-color: rgba(30,144,255,0.6) !important;
+      color: white !important;
+      border: 2px solid #1E90FF !important;
+    }
+
     @media screen and (max-width: 1024px) { #map { width: 100%; height: calc(100% - 80px) !important; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 80px; padding: 5px; } }
     @media screen and (max-width: 768px) { body { overflow: auto; } #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; } #sidebar.open { transform: translateX(0); } #map { width: 100%; height: 100vh !important; float: none; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; } #hamburger { display: block; } }
     @media screen and (max-height: 500px) { #map { height: 300px; } #slider-container { height: 60px; } }
@@ -125,7 +135,6 @@
       }
 
       if(!userMovedMap && count>0) map.setView([latSum/count,lonSum/count],map.getZoom());
-
       const scrubTimeStr = `${(scrubTime.getMonth()+1).toString().padStart(2,'0')}/${scrubTime.getDate().toString().padStart(2,'0')} ${scrubTime.getHours().toString().padStart(2,'0')}:${scrubTime.getMinutes().toString().padStart(2,'0')}`;
       document.getElementById('time-label').textContent = scrubTimeStr;
     }
@@ -138,7 +147,7 @@
       const shipData = positions[highlightedTrail];
       if(!shipData||!shipData.length) return;
       const lastPos = shipData[shipData.length-1];
-      map.flyTo([lastPos.lat,lastPos.lon],10,{duration:1.2});
+      map.flyTo([lastPos.lat,lastPos.lon],14,{duration:1.5});
     }
 
     function updateSidebar(){
@@ -158,27 +167,21 @@
     }
 
     const pastFlotillas=[
-  {name:"Madleen", year:2025, lat:31.95236, lon:32.3888, status:"Intercepted in international waters, towed to Ashdod", confidence:"Medium-High", source:"News / maritime reports"},
-  {name:"Handala", year:2025, lat:31.990316, lon:32.802406, status:"Organisers’ tracker; intercepted ~64 km from Gaza, diverted to Ashdod", confidence:"Medium", source:"Organisers' tracker / press"},
-  {name:"Marianne (Freedom Flotilla III)", year:2015, lat:31.7167, lon:32.55, status:"Boarded ~100 nm from Gaza, diverted to Ashdod", confidence:"High", source:"Freedom Flotilla tracker / press"},
-  {name:"Zaytouna-Oliva (Women’s Boat to Gaza)", year:2016, lat:31.45, lon:34.17, status:"Intercepted ~14 nm off Gaza coast (approx position)", confidence:"Medium (approx)", source:"Press reports (distance-based)"},
-  {name:"Spirit of Humanity", year:2009, lat:31.6, lon:34.15, status:"Intercepted ~20 nm off Gaza coast (approx)", confidence:"Medium (approx)", source:"UN / press reports"},
-  {name:"Mavi Marmara", year:2010, lat:32.64113, lon:33.56727, status:"Raided in international waters; casualties and diplomatic fallout", confidence:"High", source:"UN report / investigations"}
-];
+      {name:"Madleen", year:2025, lat:31.95236, lon:32.3888, status:"Intercepted in international waters, towed to Ashdod", confidence:"Medium-High", source:"News / maritime reports"},
+      {name:"Handala", year:2025, lat:31.990316, lon:32.802406, status:"Organisers’ tracker; intercepted ~64 km from Gaza, diverted to Ashdod", confidence:"Medium", source:"Organisers' tracker / press"},
+      {name:"Marianne (Freedom Flotilla III)", year:2015, lat:31.7167, lon:32.55, status:"Boarded ~100 nm from Gaza, diverted to Ashdod", confidence:"High", source:"Freedom Flotilla tracker / press"},
+      {name:"Zaytouna-Oliva (Women’s Boat to Gaza)", year:2016, lat:31.45, lon:34.17, status:"Intercepted ~14 nm off Gaza coast (approx position)", confidence:"Medium (approx)", source:"Press reports (distance-based)"},
+      {name:"Spirit of Humanity", year:2009, lat:31.6, lon:34.15, status:"Intercepted ~20 nm off Gaza coast (approx)", confidence:"Medium (approx)", source:"UN / press reports"},
+      {name:"Mavi Marmara", year:2010, lat:32.64113, lon:33.56727, status:"Raided in international waters; casualties and diplomatic fallout", confidence:"High", source:"UN report / investigations"}
+    ];
 
-function loadPastFlotillas(){
-  pastFlotillas.forEach(b=>{
-    L.circleMarker([b.lat,b.lon],{
-      radius:6,
-      color:"#ff8080",
-      fillColor:"#ff8080",
-      fillOpacity:0.9
-    }).addTo(map).bindPopup(
-      `<b>${b.name} (${b.year})</b><br>${b.status}<br><em>Confidence:</em> ${b.confidence}<br><small>Source: ${b.source}</small>`
-    );
-  });
-}
-
+    function loadPastFlotillas(){
+      pastFlotillas.forEach(b=>{
+        L.circleMarker([b.lat,b.lon],{radius:6,color:"#ff8080",fillColor:"#ff8080",fillOpacity:0.9})
+        .addTo(map)
+        .bindPopup(`<b>${b.name} (${b.year})</b><br>${b.status}<br><em>Confidence:</em> ${b.confidence}<br><small>Source: ${b.source}</small>`);
+      });
+    }
 
     function refreshMapSize(){setTimeout(()=>{map.invalidateSize();},200);}
     window.addEventListener('resize',refreshMapSize);
