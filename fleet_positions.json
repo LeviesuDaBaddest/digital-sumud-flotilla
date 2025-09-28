@@ -1763,6 +1763,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.62428,
+      "lon": 33.0794,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3529,6 +3538,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 357.4
+    },
+    {
+      "lat": 34.62940332039785,
+      "lon": 33.08767879484632,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 357.2
     }
   ],
   "ghost_2": [
@@ -5295,6 +5313,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 2.4
+    },
+    {
+      "lat": 34.5995187527136,
+      "lon": 33.06585749743381,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 2.4
     }
   ],
   "ghost_3": [
@@ -6764,6 +6791,15 @@
       "name": "Al Quds",
       "speed": 0.0,
       "heading": 1.1
+    },
+    {
+      "lat": 34.61671765318795,
+      "lon": 33.08560919943705,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 1.2
     }
   ],
   "ghost_4": [
@@ -8233,6 +8269,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 356.5
+    },
+    {
+      "lat": 34.635902518545564,
+      "lon": 33.089685281388185,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 356.7
     }
   ],
   "cyprus_1": [
@@ -8511,6 +8556,24 @@
       "name": "Brune",
       "speed": 0.0,
       "heading": 357.6
+    },
+    {
+      "lat": 34.61097396510039,
+      "lon": 33.08205482101995,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 0.0,
+      "heading": 357.3
+    },
+    {
+      "lat": 34.613554433085554,
+      "lon": 33.08325790136077,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 0.47,
+      "heading": 357.0
     }
   ],
   "cyprus_5": [
@@ -8558,6 +8621,15 @@
       "name": "Inman",
       "speed": 0.0,
       "heading": 358.8
+    },
+    {
+      "lat": 34.61096771429737,
+      "lon": 33.05278407167831,
+      "timestamp": "2025-09-29 00:13:48",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 0.0,
+      "heading": 359.3
     }
   ]
 }
