@@ -154,12 +154,17 @@ def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
     return fleet
 
 # ----------------------
-# SPAWN SINGLE SHIP
+# SPAWN SINGLE SHIP NEAR ORIGIN (changed)
 # ----------------------
-def spawn_single_ship(point, fleet, ghost_id, ship_name):
+def spawn_single_ship(origin_lat, origin_lon, fleet, ghost_id, ship_name):
+    """
+    Spawn a single ship around the provided origin (usually the real ship's lat/lon).
+    This ensures phased ships appear as dots around your actual position.
+    """
     if ghost_id not in GHOST_STATES:
+        # give stable small formation offsets per ship id
         rel_bearing = random.uniform(0, 360)
-        rel_distance = random.uniform(0.2, 0.8)
+        rel_distance = random.uniform(0.05, 0.6)  # smaller distances so they spawn close to you (0.05-0.6 nm)
         speed_bias = 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION)
         GHOST_STATES[ghost_id] = {
             "rel_bearing": rel_bearing,
@@ -167,12 +172,14 @@ def spawn_single_ship(point, fleet, ghost_id, ship_name):
             "speed_bias": speed_bias,
             "heading_jitter": random.uniform(-5, 5)
         }
+
     state = GHOST_STATES[ghost_id]
     rel_rad = math.radians(state["rel_bearing"])
     rel_lat = state["rel_distance"] * math.cos(rel_rad) / 60.0
-    rel_lon = state["rel_distance"] * math.sin(rel_rad) / (60.0 * math.cos(math.radians(point["lat"])))
-    initial_lat = point["lat"] + rel_lat
-    initial_lon = point["lon"] + rel_lon
+    rel_lon = state["rel_distance"] * math.sin(rel_rad) / (60.0 * math.cos(math.radians(origin_lat)))
+    initial_lat = origin_lat + rel_lat
+    initial_lon = origin_lon + rel_lon
+
     fleet[ghost_id] = [{
         "lat": initial_lat,
         "lon": initial_lon,
@@ -184,13 +191,13 @@ def spawn_single_ship(point, fleet, ghost_id, ship_name):
     }]
 
 # ----------------------
-# PHASED RENDEZVOUS CHECK
+# PHASED RENDEZVOUS CHECK (now spawns near real ship)
 # ----------------------
 def check_rendezvous(real_lat, real_lon, fleet):
     now = time.time()
     for point in RENDEZVOUS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
-        if distance_nm < 40:
+        if distance_nm < 40:  # loosened trigger so you can phase-in earlier if desired
             if point["name"] not in PHASED_SPAWN_QUEUE:
                 names = CYPRUS_NAMES if point["name"] == "Cyprus" else [f"{point['name']} Ship {i}" for i in range(1, point["ships"]+1)]
                 PHASED_SPAWN_QUEUE[point["name"]] = [{"id": f"{point['name'].lower()}_{i+1}", "name": names[i]} for i in range(point["ships"])]
@@ -198,8 +205,9 @@ def check_rendezvous(real_lat, real_lon, fleet):
             if PHASED_SPAWN_QUEUE[point["name"]]:
                 if now - LAST_SPAWN_TIME[point["name"]] >= PHASED_SPAWN_INTERVAL:
                     ship = PHASED_SPAWN_QUEUE[point["name"]].pop(0)
-                    print(f"⚓ Phasing in ship {ship['name']} at {point['name']}")
-                    spawn_single_ship(point, fleet, ship["id"], ship["name"])
+                    print(f"⚓ Phasing in ship {ship['name']} at {point['name']} (spawning near real ship)")
+                    # *** spawn near the real ship's current lat/lon ***
+                    spawn_single_ship(real_lat, real_lon, fleet, ship["id"], ship["name"])
                     LAST_SPAWN_TIME[point["name"]] = now
             else:
                 point["spawned"] = True
