@@ -1349,6 +1349,15 @@
       "name": "Al Awda",
       "speed": 7.6,
       "heading": 7.5
+    },
+    {
+      "lat": 34.33079166666667,
+      "lon": 33.055283333333335,
+      "timestamp": "2025-09-28 16:17:33",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 7.7,
+      "heading": 7.9
     }
   ],
   "ghost_1": [
@@ -2701,6 +2710,15 @@
       "name": "Ma\u2019an",
       "speed": 8.36,
       "heading": 10.8
+    },
+    {
+      "lat": 34.36111349119892,
+      "lon": 33.0554315448632,
+      "timestamp": "2025-09-28 16:17:33",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 8.47,
+      "heading": 11.3
     }
   ],
   "ghost_2": [
@@ -4053,6 +4071,15 @@
       "name": "Navaren",
       "speed": 7.3,
       "heading": 11.3
+    },
+    {
+      "lat": 34.35292390268713,
+      "lon": 33.0547033438954,
+      "timestamp": "2025-09-28 16:17:33",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 7.39,
+      "heading": 11.8
     }
   ],
   "ghost_3": [
@@ -5108,6 +5135,15 @@
       "name": "Al Quds",
       "speed": 7.91,
       "heading": 7.0
+    },
+    {
+      "lat": 34.34877145044355,
+      "lon": 33.05635472701365,
+      "timestamp": "2025-09-28 16:17:33",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 8.09,
+      "heading": 7.2
     }
   ],
   "ghost_4": [
@@ -6163,6 +6199,15 @@
       "name": "Ramallah",
       "speed": 7.53,
       "heading": 11.3
+    },
+    {
+      "lat": 34.34123604177336,
+      "lon": 33.06577049858433,
+      "timestamp": "2025-09-28 16:17:33",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 7.68,
+      "heading": 11.5
     }
   ]
 }
