@@ -1511,6 +1511,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.62632333333333,
+      "lon": 33.076265,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3025,6 +3034,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 358.8
+    },
+    {
+      "lat": 34.62271324458903,
+      "lon": 33.07968694849945,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 359.2
     }
   ],
   "ghost_2": [
@@ -4539,6 +4557,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 357.3
+    },
+    {
+      "lat": 34.62532976990075,
+      "lon": 33.062221884388705,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 357.1
     }
   ],
   "ghost_3": [
@@ -5756,6 +5783,15 @@
       "name": "Al Quds",
       "speed": 0.0,
       "heading": 358.4
+    },
+    {
+      "lat": 34.622790191567724,
+      "lon": 33.07758218408259,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 358.9
     }
   ],
   "ghost_4": [
@@ -6973,6 +7009,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 4.5
+    },
+    {
+      "lat": 34.618555875606404,
+      "lon": 33.07858876261546,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 4.0
     }
   ],
   "cyprus_1": [
@@ -6993,6 +7038,17 @@
       "timestamp": "2025-09-28 19:35:29",
       "ghost": true,
       "name": "Freedom",
+      "speed": 0.0,
+      "heading": 0.0
+    }
+  ],
+  "cyprus_3": [
+    {
+      "lat": 34.625550110599946,
+      "lon": 33.08470396706329,
+      "timestamp": "2025-09-28 19:45:31",
+      "ghost": true,
+      "name": "Argo",
       "speed": 0.0,
       "heading": 0.0
     }
