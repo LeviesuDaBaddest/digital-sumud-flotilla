@@ -8,67 +8,14 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: black;
-      color: white;
-      font-family: Arial, sans-serif;
+      margin: 0; padding: 0; height: 100%; width: 100%;
+      background: black; color: white; font-family: Arial, sans-serif;
       overflow: hidden;
     }
-
-    /* Desktop layout */
-    #sidebar {
-      width: 300px;
-      background: #111;
-      height: 100%;
-      float: left;
-      padding: 15px;
-      box-sizing: border-box;
-      overflow-y: auto;
-      transition: transform 0.3s;
-      z-index: 999;
-    }
-
-    #map {
-      height: 100%;
-      width: calc(100% - 300px);
-      float: right;
-      transition: all 0.3s;
-      min-height: 300px;
-    }
-
-    #slider-container {
-      width: calc(100% - 300px);
-      height: 80px;
-      background: #111;
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      padding: 10px;
-      box-sizing: border-box;
-      text-align: center;
-      transition: all 0.3s;
-      z-index: 1001;
-    }
-
-    #hamburger {
-      display: none;
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: #222;
-      color: white;
-      border: none;
-      font-size: 22px;
-      padding: 8px 12px;
-      cursor: pointer;
-      z-index: 1000;
-      border-radius: 5px;
-    }
-
-    /* Shared styles */
+    #sidebar { width: 300px; background: #111; height: 100%; float: left; padding: 15px; box-sizing: border-box; overflow-y: auto; transition: transform 0.3s; z-index: 999; }
+    #map { height: 100%; width: calc(100% - 300px); float: right; transition: all 0.3s; min-height: 300px; }
+    #slider-container { width: calc(100% - 300px); height: 80px; background: #111; position: absolute; bottom: 0; right: 0; padding: 10px; box-sizing: border-box; text-align: center; transition: all 0.3s; z-index: 1001; }
+    #hamburger { display: none; position: absolute; top: 10px; left: 10px; background: #222; color: white; border: none; font-size: 22px; padding: 8px 12px; cursor: pointer; z-index: 1000; border-radius: 5px; }
     h1 { font-size: 18px; margin: 5px 0 5px; text-align: center; }
     h2 { font-size: 14px; margin: 0 0 10px; text-align: center; color: #ff8080; }
     .ticker-container { overflow: hidden; white-space: nowrap; border-top: 1px solid #333; border-bottom: 1px solid #333; margin-bottom: 10px; }
@@ -85,25 +32,9 @@
     .boat-item:hover { background: #333; }
     .boat-item.active { background: #444; border-left: 4px solid #ff8080; }
 
-    /* Mobile adjustments */
-    @media screen and (max-width: 1024px) {
-      #map { width: 100%; height: calc(100% - 80px) !important; }
-      #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 80px; padding: 5px; }
-    }
-
-    @media screen and (max-width: 768px) {
-      body { overflow: auto; }
-      #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; }
-      #sidebar.open { transform: translateX(0); }
-      #map { width: 100%; height: 100vh !important; float: none; }
-      #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; }
-      #hamburger { display: block; }
-    }
-
-    @media screen and (max-height: 500px) {
-      #map { height: 300px; }
-      #slider-container { height: 60px; }
-    }
+    @media screen and (max-width: 1024px) { #map { width: 100%; height: calc(100% - 80px) !important; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 80px; padding: 5px; } }
+    @media screen and (max-width: 768px) { body { overflow: auto; } #sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 250px; transform: translateX(-100%); z-index: 999; } #sidebar.open { transform: translateX(0); } #map { width: 100%; height: 100vh !important; float: none; } #slider-container { width: 100%; position: fixed; bottom: 0; left: 0; height: 60px; padding: 5px; } #hamburger { display: block; } }
+    @media screen and (max-height: 500px) { #map { height: 300px; } #slider-container { height: 60px; } }
   </style>
 </head>
 <body>
@@ -111,12 +42,7 @@
   <div id="sidebar">
     <h1>Virtual Voyage To Gaza <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
-    <div class="ticker-container">
-      <div class="ticker-text">
-        Shireen Abu Akleh Hind Rajab Refaat Alareer Razan Al-Najjar Mohammed Al-Durra Ahmad Abu Hussein Wael Dahdouh's Family Iman Hejjo Layan Hamadeh Thousands of Martyrs of Palestine
-      </div>
-    </div>
-
+    <div class="ticker-container"><div class="ticker-text">Shireen Abu Akleh Hind Rajab Refaat Alareer Razan Al-Najjar Mohammed Al-Durra Ahmad Abu Hussein Wael Dahdouh's Family Iman Hejjo Layan Hamadeh Thousands of Martyrs of Palestine</div></div>
     <details class="section">
       <summary>Martyr Poems & Quotes</summary>
       <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
@@ -126,7 +52,6 @@
       <p><b>Ghada Al-Najjar:</b> "Our roots are deep in this land. Even if they burn our olive trees, we will replant them with our blood."</p>
       <p><b>Mohammed Al-Durra:</b> "I am only a child, but I carry the dreams of my people on my shoulders."</p>
     </details>
-
     <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
     <div id="boat-list"></div>
   </div>
@@ -141,9 +66,9 @@
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <script>
     const map = L.map('map').setView([32.6, 28.9], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
 
-    const markersLayer = L.markerClusterGroup({ chunkedLoading: true });
+    const markersLayer = L.markerClusterGroup({chunkedLoading:true});
     map.addLayer(markersLayer);
     const breadcrumbsLayer = L.layerGroup().addTo(map);
     const boatDivs = {};
@@ -152,20 +77,17 @@
     let userMovedMap = false;
     let highlightedTrail = null;
 
-    map.on('movestart', () => { userMovedMap = true; });
+    map.on('movestart',()=>{userMovedMap=true;});
 
-    async function loadPositions(autoUpdate = false) {
-      const res = await fetch('fleet_positions.json?t=' + Date.now());
+    async function loadPositions(autoUpdate=false){
+      const res = await fetch('fleet_positions.json?t='+Date.now());
       const newPositions = await res.json();
-      if (!newPositions) return;
-      positions = Array.isArray(newPositions) ? { fleet: newPositions } : newPositions;
-
+      if(!newPositions) return;
+      positions = Array.isArray(newPositions)?{fleet:newPositions}:newPositions;
       const slider = document.getElementById('timeSlider');
-      let maxLength = 0;
-      for (const shipId in positions) maxLength = Math.max(maxLength, positions[shipId].length);
-      slider.max = maxLength > 0 ? maxLength - 1 : 0;
-      if (!autoUpdate) slider.value = slider.max;
-
+      let maxLength=0; for(const shipId in positions) maxLength=Math.max(maxLength,positions[shipId].length);
+      slider.max=maxLength>0?maxLength-1:0;
+      if(!autoUpdate) slider.value=slider.max;
       updateMap(parseInt(slider.value));
       updateSidebar();
     }
@@ -174,110 +96,96 @@
       breadcrumbsLayer.clearLayers();
       markersLayer.clearLayers();
       const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
-      let latSum = 0, lonSum = 0, count = 0;
-      let scrubTime = null;
+      let latSum=0, lonSum=0, count=0, scrubTime=null;
 
-      for(const shipId in positions){
-        if(positions[shipId].length > index){
-          scrubTime = new Date(positions[shipId][index].timestamp);
-          break;
-        }
-      }
+      for(const shipId in positions){if(positions[shipId].length>index){scrubTime=new Date(positions[shipId][index].timestamp); break;}}
       if(!scrubTime) return;
 
       for(const shipId in positions){
         const shipData = positions[shipId];
         if(!shipData.length) continue;
-        const past = shipData.filter(p => new Date(p.timestamp) <= scrubTime);
+        const past = shipData.filter(p=>new Date(p.timestamp)<=scrubTime);
         if(!past.length) continue;
-
-        const pos = past[past.length - 1];
+        const pos = past[past.length-1];
         const isGhost = pos.ghost;
-        const color = isGhost ? '#475DD1' : '#1E90FF';
-        const opacity = (highlightedTrail === shipId || !highlightedTrail) ? 0.9 : 0.2;
+        const color = isGhost?'#475DD1':'#1E90FF';
+        const opacity = (highlightedTrail===shipId||!highlightedTrail)?0.9:0.2;
 
-        const marker = L.circleMarker([pos.lat, pos.lon], { radius: 6, color, fillColor: color, fillOpacity: 0.9 })
-          .on('click', () => highlightBoat(shipId));
-        marker.bindTooltip(pos.name, { direction:'top', permanent:false });
+        const marker = L.circleMarker([pos.lat,pos.lon],{radius:6,color,fillColor:color,fillOpacity:0.9})
+          .on('click',()=>highlightBoat(shipId));
+        marker.bindTooltip(pos.name,{direction:'top',permanent:false});
         markersLayer.addLayer(marker);
-        boatMarkers[shipId] = marker;
+        boatMarkers[shipId]=marker;
 
-        // Breadcrumbs
-        if(showBreadcrumbs && past.length > 1){
-          const trail = past.map(p => [p.lat, p.lon]);
-          L.polyline(trail, { color, weight: 2, opacity }).addTo(breadcrumbsLayer);
+        if(showBreadcrumbs && past.length>1){
+          const trail = past.map(p=>[p.lat,p.lon]);
+          L.polyline(trail,{color,weight:2,opacity}).addTo(breadcrumbsLayer);
         }
-
-        latSum += pos.lat; lonSum += pos.lon; count++;
+        latSum+=pos.lat; lonSum+=pos.lon; count++;
       }
 
-      if(!userMovedMap && count > 0){
-        map.setView([latSum/count, lonSum/count], map.getZoom());
-      }
+      if(!userMovedMap && count>0) map.setView([latSum/count,lonSum/count],map.getZoom());
 
       const scrubTimeStr = `${(scrubTime.getMonth()+1).toString().padStart(2,'0')}/${scrubTime.getDate().toString().padStart(2,'0')} ${scrubTime.getHours().toString().padStart(2,'0')}:${scrubTime.getMinutes().toString().padStart(2,'0')}`;
       document.getElementById('time-label').textContent = scrubTimeStr;
     }
 
     function highlightBoat(shipId){
-      highlightedTrail = shipId;
-      for(const id in boatDivs) boatDivs[id].classList.toggle('active', id === shipId);
+      highlightedTrail = highlightedTrail===shipId?null:shipId;
+      for(const id in boatDivs) boatDivs[id].classList.toggle('active',id===highlightedTrail);
       updateMap(parseInt(document.getElementById('timeSlider').value));
-
-      const shipData = positions[shipId];
-      if(!shipData || !shipData.length) return;
+      if(!highlightedTrail) return;
+      const shipData = positions[highlightedTrail];
+      if(!shipData||!shipData.length) return;
       const lastPos = shipData[shipData.length-1];
-      map.flyTo([lastPos.lat, lastPos.lon], 10, {duration:1.2});
+      map.flyTo([lastPos.lat,lastPos.lon],10,{duration:1.2});
     }
 
     function updateSidebar(){
-      const boatList = document.getElementById('boat-list');
-      boatList.innerHTML = '';
+      const boatList=document.getElementById('boat-list');
+      boatList.innerHTML='';
       for(const shipId in positions){
-        const shipData = positions[shipId];
+        const shipData=positions[shipId];
         if(!shipData.length) continue;
         const pos = shipData[shipData.length-1];
-
-        const div = document.createElement('div');
+        const div=document.createElement('div');
         div.className='boat-item';
-        div.innerHTML=`${pos.name || shipId}<br>Speed: ${pos.speed || 'N/A'} kn`;
-
-        boatDivs[shipId] = div;
-        div.addEventListener('click', ()=>{
-          highlightBoat(shipId);
-        });
-
+        div.innerHTML=`${pos.name||shipId}<br>Speed: ${pos.speed||'N/A'} kn`;
+        boatDivs[shipId]=div;
+        div.addEventListener('click',()=>{highlightBoat(shipId);});
         boatList.appendChild(div);
       }
     }
 
-    // Past flotillas
     const pastFlotillas=[
-      {name:"Madleen",year:2025,lat:31.95236,lon:32.3888,status:"Intercepted in international waters, towed to Ashdod",confidence:"Medium-High",source:"News / maritime reports"},
-      {name:"Handala",year:2025,lat:31.990316,lon:32.802406,status:"Organisers’ tracker; intercepted ~64 km from Gaza, diverted to Ashdod",confidence:"Medium",source:"Organisers' tracker / press"},
-      {name:"Marianne (Freedom Flotilla III)",year:2015,lat:31.7167,lon:32.55,status:"Boarded ~100 nm from Gaza, diverted to Ashdod",confidence:"High",source:"Freedom Flotilla tracker / press"},
-      {name:"Zaytouna-Oliva (Women’s Boat to Gaza)",year:2016,lat:31.45,lon:34.17,status:"Intercepted ~14 nm off Gaza coast (approx position)",confidence:"Medium (approx)",source:"Press reports (distance-based)"},
-      {name:"Spirit of Humanity",year:2009,lat:31.6,lon:34.15,status:"Intercepted ~20 nm off Gaza coast (approx)",confidence:"Medium (approx)",source:"UN / press reports"},
-      {name:"Mavi Marmara",year:2010,lat:32.64113,lon:33.56727,status:"Raided in international waters; casualties and diplomatic fallout",confidence:"High",source:"UN report / investigations"}
-    ];
+  {name:"Madleen", year:2025, lat:31.95236, lon:32.3888, status:"Intercepted in international waters, towed to Ashdod", confidence:"Medium-High", source:"News / maritime reports"},
+  {name:"Handala", year:2025, lat:31.990316, lon:32.802406, status:"Organisers’ tracker; intercepted ~64 km from Gaza, diverted to Ashdod", confidence:"Medium", source:"Organisers' tracker / press"},
+  {name:"Marianne (Freedom Flotilla III)", year:2015, lat:31.7167, lon:32.55, status:"Boarded ~100 nm from Gaza, diverted to Ashdod", confidence:"High", source:"Freedom Flotilla tracker / press"},
+  {name:"Zaytouna-Oliva (Women’s Boat to Gaza)", year:2016, lat:31.45, lon:34.17, status:"Intercepted ~14 nm off Gaza coast (approx position)", confidence:"Medium (approx)", source:"Press reports (distance-based)"},
+  {name:"Spirit of Humanity", year:2009, lat:31.6, lon:34.15, status:"Intercepted ~20 nm off Gaza coast (approx)", confidence:"Medium (approx)", source:"UN / press reports"},
+  {name:"Mavi Marmara", year:2010, lat:32.64113, lon:33.56727, status:"Raided in international waters; casualties and diplomatic fallout", confidence:"High", source:"UN report / investigations"}
+];
 
-    function loadPastFlotillas(){
-      pastFlotillas.forEach(b=>{
-        L.circleMarker([b.lat,b.lon],{radius:6,color:"#ff8080",fillColor:"#ff8080",fillOpacity:0.9}).addTo(map)
-        .bindPopup(`<b>${b.name} (${b.year})</b><br>${b.status}<br><em>Confidence:</em> ${b.confidence}<br><small>Source: ${b.source}</small>`);
-      });
-    }
+function loadPastFlotillas(){
+  pastFlotillas.forEach(b=>{
+    L.circleMarker([b.lat,b.lon],{
+      radius:6,
+      color:"#ff8080",
+      fillColor:"#ff8080",
+      fillOpacity:0.9
+    }).addTo(map).bindPopup(
+      `<b>${b.name} (${b.year})</b><br>${b.status}<br><em>Confidence:</em> ${b.confidence}<br><small>Source: ${b.source}</small>`
+    );
+  });
+}
 
-    function refreshMapSize(){ setTimeout(()=>{map.invalidateSize();},200); }
-    window.addEventListener('resize', refreshMapSize);
-    window.addEventListener('load', refreshMapSize);
-    document.getElementById('hamburger').addEventListener('click',()=>{ 
-      document.getElementById('sidebar').classList.toggle('open'); 
-      refreshMapSize();
-    });
 
-    document.getElementById('timeSlider').addEventListener('input', e=>updateMap(parseInt(e.target.value)));
-    document.getElementById('breadcrumbsToggle').addEventListener('change', ()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
+    function refreshMapSize(){setTimeout(()=>{map.invalidateSize();},200);}
+    window.addEventListener('resize',refreshMapSize);
+    window.addEventListener('load',refreshMapSize);
+    document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('sidebar').classList.toggle('open');refreshMapSize();});
+    document.getElementById('timeSlider').addEventListener('input',e=>updateMap(parseInt(e.target.value)));
+    document.getElementById('breadcrumbsToggle').addEventListener('change',()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
 
     loadPastFlotillas();
     loadPositions();
