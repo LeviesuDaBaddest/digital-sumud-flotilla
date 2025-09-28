@@ -190,7 +190,7 @@ def check_rendezvous(real_lat, real_lon, fleet):
     now = time.time()
     for point in RENDEZVOUS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
-        if distance_nm < 15:
+        if distance_nm < 40:
             if point["name"] not in PHASED_SPAWN_QUEUE:
                 names = CYPRUS_NAMES if point["name"] == "Cyprus" else [f"{point['name']} Ship {i}" for i in range(1, point["ships"]+1)]
                 PHASED_SPAWN_QUEUE[point["name"]] = [{"id": f"{point['name'].lower()}_{i+1}", "name": names[i]} for i in range(point["ships"])]
