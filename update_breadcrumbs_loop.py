@@ -19,8 +19,7 @@ PHASED_SPAWN_INTERVAL = 600
 # ----------------------
 # CUSTOM GHOST NAMES
 # ----------------------
-GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
-CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
+GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami","Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 
 # ----------------------
 # RENDEZVOUS POINTS
