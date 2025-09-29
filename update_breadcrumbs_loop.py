@@ -9,7 +9,7 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-UPDATE_INTERVAL = 600  # seconds
+UPDATE_INTERVAL = 300  # seconds
 SPEED_VARIATION = 0.05  # smaller variation for smoother speeds
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
@@ -184,4 +184,139 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     heading_adjust = angle_diff * CONVERGENCE_STRENGTH
     # add tiny random jitter to avoid robotic motion
     heading_adjust += random.uniform(-0.7, 0.7)
-    new_hdg = (current_hdg + heading_adjust) % 36_
+    new_hdg = (current_hdg + heading_adjust) % 360
+    state["hdg"] = new_hdg
+
+    # move ghost forward along its heading by ghost_speed (converted to degrees)
+    move_dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600) / 60.0
+    move_rad = math.radians(new_hdg)
+    delta_lat = move_dist_deg * math.cos(move_rad)
+    delta_lon = move_dist_deg * math.sin(move_rad) / max(0.0001, math.cos(math.radians(state["lat"])))
+
+    # Apply a small attraction toward the target (so they don't just orbit)
+    attraction_strength = 0.35  # how much of the target vector to apply per update (0..1)
+    state["lat"] += delta_lat + dlat * attraction_strength * 0.02
+    state["lon"] += delta_lon + dlon * attraction_strength * 0.02
+
+    return state["lat"], state["lon"], ghost_speed, new_hdg
+
+# ----------------------
+# SPAWN ONE NEW GHOST IF IN RENDEZVOUS
+# ----------------------
+def spawn_one_ghost(real_lat, real_lon):
+    # We'll spawn only one ghost per update. Choose original ghosts first (if any missing names),
+    # then rendezvous ghosts.
+    # Determine used friendly names
+    used_names = {s["name"] for s in GHOST_STATES.values()}
+
+    # Spawn original named ghosts first (if any not present)
+    for name in GHOST_NAMES:
+        if name not in used_names:
+            # create a stable ID using the name
+            ghost_id = f"ghost_{name.lower().replace(' ', '_')}"
+            # slot around the ship: prefer behind (negative bearing) with small spread
+            slot_bearing = random.uniform(-35, 35) * -1  # slightly behind by default
+            slot_distance = random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM)
+            GHOST_STATES[ghost_id] = {
+                "name": name,
+                "lat": real_lat + random.uniform(-0.01, 0.01),
+                "lon": real_lon + random.uniform(-0.01, 0.01),
+                "slot_bearing": slot_bearing,
+                "slot_distance": slot_distance,
+                "phase": random.uniform(0, 2*math.pi),
+                "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
+                "hdg": None
+            }
+            print(f"👻 Spawned named ghost {name}")
+            return
+
+    # Spawn rendezvous ghosts if inside a point
+    for point in RENDEZVOUS_POINTS:
+        distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
+        if distance_nm < 40:
+            names = point.get("names", [])
+            for i in range(point["ships"]):
+                # ID unique per rendezvous slot
+                ghost_id = f"{point['name'].lower()}_{i+1}"
+                if ghost_id not in GHOST_STATES:
+                    name = names[i % len(names)] if names else ghost_id
+                    # assign slot_bearing spread across the formation so they don't all stack
+                    base_bearing = -20 + (i - (point["ships"]-1)/2) * 12  # spread across +/- ~30deg
+                    slot_bearing = base_bearing + random.uniform(-6, 6)
+                    slot_distance = random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM)
+                    GHOST_STATES[ghost_id] = {
+                        "name": name,
+                        "lat": real_lat + random.uniform(-0.01, 0.01),
+                        "lon": real_lon + random.uniform(-0.01, 0.01),
+                        "slot_bearing": slot_bearing,
+                        "slot_distance": slot_distance,
+                        "phase": random.uniform(0, 2*math.pi),
+                        "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
+                        "hdg": None
+                    }
+                    print(f"👻 Spawned rendezvous ghost {name} at {point['name']}")
+                    return  # only spawn one per update
+
+# ----------------------
+# GENERATE OR UPDATE ALL GHOSTS
+# ----------------------
+def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
+    for ghost_id, state in list(GHOST_STATES.items()):
+        fleet.setdefault(ghost_id, [])
+        new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
+        # ensure friendly name output
+        fleet[ghost_id].append({
+            "lat": new_lat,
+            "lon": new_lon,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "ghost": True,
+            "name": state["name"],
+            "speed": round(ghost_speed, 2),
+            "heading": round(ghost_hdg, 1)
+        })
+    return fleet
+
+# ----------------------
+# APPEND POSITIONS
+# ----------------------
+def append_positions(real_lat, real_lon, sog, hdg):
+    fleet = load_positions()
+    fleet.setdefault(REAL_SHIP_ID, []).append({
+        "lat": real_lat,
+        "lon": real_lon,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "ghost": False,
+        "name": "Al Awda",
+        "speed": round(sog, 2),
+        "heading": round(hdg, 1)
+    })
+    spawn_one_ghost(real_lat, real_lon)
+    fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
+    save_positions(fleet)
+    print(f"📌 Appended real ship + {len(GHOST_STATES)} ghost ships.")
+
+# ----------------------
+# GIT PUSH
+# ----------------------
+def push_to_git():
+    subprocess.run(["git","add","-A"])
+    result = subprocess.run(["git","commit","-m","🛰️ Auto-update with heartbeat"])
+    if result.returncode != 0:
+        print("⚠️ Nothing to commit")
+    subprocess.run(["git","push"])
+    print("📤 Pushed to GitHub.")
+
+# ----------------------
+# MAIN LOOP
+# ----------------------
+if __name__ == "__main__":
+    print("🚀 Starting Virtual Voyage To Gaza Tracker...")
+    initialize_ghost_states()
+    while True:
+        lat, lon, sog, hdg = read_position()
+        if lat and lon:
+            append_positions(lat, lon, sog, hdg)
+            push_to_git()
+        print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
+        time.sleep(UPDATE_INTERVAL)
+
