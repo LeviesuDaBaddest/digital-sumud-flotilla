@@ -170,6 +170,15 @@
       "name": "Al Awda",
       "speed": 6.25,
       "heading": 269.2
+    },
+    {
+      "lat": 34.432495,
+      "lon": 32.842295,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 6.57,
+      "heading": 268.7
     }
   ],
   "ghost_ma\u2019an": [
@@ -343,6 +352,15 @@
       "name": "Ma\u2019an",
       "speed": 6.38,
       "heading": 269.2
+    },
+    {
+      "lat": 34.093330347467436,
+      "lon": 32.71384015325103,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 6.69,
+      "heading": 268.7
     }
   ],
   "ghost_navaren": [
@@ -507,6 +525,15 @@
       "name": "Navaren",
       "speed": 6.11,
       "heading": 269.2
+    },
+    {
+      "lat": 34.19795347110548,
+      "lon": 32.793094066626594,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 6.46,
+      "heading": 268.7
     }
   ],
   "ghost_al quds": [
@@ -662,6 +689,15 @@
       "name": "Al Quds",
       "speed": 6.0,
       "heading": 269.2
+    },
+    {
+      "lat": 34.177302082110124,
+      "lon": 32.79891918070392,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 6.36,
+      "heading": 268.7
     }
   ],
   "ghost_ramallah": [
@@ -808,6 +844,15 @@
       "name": "Ramallah",
       "speed": 6.35,
       "heading": 269.2
+    },
+    {
+      "lat": 34.10579912673803,
+      "lon": 32.65219508442283,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 6.61,
+      "heading": 268.7
     }
   ],
   "ghost_ode": [
@@ -945,6 +990,15 @@
       "name": "Ode",
       "speed": 6.42,
       "heading": 269.2
+    },
+    {
+      "lat": 34.18938888627684,
+      "lon": 32.83334322260362,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 6.75,
+      "heading": 268.7
     }
   ],
   "ghost_miami": [
@@ -1073,6 +1127,15 @@
       "name": "Miami",
       "speed": 6.04,
       "heading": 269.2
+    },
+    {
+      "lat": 34.16508457699254,
+      "lon": 32.707874434219285,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 6.41,
+      "heading": 268.7
     }
   ],
   "ghost_gaza city": [
@@ -1192,6 +1255,15 @@
       "name": "Gaza City",
       "speed": 6.33,
       "heading": 269.2
+    },
+    {
+      "lat": 34.28994441641974,
+      "lon": 32.861949803368056,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 6.67,
+      "heading": 268.7
     }
   ],
   "ghost_freedom": [
@@ -1302,6 +1374,15 @@
       "name": "Freedom",
       "speed": 6.36,
       "heading": 269.2
+    },
+    {
+      "lat": 34.32582012134694,
+      "lon": 32.822042393864955,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 6.73,
+      "heading": 268.7
     }
   ],
   "ghost_argo": [
@@ -1403,6 +1484,15 @@
       "name": "Argo",
       "speed": 5.99,
       "heading": 269.2
+    },
+    {
+      "lat": 34.29792830944986,
+      "lon": 32.86440224027061,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 6.27,
+      "heading": 268.7
     }
   ],
   "ghost_brune": [
@@ -1495,6 +1585,15 @@
       "name": "Brune",
       "speed": 6.24,
       "heading": 269.2
+    },
+    {
+      "lat": 34.30708802281685,
+      "lon": 32.784389730726296,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 6.62,
+      "heading": 268.7
     }
   ],
   "ghost_inman": [
@@ -1578,6 +1677,15 @@
       "name": "Inman",
       "speed": 6.12,
       "heading": 269.2
+    },
+    {
+      "lat": 34.34071392977111,
+      "lon": 32.85056965460623,
+      "timestamp": "2025-09-29 05:19:35",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 6.4,
+      "heading": 268.7
     }
   ]
 }
