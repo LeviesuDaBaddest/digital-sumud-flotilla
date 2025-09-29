@@ -62,6 +62,15 @@
       "name": "Al Awda",
       "speed": 7.61,
       "heading": 197.9
+    },
+    {
+      "lat": 34.402948333333335,
+      "lon": 33.027895,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 7.8,
+      "heading": 197.1
     }
   ],
   "ghost_ma\u2019an": [
@@ -127,6 +136,15 @@
       "name": "Ma\u2019an",
       "speed": 8.16,
       "heading": 199.0
+    },
+    {
+      "lat": 34.18774592954917,
+      "lon": 32.92559498880373,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 9.31,
+      "heading": 200.1
     }
   ],
   "ghost_navaren": [
@@ -183,6 +201,15 @@
       "name": "Navaren",
       "speed": 9.57,
       "heading": 194.9
+    },
+    {
+      "lat": 34.27581816732959,
+      "lon": 33.002806628924965,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 8.49,
+      "heading": 201.8
     }
   ],
   "ghost_al quds": [
@@ -230,6 +257,15 @@
       "name": "Al Quds",
       "speed": 8.28,
       "heading": 200.3
+    },
+    {
+      "lat": 34.25814672877949,
+      "lon": 32.970598548174806,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 9.52,
+      "heading": 198.2
     }
   ],
   "ghost_ramallah": [
@@ -268,6 +304,15 @@
       "name": "Ramallah",
       "speed": 7.95,
       "heading": 196.8
+    },
+    {
+      "lat": 34.25456571891164,
+      "lon": 32.93141911530828,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 10.19,
+      "heading": 199.3
     }
   ],
   "ghost_ode": [
@@ -297,6 +342,15 @@
       "name": "Ode",
       "speed": 7.74,
       "heading": 197.8
+    },
+    {
+      "lat": 34.3161364010675,
+      "lon": 33.003091266147905,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 9.66,
+      "heading": 194.1
     }
   ],
   "ghost_miami": [
@@ -317,6 +371,15 @@
       "name": "Miami",
       "speed": 8.26,
       "heading": 199.3
+    },
+    {
+      "lat": 34.29082342153026,
+      "lon": 32.97451905118896,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 8.04,
+      "heading": 195.2
     }
   ],
   "ghost_gaza city": [
@@ -328,6 +391,26 @@
       "name": "Gaza City",
       "speed": 8.25,
       "heading": 200.8
+    },
+    {
+      "lat": 34.35547883100419,
+      "lon": 33.036499771881736,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 10.86,
+      "heading": 196.4
+    }
+  ],
+  "ghost_freedom": [
+    {
+      "lat": 34.39520538253458,
+      "lon": 33.04399416469471,
+      "timestamp": "2025-09-29 03:44:37",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 9.17,
+      "heading": 196.6
     }
   ]
 }
