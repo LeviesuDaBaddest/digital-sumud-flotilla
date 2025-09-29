@@ -1871,6 +1871,15 @@
       "name": "Al Awda",
       "speed": 7.31,
       "heading": 197.3
+    },
+    {
+      "lat": 34.495335,
+      "lon": 33.06254333333333,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 7.45,
+      "heading": 197.1
     }
   ],
   "ghost_1": [
@@ -3745,6 +3754,15 @@
       "name": "Ma\u2019an",
       "speed": 7.76,
       "heading": 195.4
+    },
+    {
+      "lat": 34.47208021042386,
+      "lon": 33.048700518707584,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 6.8,
+      "heading": 193.8
     }
   ],
   "ghost_2": [
@@ -5619,6 +5637,15 @@
       "name": "Navaren",
       "speed": 7.3,
       "heading": 194.5
+    },
+    {
+      "lat": 34.47072682147826,
+      "lon": 33.0354592447481,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 7.22,
+      "heading": 194.0
     }
   ],
   "ghost_3": [
@@ -7196,6 +7223,15 @@
       "name": "Al Quds",
       "speed": 7.57,
       "heading": 194.0
+    },
+    {
+      "lat": 34.45121971506698,
+      "lon": 33.031833593523864,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 6.89,
+      "heading": 195.2
     }
   ],
   "ghost_4": [
@@ -8773,6 +8809,15 @@
       "name": "Ramallah",
       "speed": 7.76,
       "heading": 198.2
+    },
+    {
+      "lat": 34.47689401329199,
+      "lon": 33.05711071346866,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 7.36,
+      "heading": 196.9
     }
   ],
   "cyprus_1": [
@@ -9253,6 +9298,15 @@
       "name": "Ode",
       "speed": 6.96,
       "heading": 199.2
+    },
+    {
+      "lat": 34.46231090076367,
+      "lon": 33.04219623320149,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 7.24,
+      "heading": 194.6
     }
   ],
   "ghost_6": [
@@ -9309,6 +9363,15 @@
       "name": "Miami",
       "speed": 7.53,
       "heading": 201.7
+    },
+    {
+      "lat": 34.46672858522064,
+      "lon": 33.0598235422838,
+      "timestamp": "2025-09-29 02:58:27",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 7.57,
+      "heading": 194.9
     }
   ]
 }
