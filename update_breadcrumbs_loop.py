@@ -9,6 +9,7 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
+NUM_GHOSTS = 11 # Original ghosts
 UPDATE_INTERVAL = 600  # seconds
 SPEED_VARIATION = 0.08
 POSITIONS_FILE = "fleet_positions.json"
@@ -17,9 +18,9 @@ REAL_SHIP_ID = "al_awda"
 # ----------------------
 # CUSTOM GHOST NAMES
 # ----------------------
-GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
+GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami", "Gaza City", "Freedom", "Argo", "Brune", "Inman"]
+
 RENDEZVOUS_NAMES = {
-    "Cyprus": ["Gaza City", "Freedom", "Argo", "Brune", "Inman"],
     "Tunisia": ["Tunisia1", "Tunisia2", "Tunisia3"],
     "Italy": ["Italy1", "Italy2"]
 }
@@ -28,8 +29,7 @@ RENDEZVOUS_NAMES = {
 # RENDEZVOUS POINTS
 # ----------------------
 RENDEZVOUS = [
-    {"name": "Cyprus",  "lat": 35.16, "lon": 33.36, "ships": 5},
-    {"name": "Tunisia", "lat": 36.8,  "lon": 10.17, "ships": 3},
+   {"name": "Tunisia", "lat": 36.8,  "lon": 10.17, "ships": 3},
     {"name": "Italy",   "lat": 37.5,  "lon": 15.1, "ships": 2}
 ]
 
