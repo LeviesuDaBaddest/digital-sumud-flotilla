@@ -9,7 +9,7 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-NUM_GHOSTS = 4  # Original ghosts
+NUM_GHOSTS = 6  # Original ghosts
 UPDATE_INTERVAL = 600  # seconds
 SPEED_VARIATION = 0.08
 POSITIONS_FILE = "fleet_positions.json"
@@ -19,7 +19,7 @@ PHASED_SPAWN_INTERVAL = 600
 # ----------------------
 # CUSTOM GHOST NAMES
 # ----------------------
-GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah"]
+GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
 CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 
 # ----------------------

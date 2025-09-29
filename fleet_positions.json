@@ -1817,6 +1817,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.62430666666667,
+      "lon": 33.079585,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_1": [
@@ -3637,6 +3646,15 @@
       "name": "Ma\u2019an",
       "speed": 0.0,
       "heading": 357.3
+    },
+    {
+      "lat": 34.59582157871342,
+      "lon": 33.0563984602244,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.0,
+      "heading": 357.4
     }
   ],
   "ghost_2": [
@@ -5457,6 +5475,15 @@
       "name": "Navaren",
       "speed": 0.0,
       "heading": 356.9
+    },
+    {
+      "lat": 34.62685958786293,
+      "lon": 33.073610094179124,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.0,
+      "heading": 0.2
     }
   ],
   "ghost_3": [
@@ -6980,6 +7007,15 @@
       "name": "Al Quds",
       "speed": 0.0,
       "heading": 3.8
+    },
+    {
+      "lat": 34.61935022568986,
+      "lon": 33.06226910751901,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.0,
+      "heading": 4.6
     }
   ],
   "ghost_4": [
@@ -8503,6 +8539,15 @@
       "name": "Ramallah",
       "speed": 0.0,
       "heading": 356.9
+    },
+    {
+      "lat": 34.62562253906046,
+      "lon": 33.08831416489913,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.0,
+      "heading": 2.0
     }
   ],
   "cyprus_1": [
@@ -8649,6 +8694,15 @@
       "name": "Gaza City",
       "speed": 0.48,
       "heading": 3.5
+    },
+    {
+      "lat": 34.62491414605916,
+      "lon": 33.084958468089276,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 0.51,
+      "heading": 355.1
     }
   ],
   "cyprus_2": [
@@ -8900,6 +8954,28 @@
       "name": "Inman",
       "speed": 0.51,
       "heading": 358.8
+    }
+  ],
+  "ghost_5": [
+    {
+      "lat": 34.62116962284284,
+      "lon": 33.07416965403281,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 0.0,
+      "heading": 2.7
+    }
+  ],
+  "ghost_6": [
+    {
+      "lat": 34.61670174751921,
+      "lon": 33.07223925855355,
+      "timestamp": "2025-09-29 02:22:25",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 0.0,
+      "heading": 0.3
     }
   ]
 }
