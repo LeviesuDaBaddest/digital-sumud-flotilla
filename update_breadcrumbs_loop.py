@@ -136,7 +136,7 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
 # ----------------------
 # SPAWN SINGLE SHIP RELATIVE TO REAL SHIP
 # ----------------------
-def spawn_single_ship(real_lat, real_lon, ghost_id, ship_name):
+def spawn_single_ship(real_lat, real_lon, sog, hdg, ghost_id, ship_name):
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "rel_bearing": random.uniform(0, 360),
@@ -145,8 +145,7 @@ def spawn_single_ship(real_lat, real_lon, ghost_id, ship_name):
             "heading_jitter": random.uniform(-5, 5),
             "current_nudge": random.uniform(-0.02, 0.02)
         }
-    lat, lon, speed, heading = move_ghost(real_lat, real_lon, 0.5, 0, ghost_id)
-    return lat, lon, speed, heading
+    return move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
 
 # ----------------------
 # GENERATE OR UPDATE ALL GHOSTS
@@ -188,7 +187,7 @@ def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
 # ----------------------
 # CHECK RENDEZVOUS
 # ----------------------
-def check_rendezvous(real_lat, real_lon, fleet):
+def check_rendezvous(real_lat, real_lon, sog, hdg, fleet):
     now = time.time()
     for point in RENDEZVOUS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
@@ -201,7 +200,7 @@ def check_rendezvous(real_lat, real_lon, fleet):
             queue = PHASED_SPAWN_QUEUE[point["name"]]
             if queue and now - LAST_SPAWN_TIME[point["name"]] >= PHASED_SPAWN_INTERVAL:
                 ship = queue.pop(0)
-                lat, lon, speed, heading = spawn_single_ship(real_lat, real_lon, ship["id"], ship["name"])
+                lat, lon, speed, heading = spawn_single_ship(real_lat, real_lon, sog, hdg, ship["id"], ship["name"])
                 fleet.setdefault(ship["id"], []).append({
                     "lat": lat,
                     "lon": lon,
@@ -230,7 +229,7 @@ def append_positions(real_lat, real_lon, sog, hdg):
         "heading": round(hdg,1)
     })
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
-    check_rendezvous(real_lat, real_lon, fleet)
+    check_rendezvous(real_lat, real_lon, sog, hdg, fleet)
     save_positions(fleet)
     print(f"📌 Appended real ship + {NUM_GHOSTS} ghost ships + phased ships.")
 
