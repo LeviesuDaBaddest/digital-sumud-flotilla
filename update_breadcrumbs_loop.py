@@ -137,7 +137,8 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
 # ----------------------
 # SPAWN SINGLE SHIP RELATIVE TO REAL SHIP
 # ----------------------
-def spawn_single_ship(real_lat, real_lon, ghost_id, ship_name):
+def spawn_single_ship(real_lat, real_lon, sog, hdg, ghost_id, ship_name):
+    """Spawn a phased ghost using the real ship speed/heading."""
     if ghost_id not in GHOST_STATES:
         GHOST_STATES[ghost_id] = {
             "rel_bearing": random.uniform(0, 360),
@@ -146,8 +147,9 @@ def spawn_single_ship(real_lat, real_lon, ghost_id, ship_name):
             "heading_jitter": random.uniform(-5, 5),
             "current_nudge": random.uniform(-0.02, 0.02)
         }
-    lat, lon, speed, heading = move_ghost(real_lat, real_lon, 0.5, 0, ghost_id)
+    lat, lon, speed, heading = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
     return lat, lon, speed, heading
+
 
 # ----------------------
 # GENERATE OR UPDATE ALL GHOSTS
