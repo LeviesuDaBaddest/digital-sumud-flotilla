@@ -36,7 +36,8 @@ RENDEZVOUS = [
 # ----------------------
 # GLOBAL STATE
 # ----------------------
-GHOST_STATES = {}  # Tracks all ghosts and their movement data
+GHOST_STATES = {}  # Tracks ghosts
+USED_NAMES = set()  # Tracks which names are already spawned
 
 # ----------------------
 # HELPER FUNCTIONS
@@ -96,17 +97,17 @@ def haversine_nm(lat1, lon1, lat2, lon2):
     return R_nm * c
 
 # ----------------------
-# INITIALIZE GHOSTS FROM LAST POSITIONS
+# INITIALIZE GHOSTS
 # ----------------------
 def initialize_ghost_states():
     fleet = load_positions()
     for ghost_id, positions in fleet.items():
-        if ghost_id == REAL_SHIP_ID: 
-            continue
+        if ghost_id == REAL_SHIP_ID: continue
         if positions:
             last_pos = positions[-1]
+            name = last_pos.get("name", ghost_id)
             GHOST_STATES[ghost_id] = {
-                "name": last_pos.get("name", ghost_id),
+                "name": name,
                 "lat": last_pos["lat"],
                 "lon": last_pos["lon"],
                 "rel_bearing": random.uniform(0, 360),
@@ -115,6 +116,7 @@ def initialize_ghost_states():
                 "heading_jitter": random.uniform(-5, 5),
                 "current_nudge": random.uniform(-0.02, 0.02)
             }
+            USED_NAMES.add(name)
 
 # ----------------------
 # MOVE GHOST
@@ -149,14 +151,12 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     return state["lat"], state["lon"], ghost_speed, ghost_hdg
 
 # ----------------------
-# SPAWN ONE NEW GHOST WITH CUSTOM NAME
+# SPAWN ONE NEW GHOST
 # ----------------------
 def spawn_one_ghost(real_lat, real_lon):
-    used_names = {state["name"] for state in GHOST_STATES.values()}
-
-    # Spawn normal ghosts
+    # Spawn from original ghosts first
     for name in GHOST_NAMES:
-        if name not in used_names:
+        if name not in USED_NAMES:
             ghost_id = f"ghost_{name.lower()}"
             GHOST_STATES[ghost_id] = {
                 "name": name,
@@ -168,17 +168,18 @@ def spawn_one_ghost(real_lat, real_lon):
                 "heading_jitter": random.uniform(-5, 5),
                 "current_nudge": random.uniform(-0.02, 0.02)
             }
-            print(f"👻 Spawned ghost {name}")
+            USED_NAMES.add(name)
+            print(f"👻 Spawned {name}")
             return
 
-    # Spawn rendezvous ghosts if inside a point
+    # Then spawn rendezvous ghosts if inside a point
     for point in RENDEZVOUS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
         if distance_nm < 40:
             names = RENDEZVOUS_NAMES.get(point["name"], [])
             for i, name in enumerate(names[:point["ships"]]):
                 ghost_id = f"{point['name'].lower()}_{i+1}"
-                if ghost_id not in GHOST_STATES:
+                if ghost_id not in GHOST_STATES and name not in USED_NAMES:
                     GHOST_STATES[ghost_id] = {
                         "name": name,
                         "lat": real_lat + random.uniform(-0.02, 0.02),
@@ -189,7 +190,8 @@ def spawn_one_ghost(real_lat, real_lon):
                         "heading_jitter": random.uniform(-5, 5),
                         "current_nudge": random.uniform(-0.02, 0.02)
                     }
-                    print(f"👻 Spawned rendezvous ghost {name} at {point['name']}")
+                    USED_NAMES.add(name)
+                    print(f"👻 Spawned {name} at {point['name']}")
                     return
 
 # ----------------------
