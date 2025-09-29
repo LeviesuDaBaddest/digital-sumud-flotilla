@@ -17,6 +17,15 @@
       "name": "Al Awda",
       "speed": 7.42,
       "heading": 197.5
+    },
+    {
+      "lat": 34.40562333333333,
+      "lon": 33.02889666666667,
+      "timestamp": "2025-09-29 03:43:17",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 7.29,
+      "heading": 197.4
     }
   ],
   "ghost_ma\u2019an": [
@@ -37,6 +46,15 @@
       "name": "Ma\u2019an",
       "speed": 8.89,
       "heading": 197.0
+    },
+    {
+      "lat": 34.3081410931265,
+      "lon": 32.97130539642271,
+      "timestamp": "2025-09-29 03:43:17",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 7.15,
+      "heading": 200.1
     }
   ],
   "ghost_navaren": [
@@ -48,6 +66,26 @@
       "name": "Navaren",
       "speed": 7.32,
       "heading": 201.2
+    },
+    {
+      "lat": 34.37907786240392,
+      "lon": 33.039032373458035,
+      "timestamp": "2025-09-29 03:43:17",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 7.48,
+      "heading": 195.1
+    }
+  ],
+  "ghost_al quds": [
+    {
+      "lat": 34.373985336580766,
+      "lon": 33.01307407143791,
+      "timestamp": "2025-09-29 03:43:17",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 8.33,
+      "heading": 201.7
     }
   ]
 }
