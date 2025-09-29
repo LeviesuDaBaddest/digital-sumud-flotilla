@@ -31,8 +31,9 @@ GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
 CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 RENDEZVOUS_POINTS = [
     {"name": "Cyprus",  "lat": 35.16, "lon": 33.36, "ships": 5, "names": CYPRUS_NAMES},
-    {"name": "Tunisia", "lat": 36.8,  "lon": 10.17, "ships": 3, "names": GHOST_NAMES[:3]},
-    {"name": "Italy",   "lat": 37.5,  "lon": 15.1, "ships": 2, "names": GHOST_NAMES[3:5]}
+    {"name": "Koufonisi", "lat": 36.9335,  "lon": 25.6020,  "ships": 2, "names": ["Serenity", "Puppet"]},
+    {"name": "Tunisia",   "lat": 36.8189,  "lon": 10.3050,  "ships": 3, "names": ["Serene", "Union", "Elite"]},
+    {"name": "Italy",     "lat": 37.0600,  "lon": 15.2930,  "ships": 2, "names": GHOST_NAMES[3:5]}
 ]
 
 # ----------------------
