@@ -10,39 +10,41 @@ import math
 # CONFIG
 # ----------------------
 UPDATE_INTERVAL = 300  # seconds
-SPEED_VARIATION = 0.05  # smaller variation for smoother speeds
+SPEED_VARIATION = 0.05  # base variation for smoothing speeds
 POSITIONS_FILE = "fleet_positions.json"
 REAL_SHIP_ID = "al_awda"
-MAX_SPEED_FACTOR = 1.05  # ghosts cannot exceed 105% of real ship speed
-MIN_DISTANCE_NM = 0.05  # minimum distance offset from real ship
-MAX_DISTANCE_NM = 0.5   # maximum distance offset from real ship
+MAX_SPEED_FACTOR = 1.08  # ghosts cannot exceed 108% of real ship speed
+MIN_DISTANCE_NM = 0.03   # minimum distance offset from real ship
+MAX_DISTANCE_NM = 0.6    # maximum distance offset from real ship
 
 # Group/flock behaviour
-FLOCK_PERIOD = 300.0            # seconds: how long one breathe/fan cycle takes
-FAN_AMPLITUDE_NM = 0.25         # how wide the group fans out (nm)
-CONVERGENCE_STRENGTH = 0.12     # how aggressively ghosts steer back to slot
-SLOT_OSCILLATION_BEARING = 8.0  # degrees of bearing oscillation per ghost
-SLOT_OSCILLATION_DISTANCE = 0.18  # nm of distance oscillation per ghost
+FLOCK_PERIOD = 240.0              # seconds: group breathe/fan cycle length
+FAN_AMPLITUDE_NM = 0.25           # how wide the group can fan (nm)
+CONVERGENCE_STRENGTH = 0.14       # how aggressively ghosts steer back to slot
+SLOT_OSCILLATION_BEARING = 6.0    # degrees of bearing oscillation per ghost
+SLOT_OSCILLATION_DISTANCE = 0.12  # nm of distance oscillation per ghost
+LEADER_SWAP_CHANCE = 0.02         # chance per spawn cycle to swap a leader role
 
 # ----------------------
-# CUSTOM GHOST NAMES
+# CUSTOM GHOST NAMES & RENDEZVOUS
 # ----------------------
 GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
 CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 RENDEZVOUS_POINTS = [
-    {"name": "Cyprus",  "lat": 35.16, "lon": 33.36, "ships": 5, "names": CYPRUS_NAMES},
-    {"name": "Koufonisi", "lat": 36.9335,  "lon": 25.6020,  "ships": 2, "names": ["Serenity", "Puppet"]},
-    {"name": "Tunisia",   "lat": 36.8189,  "lon": 10.3050,  "ships": 3, "names": ["Serene", "Union", "Elite"]},
-    {"name": "Italy",     "lat": 37.0600,  "lon": 15.2930,  "ships": 2, "names": GHOST_NAMES[3:5]}
+    {"name": "Cyprus",    "lat": 35.16,   "lon": 33.36,   "ships": 5, "names": CYPRUS_NAMES},
+    {"name": "Koufonisi", "lat": 36.9335, "lon": 25.6020, "ships": 2, "names": ["Serenity", "Puppet"]},
+    {"name": "Tunisia",   "lat": 36.8189, "lon": 10.3050, "ships": 3, "names": ["Serene", "Union", "Elite"]},
+    {"name": "Italy",     "lat": 37.0600, "lon": 15.2930, "ships": 2, "names": GHOST_NAMES[3:5]}
 ]
 
 # ----------------------
 # GLOBAL STATE
 # ----------------------
-GHOST_STATES = {}  # track ghosts and movement offsets
+GHOST_STATES = {}  # track ghosts (id -> state dict)
+LAST_LEADER_CHECK = time.time()
 
 # ----------------------
-# HELPER FUNCTIONS
+# HELPERS
 # ----------------------
 def read_position():
     try:
@@ -51,7 +53,7 @@ def read_position():
         s.settimeout(10)
         true_heading = None
         while True:
-            raw = s.recv(1024).decode(errors="ignore")
+            raw = s.recv(4096).decode(errors="ignore")
             for line in raw.splitlines():
                 if line.startswith("$HDT") or line.startswith("$HDG"):
                     try:
@@ -66,8 +68,8 @@ def read_position():
                     lon_raw, lon_dir = parts[5], parts[6]
                     if not lat_raw or not lon_raw:
                         continue
-                    lat = float(lat_raw[:2]) + float(lat_raw[2:])/60.0
-                    lon = float(lon_raw[:3]) + float(lon_raw[3:])/60.0
+                    lat = float(lat_raw[:2]) + float(lat_raw[2:]) / 60.0
+                    lon = float(lon_raw[:3]) + float(lon_raw[3:]) / 60.0
                     if lat_dir.upper() == "S": lat = -lat
                     if lon_dir.upper() == "W": lon = -lon
                     sog = float(parts[7]) if parts[7] else 0.0
@@ -101,27 +103,28 @@ def haversine_nm(lat1, lon1, lat2, lon2):
     return R_nm * c
 
 def deg_normalize(angle):
-    """Normalize to [-180, 180)"""
     a = (angle + 180) % 360 - 180
     return a
 
+def assign_role():
+    """Return a role string with probabilities for variety."""
+    r = random.random()
+    if r < 0.12: return "leader"
+    if r < 0.28: return "rear"
+    return "flank"
+
 # ----------------------
-# INITIALIZE GHOSTS FROM LAST POSITIONS
+# INITIALIZE GHOSTS FROM LAST POSITIONS (keeps names + gives formation slots & role)
 # ----------------------
 def initialize_ghost_states():
     fleet = load_positions()
-    # If there are existing ghost entries in the JSON, reuse them (but assign formation slots)
     for ghost_id, positions in fleet.items():
         if ghost_id == REAL_SHIP_ID:
             continue
         if positions:
             last_pos = positions[-1]
-            # each ghost gets:
-            # - name (friendly)
-            # - lat/lon resume
-            # - slot_bearing + slot_distance (formation slot relative to real ship heading)
-            # - phase for oscillations so they aren't all identical
-            slot_bearing = random.uniform(-60, 60)  # prefer behind/around the ship
+            # formation slot preference: spread bearings across -45..45, distance small-medium
+            slot_bearing = random.uniform(-40, 40)
             slot_distance = random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM)
             GHOST_STATES[ghost_id] = {
                 "name": last_pos.get("name", ghost_id),
@@ -131,154 +134,198 @@ def initialize_ghost_states():
                 "slot_distance": slot_distance,
                 "phase": random.uniform(0, 2*math.pi),
                 "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
-                "hdg": last_pos.get("heading", 0.0)
+                "hdg": last_pos.get("heading", 0.0),
+                "role": assign_role(),
+                "last_burst": 0.0
             }
 
 # ----------------------
-# MOVE GHOST: breathing + converge + gentle pursuit
+# MOVE GHOST with rich behavior
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     state = GHOST_STATES[ghost_id]
     now = time.time()
 
-    # small speed bias variation but constrained
-    state["speed_bias"] += random.uniform(-0.005, 0.005)
-    state["speed_bias"] = max(0.92, min(1.08, state["speed_bias"]))
+    # ---- speed drift & smoothing ----
+    state["speed_bias"] += random.uniform(-0.004, 0.004)
+    state["speed_bias"] = max(0.90, min(1.10, state["speed_bias"]))
+    target_speed = sog * state["speed_bias"]
+    target_speed = min(target_speed, sog * MAX_SPEED_FACTOR)
+    if target_speed < 0.08:
+        target_speed = 0.08
 
-    # natural ghost speed, smoothed and capped relative to real ship
-    ghost_speed = sog * state["speed_bias"]
-    ghost_speed = min(ghost_speed, sog * MAX_SPEED_FACTOR)
-    if ghost_speed < 0.1:
-        ghost_speed = 0.1
+    # add occasional short burst (rare)
+    if random.random() < 0.01 and now - state.get("last_burst", 0) > 600:
+        burst_multiplier = 1.12 + random.random()*0.06
+        state["last_burst"] = now
+    else:
+        burst_multiplier = 1.0
 
-    # group-wide fan factor (sinusoidal)
+    ghost_speed = target_speed * burst_multiplier
+
+    # ---- group breathing / fan ----
     flock_phase = (now / FLOCK_PERIOD) * 2 * math.pi
     group_fan = math.sin(flock_phase)  # -1..1
     fan_offset = group_fan * FAN_AMPLITUDE_NM
 
-    # per-ghost oscillation (gives breathing + individual variation)
+    # ---- per-ghost oscillation ----
     oscill_bearing = math.sin(now * 0.6 + state["phase"]) * SLOT_OSCILLATION_BEARING
     oscill_distance = math.sin(now * 0.35 + state["phase"]) * SLOT_OSCILLATION_DISTANCE
 
-    # dynamic slot = base slot + group fan + per-ghost oscillation
-    dynamic_distance = max(MIN_DISTANCE_NM, min(MAX_DISTANCE_NM + FAN_AMPLITUDE_NM,
-                                               state["slot_distance"] + fan_offset + oscill_distance))
-    dynamic_bearing = state["slot_bearing"] + oscill_bearing
+    # apply role biases
+    role = state.get("role", "flank")
+    role_distance_bias = 0.0
+    role_bearing_bias = 0.0
+    role_speed_bias = 1.0
+    if role == "leader":
+        role_distance_bias = -0.08  # slightly ahead (smaller distance)
+        role_bearing_bias = -6
+        role_speed_bias = 1.02
+    elif role == "rear":
+        role_distance_bias = 0.12
+        role_bearing_bias = 6
+        role_speed_bias = 0.98
+    elif role == "flank":
+        role_distance_bias = random.uniform(-0.04, 0.04)
+        role_bearing_bias = random.uniform(-8, 8)
 
-    # convert dynamic slot relative to real ship heading (so formation rotates with ship)
+    # dynamic slot (slot_distance + group fan + per ghost oscillation + role bias)
+    dynamic_distance = state["slot_distance"] + fan_offset + oscill_distance + role_distance_bias
+    dynamic_distance = max(MIN_DISTANCE_NM, min(MAX_DISTANCE_NM + FAN_AMPLITUDE_NM, dynamic_distance))
+
+    dynamic_bearing = state["slot_bearing"] + oscill_bearing + role_bearing_bias
+
+    # convert dynamic slot to world coordinates relative to real ship heading
     total_bearing = (hdg + dynamic_bearing) % 360
-    rad = math.radians(total_bearing)
-    target_lat = real_lat + (dynamic_distance * math.cos(rad)) / 60.0
-    target_lon = real_lon + (dynamic_distance * math.sin(rad)) / (60.0 * math.cos(math.radians(real_lat)))
+    br = math.radians(total_bearing)
+    target_lat = real_lat + (dynamic_distance * math.cos(br)) / 60.0
+    target_lon = real_lon + (dynamic_distance * math.sin(br)) / (60.0 * math.cos(math.radians(real_lat)))
 
-    # compute vector from ghost to target
+    # vector from ghost to target
     dlat = target_lat - state["lat"]
     dlon = target_lon - state["lon"]
-    # bearing to target (atan2 with lon, lat)
+
+    # bearing to target
     bearing_to_target = math.degrees(math.atan2(dlon, dlat)) % 360
 
-    # compute smallest angle difference from ghost heading to bearing_to_target
+    # current heading for ghost
     current_hdg = state.get("hdg", hdg)
+
+    # smallest angle difference
     angle_diff = deg_normalize(bearing_to_target - current_hdg)
 
-    # adjust heading gradually toward the target (convergence)
+    # convergence: steer a fraction of the angle_diff toward target (plus small noise)
     heading_adjust = angle_diff * CONVERGENCE_STRENGTH
-    # add tiny random jitter to avoid robotic motion
-    heading_adjust += random.uniform(-0.7, 0.7)
+    heading_adjust += random.uniform(-0.9, 0.9)  # jitter
     new_hdg = (current_hdg + heading_adjust) % 360
     state["hdg"] = new_hdg
 
-    # move ghost forward along its heading by ghost_speed (converted to degrees)
-    move_dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600) / 60.0
+    # movement along heading
+    move_dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600.0) / 60.0
     move_rad = math.radians(new_hdg)
     delta_lat = move_dist_deg * math.cos(move_rad)
     delta_lon = move_dist_deg * math.sin(move_rad) / max(0.0001, math.cos(math.radians(state["lat"])))
 
-    # Apply a small attraction toward the target (so they don't just orbit)
-    attraction_strength = 0.35  # how much of the target vector to apply per update (0..1)
-    state["lat"] += delta_lat + dlat * attraction_strength * 0.02
-    state["lon"] += delta_lon + dlon * attraction_strength * 0.02
+    # attraction to target so they don't orbit: apply a small fraction of dlat/dlon
+    attraction_strength = 0.28  # how strongly they correct position each update
+    state["lat"] += delta_lat + dlat * attraction_strength * 0.03
+    state["lon"] += delta_lon + dlon * attraction_strength * 0.03
 
-    return state["lat"], state["lon"], ghost_speed, new_hdg
+    # gentle automatic role reshuffle occasionally (rare) so leaders change
+    global LAST_LEADER_CHECK
+    if now - LAST_LEADER_CHECK > 600 and random.random() < LEADER_SWAP_CHANCE:
+        LAST_LEADER_CHECK = now
+        # pick a random ghost to become leader, demote existing leader(s)
+        ids = list(GHOST_STATES.keys())
+        if ids:
+            chosen = random.choice(ids)
+            for gid, s in GHOST_STATES.items():
+                if gid == chosen:
+                    s["role"] = "leader"
+                elif s.get("role") == "leader":
+                    s["role"] = assign_role()
+
+    # role speed bias apply
+    ghost_speed *= role_speed_bias
+
+    return state["lat"], state["lon"], round(ghost_speed, 2), round(new_hdg, 1)
 
 # ----------------------
 # SPAWN ONE NEW GHOST IF IN RENDEZVOUS
 # ----------------------
 def spawn_one_ghost(real_lat, real_lon):
-    # We'll spawn only one ghost per update. Choose original ghosts first (if any missing names),
-    # then rendezvous ghosts.
-    # Determine used friendly names
+    # spawn original named ghosts first (so initial set appears)
     used_names = {s["name"] for s in GHOST_STATES.values()}
 
-    # Spawn original named ghosts first (if any not present)
     for name in GHOST_NAMES:
         if name not in used_names:
-            # create a stable ID using the name
             ghost_id = f"ghost_{name.lower().replace(' ', '_')}"
-            # slot around the ship: prefer behind (negative bearing) with small spread
-            slot_bearing = random.uniform(-35, 35) * -1  # slightly behind by default
+            # prefer behind the ship slightly for initial spawn
+            slot_bearing = random.uniform(-32, 32) * -1
             slot_distance = random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM)
             GHOST_STATES[ghost_id] = {
                 "name": name,
-                "lat": real_lat + random.uniform(-0.01, 0.01),
-                "lon": real_lon + random.uniform(-0.01, 0.01),
+                "lat": real_lat + random.uniform(-0.008, 0.008),
+                "lon": real_lon + random.uniform(-0.008, 0.008),
                 "slot_bearing": slot_bearing,
                 "slot_distance": slot_distance,
                 "phase": random.uniform(0, 2*math.pi),
                 "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
-                "hdg": None
+                "hdg": None,
+                "role": assign_role(),
+                "last_burst": 0.0
             }
             print(f"👻 Spawned named ghost {name}")
             return
 
-    # Spawn rendezvous ghosts if inside a point
+    # spawn rendezvous ghosts (one per update) if inside point
     for point in RENDEZVOUS_POINTS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
         if distance_nm < 40:
             names = point.get("names", [])
             for i in range(point["ships"]):
-                # ID unique per rendezvous slot
                 ghost_id = f"{point['name'].lower()}_{i+1}"
                 if ghost_id not in GHOST_STATES:
                     name = names[i % len(names)] if names else ghost_id
-                    # assign slot_bearing spread across the formation so they don't all stack
-                    base_bearing = -20 + (i - (point["ships"]-1)/2) * 12  # spread across +/- ~30deg
+                    # spread slots across formation so they naturally group
+                    base_bearing = -18 + (i - (point["ships"]-1)/2.0) * 14.0
                     slot_bearing = base_bearing + random.uniform(-6, 6)
                     slot_distance = random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM)
                     GHOST_STATES[ghost_id] = {
                         "name": name,
-                        "lat": real_lat + random.uniform(-0.01, 0.01),
-                        "lon": real_lon + random.uniform(-0.01, 0.01),
+                        "lat": real_lat + random.uniform(-0.008, 0.008),
+                        "lon": real_lon + random.uniform(-0.008, 0.008),
                         "slot_bearing": slot_bearing,
                         "slot_distance": slot_distance,
                         "phase": random.uniform(0, 2*math.pi),
                         "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
-                        "hdg": None
+                        "hdg": None,
+                        "role": assign_role(),
+                        "last_burst": 0.0
                     }
                     print(f"👻 Spawned rendezvous ghost {name} at {point['name']}")
-                    return  # only spawn one per update
+                    return
 
 # ----------------------
-# GENERATE OR UPDATE ALL GHOSTS
+# UPDATE ALL GHOSTS & APPEND POSITIONS
 # ----------------------
 def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
     for ghost_id, state in list(GHOST_STATES.items()):
         fleet.setdefault(ghost_id, [])
         new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
-        # ensure friendly name output
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "ghost": True,
             "name": state["name"],
-            "speed": round(ghost_speed, 2),
-            "heading": round(ghost_hdg, 1)
+            "speed": ghost_speed,
+            "heading": ghost_hdg
         })
     return fleet
 
 # ----------------------
-# APPEND POSITIONS
+# APPEND POSITIONS (real ship + ghosts) AND SAVE
 # ----------------------
 def append_positions(real_lat, real_lon, sog, hdg):
     fleet = load_positions()
@@ -311,7 +358,7 @@ def push_to_git():
 # MAIN LOOP
 # ----------------------
 if __name__ == "__main__":
-    print("🚀 Starting Virtual Voyage To Gaza Tracker...")
+    print("🚀 Starting Virtual Voyage To Gaza Tracker (alive flotilla)...")
     initialize_ghost_states()
     while True:
         lat, lon, sog, hdg = read_position()
@@ -320,4 +367,5 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
 
