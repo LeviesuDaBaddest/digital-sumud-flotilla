@@ -25,17 +25,15 @@ CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 # RENDEZVOUS POINTS
 # ----------------------
 RENDEZVOUS = [
-    {"name": "Cyprus",  "lat": 35.16, "lon": 33.36, "ships": 5, "spawned": False},
-    {"name": "Tunisia", "lat": 36.8,  "lon": 10.17, "ships": 3, "spawned": False},
-    {"name": "Italy",   "lat": 37.5,  "lon": 15.1, "ships": 2, "spawned": False}
+    {"name": "Cyprus",  "lat": 35.16, "lon": 33.36, "ships": 5},
+    {"name": "Tunisia", "lat": 36.8,  "lon": 10.17, "ships": 3},
+    {"name": "Italy",   "lat": 37.5,  "lon": 15.1, "ships": 2}
 ]
 
 # ----------------------
 # GLOBAL STATE
 # ----------------------
-GHOST_STATES = {}
-PHASED_SPAWN_QUEUE = {}
-LAST_SPAWN_TIME = {}
+GHOST_STATES = {}  # Tracks all ghosts for movement
 
 # ----------------------
 # HELPER FUNCTIONS
@@ -95,10 +93,11 @@ def haversine_nm(lat1, lon1, lat2, lon2):
     return R_nm * c
 
 # ----------------------
-# MOVE GHOST (sea realism + bursts)
+# MOVE GHOST
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     if ghost_id not in GHOST_STATES:
+        # Initialize new ghost
         GHOST_STATES[ghost_id] = {
             "rel_bearing": random.uniform(0, 360),
             "rel_distance": random.uniform(0.05, 0.8),
@@ -108,7 +107,7 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
         }
     state = GHOST_STATES[ghost_id]
 
-    # Small random variations
+    # Apply small variations
     state["speed_bias"] += random.uniform(-0.01, 0.01)
     state["speed_bias"] = max(0.85, min(1.15, state["speed_bias"]))
     state["heading_jitter"] += random.uniform(-0.5, 0.5)
@@ -116,7 +115,7 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     state["current_nudge"] += random.uniform(-0.005, 0.005)
     state["current_nudge"] = max(-0.03, min(0.03, state["current_nudge"]))
 
-    # Burst factor for movement even when slow
+    # Burst factor ensures slow ships still move
     burst_factor = random.uniform(1.0, 1.3)
     ghost_speed = max(0.05, sog * state["speed_bias"] * burst_factor)
 
@@ -126,7 +125,6 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     delta_lat = dist_deg * math.cos(rad) + state["current_nudge"]
     delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat))) + state["current_nudge"]
 
-    # Relative offset
     rel_rad = math.radians(hdg + state["rel_bearing"])
     rel_lat = state["rel_distance"] * math.cos(rel_rad) / 60.0
     rel_lon = state["rel_distance"] * math.sin(rel_rad) / (60.0 * math.cos(math.radians(real_lat)))
@@ -138,19 +136,22 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     return new_lat, new_lon, ghost_speed, ghost_hdg
 
 # ----------------------
-# SPAWN SINGLE SHIP RELATIVE TO REAL SHIP
+# SPAWN PHASED GHOSTS
 # ----------------------
-def spawn_single_ship(real_lat, real_lon, sog, hdg, ghost_id, ship_name):
-    # Init immediately so they move
-    if ghost_id not in GHOST_STATES:
-        GHOST_STATES[ghost_id] = {
-            "rel_bearing": random.uniform(0, 360),
-            "rel_distance": random.uniform(0.05, 0.6),
-            "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
-            "heading_jitter": random.uniform(-5, 5),
-            "current_nudge": random.uniform(-0.02, 0.02)
-        }
-    return move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
+def spawn_phased_ghosts(real_lat, real_lon, sog, hdg):
+    for point in RENDEZVOUS:
+        distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
+        if distance_nm < 40:
+            for i in range(point["ships"]):
+                ghost_id = f"ghost_{point['name'].lower()}_{i+1}"
+                if ghost_id not in GHOST_STATES:
+                    GHOST_STATES[ghost_id] = {
+                        "rel_bearing": random.uniform(0, 360),
+                        "rel_distance": random.uniform(0.05, 0.8),
+                        "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
+                        "heading_jitter": random.uniform(-5, 5),
+                        "current_nudge": random.uniform(-0.02, 0.02)
+                    }
 
 # ----------------------
 # GENERATE OR UPDATE ALL GHOSTS
@@ -158,46 +159,17 @@ def spawn_single_ship(real_lat, real_lon, sog, hdg, ghost_id, ship_name):
 def generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet):
     for ghost_id in list(GHOST_STATES.keys()):
         fleet.setdefault(ghost_id, [])
-        ghost_name = ghost_id
         new_lat, new_lon, ghost_speed, ghost_hdg = move_ghost(real_lat, real_lon, sog, hdg, ghost_id)
         fleet[ghost_id].append({
             "lat": new_lat,
             "lon": new_lon,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "ghost": True,
-            "name": ghost_name,
+            "name": ghost_id,
             "speed": round(ghost_speed, 2),
             "heading": round(ghost_hdg, 1)
         })
     return fleet
-
-# ----------------------
-# CHECK RENDEZVOUS
-# ----------------------
-def check_rendezvous(real_lat, real_lon, sog, hdg, fleet):
-    now = time.time()
-    for point in RENDEZVOUS:
-        distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
-        if distance_nm < 40:
-            if point["name"] not in PHASED_SPAWN_QUEUE:
-                names = CYPRUS_NAMES if point["name"] == "Cyprus" else [f"{point['name']} Ship {i}" for i in range(point["ships"])]
-                PHASED_SPAWN_QUEUE[point["name"]] = [{"id": f"ghost_{point['name'].lower()}_{i+1}", "name": names[i]} for i in range(point["ships"])]
-                LAST_SPAWN_TIME[point["name"]] = now - UPDATE_INTERVAL
-
-            queue = PHASED_SPAWN_QUEUE[point["name"]]
-            if queue and now - LAST_SPAWN_TIME[point["name"]] >= UPDATE_INTERVAL:
-                ship = queue.pop(0)
-                lat, lon, speed, heading = spawn_single_ship(real_lat, real_lon, sog, hdg, ship["id"], ship["name"])
-                fleet.setdefault(ship["id"], []).append({
-                    "lat": lat,
-                    "lon": lon,
-                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "ghost": True,
-                    "name": ship["name"],
-                    "speed": round(speed,2),
-                    "heading": round(heading,1)
-                })
-                LAST_SPAWN_TIME[point["name"]] = now
 
 # ----------------------
 # APPEND POSITIONS
@@ -214,8 +186,8 @@ def append_positions(real_lat, real_lon, sog, hdg):
         "speed": round(sog,2),
         "heading": round(hdg,1)
     })
-    # Spawn / move phased ghosts
-    check_rendezvous(real_lat, real_lon, sog, hdg, fleet)
+    # Spawn phased ships immediately into GHOST_STATES
+    spawn_phased_ghosts(real_lat, real_lon, sog, hdg)
     # Move all ghosts
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
     save_positions(fleet)
@@ -243,4 +215,3 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
