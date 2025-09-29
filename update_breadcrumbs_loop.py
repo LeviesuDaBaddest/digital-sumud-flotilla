@@ -9,7 +9,6 @@ import math
 # ----------------------
 # CONFIG
 # ----------------------
-NUM_GHOSTS = 6  # Original ghosts
 UPDATE_INTERVAL = 600  # seconds
 SPEED_VARIATION = 0.08
 POSITIONS_FILE = "fleet_positions.json"
@@ -19,7 +18,6 @@ REAL_SHIP_ID = "al_awda"
 # CUSTOM GHOST NAMES
 # ----------------------
 GHOST_NAMES = ["Ma’an", "Navaren", "Al Quds", "Ramallah", "Ode", "Miami"]
-CYPRUS_NAMES = ["Gaza City", "Freedom", "Argo", "Brune", "Inman"]
 
 # ----------------------
 # RENDEZVOUS POINTS
@@ -33,7 +31,7 @@ RENDEZVOUS = [
 # ----------------------
 # GLOBAL STATE
 # ----------------------
-GHOST_STATES = {}  # Tracks all ghosts for movement
+GHOST_STATES = {}  # Tracks all ghosts and their movement data
 
 # ----------------------
 # HELPER FUNCTIONS
@@ -93,21 +91,36 @@ def haversine_nm(lat1, lon1, lat2, lon2):
     return R_nm * c
 
 # ----------------------
+# INITIALIZE GHOSTS FROM LAST POSITIONS
+# ----------------------
+def initialize_ghost_states():
+    fleet = load_positions()
+    for ghost_id, positions in fleet.items():
+        if ghost_id == REAL_SHIP_ID: 
+            continue
+        if positions:
+            last_pos = positions[-1]
+            GHOST_STATES[ghost_id] = {
+                "lat": last_pos["lat"],
+                "lon": last_pos["lon"],
+                "rel_bearing": random.uniform(0, 360),
+                "rel_distance": random.uniform(0.05, 0.8),
+                "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
+                "heading_jitter": random.uniform(-5, 5),
+                "current_nudge": random.uniform(-0.02, 0.02)
+            }
+
+# ----------------------
 # MOVE GHOST
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
-    if ghost_id not in GHOST_STATES:
-        # Initialize new ghost
-        GHOST_STATES[ghost_id] = {
-            "rel_bearing": random.uniform(0, 360),
-            "rel_distance": random.uniform(0.05, 0.8),
-            "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
-            "heading_jitter": random.uniform(-5, 5),
-            "current_nudge": random.uniform(-0.02, 0.02)
-        }
     state = GHOST_STATES[ghost_id]
 
-    # Apply small variations
+    if "lat" not in state or "lon" not in state:
+        state["lat"] = real_lat + random.uniform(-0.02, 0.02)
+        state["lon"] = real_lon + random.uniform(-0.02, 0.02)
+
+    # Apply variations
     state["speed_bias"] += random.uniform(-0.01, 0.01)
     state["speed_bias"] = max(0.85, min(1.15, state["speed_bias"]))
     state["heading_jitter"] += random.uniform(-0.5, 0.5)
@@ -115,30 +128,26 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     state["current_nudge"] += random.uniform(-0.005, 0.005)
     state["current_nudge"] = max(-0.03, min(0.03, state["current_nudge"]))
 
-    # Burst factor ensures slow ships still move
     burst_factor = random.uniform(1.0, 1.3)
     ghost_speed = max(0.05, sog * state["speed_bias"] * burst_factor)
-
     dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600) / 60
     move_heading = hdg + state["heading_jitter"]
     rad = math.radians(move_heading)
+
+    # Move relative to last position
     delta_lat = dist_deg * math.cos(rad) + state["current_nudge"]
-    delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(real_lat))) + state["current_nudge"]
+    delta_lon = dist_deg * math.sin(rad) / max(0.1, math.cos(math.radians(state["lat"]))) + state["current_nudge"]
 
-    rel_rad = math.radians(hdg + state["rel_bearing"])
-    rel_lat = state["rel_distance"] * math.cos(rel_rad) / 60.0
-    rel_lon = state["rel_distance"] * math.sin(rel_rad) / (60.0 * math.cos(math.radians(real_lat)))
-
-    new_lat = real_lat + rel_lat + delta_lat
-    new_lon = real_lon + rel_lon + delta_lon
+    state["lat"] += delta_lat
+    state["lon"] += delta_lon
     ghost_hdg = (hdg + state["heading_jitter"]) % 360
 
-    return new_lat, new_lon, ghost_speed, ghost_hdg
+    return state["lat"], state["lon"], ghost_speed, ghost_hdg
 
 # ----------------------
-# SPAWN PHASED GHOSTS
+# SPAWN ONE NEW GHOST IF IN RENDEZVOUS
 # ----------------------
-def spawn_phased_ghosts(real_lat, real_lon, sog, hdg):
+def spawn_one_ghost(real_lat, real_lon):
     for point in RENDEZVOUS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
         if distance_nm < 40:
@@ -146,12 +155,16 @@ def spawn_phased_ghosts(real_lat, real_lon, sog, hdg):
                 ghost_id = f"ghost_{point['name'].lower()}_{i+1}"
                 if ghost_id not in GHOST_STATES:
                     GHOST_STATES[ghost_id] = {
+                        "lat": real_lat + random.uniform(-0.02, 0.02),
+                        "lon": real_lon + random.uniform(-0.02, 0.02),
                         "rel_bearing": random.uniform(0, 360),
                         "rel_distance": random.uniform(0.05, 0.8),
                         "speed_bias": 1 + random.uniform(-SPEED_VARIATION, SPEED_VARIATION),
                         "heading_jitter": random.uniform(-5, 5),
                         "current_nudge": random.uniform(-0.02, 0.02)
                     }
+                    print(f"👻 Spawned ghost {ghost_id} at {point['name']}")
+                    return  # Only spawn one per update
 
 # ----------------------
 # GENERATE OR UPDATE ALL GHOSTS
@@ -183,11 +196,11 @@ def append_positions(real_lat, real_lon, sog, hdg):
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "ghost": False,
         "name": "Al Awda",
-        "speed": round(sog,2),
-        "heading": round(hdg,1)
+        "speed": round(sog, 2),
+        "heading": round(hdg, 1)
     })
-    # Spawn phased ships immediately into GHOST_STATES
-    spawn_phased_ghosts(real_lat, real_lon, sog, hdg)
+    # Spawn new ghost if in rendezvous
+    spawn_one_ghost(real_lat, real_lon)
     # Move all ghosts
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
     save_positions(fleet)
@@ -208,6 +221,7 @@ def push_to_git():
 # ----------------------
 if __name__ == "__main__":
     print("🚀 Starting Virtual Voyage To Gaza Tracker...")
+    initialize_ghost_states()
     while True:
         lat, lon, sog, hdg = read_position()
         if lat and lon:
@@ -215,3 +229,5 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
+
