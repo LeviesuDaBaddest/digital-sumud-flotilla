@@ -1934,6 +1934,15 @@
       "name": "Al Awda",
       "speed": 7.57,
       "heading": 197.5
+    },
+    {
+      "lat": 34.41867833333333,
+      "lon": 33.033785,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 7.79,
+      "heading": 196.8
     }
   ],
   "ghost_1": [
@@ -3835,6 +3844,15 @@
       "name": "ghost_1",
       "speed": 8.67,
       "heading": 198.1
+    },
+    {
+      "lat": 34.410023709773355,
+      "lon": 33.02945096119674,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_1",
+      "speed": 9.91,
+      "heading": 201.3
     }
   ],
   "ghost_2": [
@@ -5736,6 +5754,15 @@
       "name": "ghost_2",
       "speed": 9.29,
       "heading": 198.5
+    },
+    {
+      "lat": 34.41903100358096,
+      "lon": 33.02966336741812,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_2",
+      "speed": 9.93,
+      "heading": 196.1
     }
   ],
   "ghost_3": [
@@ -7340,6 +7367,15 @@
       "name": "ghost_3",
       "speed": 9.82,
       "heading": 198.5
+    },
+    {
+      "lat": 34.38722731842886,
+      "lon": 33.0063131498935,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_3",
+      "speed": 8.31,
+      "heading": 198.4
     }
   ],
   "ghost_4": [
@@ -8944,6 +8980,15 @@
       "name": "ghost_4",
       "speed": 8.12,
       "heading": 199.4
+    },
+    {
+      "lat": 34.389539653996636,
+      "lon": 33.01461946173025,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_4",
+      "speed": 8.59,
+      "heading": 193.3
     }
   ],
   "cyprus_1": [
@@ -9135,6 +9180,15 @@
       "name": "cyprus_1",
       "speed": 7.33,
       "heading": 194.8
+    },
+    {
+      "lat": 34.42635911758091,
+      "lon": 33.00690180809403,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "cyprus_1",
+      "speed": 9.01,
+      "heading": 192.6
     }
   ],
   "cyprus_2": [
@@ -9200,6 +9254,15 @@
       "name": "cyprus_2",
       "speed": 7.76,
       "heading": 202.2
+    },
+    {
+      "lat": 34.552555289259445,
+      "lon": 33.05884882157549,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "cyprus_2",
+      "speed": 9.01,
+      "heading": 198.5
     }
   ],
   "cyprus_3": [
@@ -9283,6 +9346,15 @@
       "name": "cyprus_3",
       "speed": 7.92,
       "heading": 193.5
+    },
+    {
+      "lat": 34.57335060449852,
+      "lon": 33.053580747646116,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "cyprus_3",
+      "speed": 9.81,
+      "heading": 200.4
     }
   ],
   "cyprus_4": [
@@ -9366,6 +9438,15 @@
       "name": "cyprus_4",
       "speed": 9.82,
       "heading": 195.2
+    },
+    {
+      "lat": 34.53723939436276,
+      "lon": 33.05515419186175,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "cyprus_4",
+      "speed": 9.52,
+      "heading": 198.8
     }
   ],
   "cyprus_5": [
@@ -9458,6 +9539,15 @@
       "name": "cyprus_5",
       "speed": 8.88,
       "heading": 195.3
+    },
+    {
+      "lat": 34.54273692546886,
+      "lon": 33.03015215456142,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "cyprus_5",
+      "speed": 8.33,
+      "heading": 193.0
     }
   ],
   "ghost_5": [
@@ -9541,6 +9631,15 @@
       "name": "ghost_5",
       "speed": 10.06,
       "heading": 196.2
+    },
+    {
+      "lat": 34.41044272335561,
+      "lon": 33.03524518756841,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_5",
+      "speed": 8.86,
+      "heading": 199.1
     }
   ],
   "ghost_6": [
@@ -9624,6 +9723,15 @@
       "name": "ghost_6",
       "speed": 8.42,
       "heading": 199.9
+    },
+    {
+      "lat": 34.42483945732104,
+      "lon": 33.058804217287225,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "ghost_6",
+      "speed": 7.63,
+      "heading": 199.0
     }
   ],
   "ghost_ma\u2019an": [
@@ -9635,6 +9743,26 @@
       "name": "Ma\u2019an",
       "speed": 8.8,
       "heading": 196.3
+    },
+    {
+      "lat": 34.38907198296026,
+      "lon": 33.039705074416034,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 9.71,
+      "heading": 197.2
+    }
+  ],
+  "ghost_navaren": [
+    {
+      "lat": 34.40729840270186,
+      "lon": 32.99921670354248,
+      "timestamp": "2025-09-29 03:36:47",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 8.97,
+      "heading": 199.6
     }
   ]
 }
