@@ -70,8 +70,51 @@
         <li><a href="https://globalsumudflotilla.org/" target="_blank">Global Sumud Flotilla</a></li>
       </ul>
     </details>
+     <!-- Take Action / Donate / Learn More Section -->
+<div style="text-align:center; margin:15px 0;">
+  <a href="https://freedomflotilla.org/donate/" target="_blank" 
+     style="display:inline-block; padding:8px 12px; margin:5px; 
+            background:#ff8080; color:white; border-radius:6px; 
+            text-decoration:none; font-weight:bold;">
+    🚢 Donate to FFC
+  </a>
+  <a href="https://thousandmadleens.org" target="_blank" 
+     style="display:inline-block; padding:8px 12px; margin:5px; 
+            background:#444; color:white; border-radius:6px; 
+            text-decoration:none;">
+    ✨ Thousand Madleens
+  </a>
+  <a href="https://globalsumudflotilla.org/" target="_blank" 
+     style="display:inline-block; padding:8px 12px; margin:5px; 
+            background:#444; color:white; border-radius:6px; 
+            text-decoration:none;">
+    🌍 Global Sumud
+  </a>
+</div>
 
-    <label><input type="checkbox" id="breadcrumbsToggle"> Show Breadcrumbs</label>
+<details class="section">
+  <summary>👉 Take Action / Learn More</summary>
+  <p><b>💸 Donate / Support Directly</b></p>
+  <ul>
+    <li><a href="https://freedomflotilla.org/donate/" target="_blank">Freedom Flotilla Coalition</a> – help fund boats, legal defense, and global campaigning.</li>
+    <li><a href="https://thousandmadleens.org" target="_blank">Thousand Madleens to Gaza</a> – support creative solidarity inspired by Madleen’s story.</li>
+    <li><a href="https://globalsumudflotilla.org/" target="_blank">Global Sumud Flotilla</a> – connect with struggles for justice and resilience worldwide.</li>
+  </ul>
+
+  <p><b>📢 Spread the Word</b></p>
+  <ul>
+    <li>Share voyage screenshots with <code>#VirtualVoyageToGaza</code> and <code>#EndTheBlockade</code>.</li>
+    <li>Talk to friends, family, or community groups about Gaza.</li>
+  </ul>
+
+  <p><b>📝 Stay Involved</b></p>
+  <ul>
+    <li><a href="https://freedomflotilla.org/" target="_blank">Sign petitions and statements</a> to pressure governments.</li>
+    <li>Join or organize local solidarity events: teach-ins, vigils, art actions, banner drops.</li>
+  </ul>
+</details>
+
+   
     <div id="boat-list"></div>
   </div>
 
@@ -116,7 +159,7 @@
     function updateMap(index){
       breadcrumbsLayer.clearLayers();
       markersLayer.clearLayers();
-      const showBreadcrumbs = document.getElementById('breadcrumbsToggle').checked;
+      const showBreadcrumbs = true;
       let latSum=0, lonSum=0, count=0, scrubTime=null;
 
       for(const shipId in positions){if(positions[shipId].length>index){scrubTime=new Date(positions[shipId][index].timestamp); break;} }
