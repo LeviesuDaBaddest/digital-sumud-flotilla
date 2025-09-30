@@ -50,6 +50,7 @@
     <h1>Virtual Voyage To Gaza <span class="flashing-dot"></span></h1>
     <h2>In Memory Of</h2>
     <div class="ticker-container"><div class="ticker-text">Shireen Abu Akleh Hind Rajab Refaat Alareer Razan Al-Najjar Mohammed Al-Durra Ahmad Abu Hussein Wael Dahdouh's Family Iman Hejjo Layan Hamadeh Thousands of Martyrs of Palestine</div></div>
+    
     <details class="section">
       <summary>Martyr Poems & Quotes</summary>
       <p><b>Refaat Alareer:</b> "If I must die, let it bring hope."</p>
@@ -70,51 +71,51 @@
         <li><a href="https://globalsumudflotilla.org/" target="_blank">Global Sumud Flotilla</a></li>
       </ul>
     </details>
-     <!-- Take Action / Donate / Learn More Section -->
-<div style="text-align:center; margin:15px 0;">
-  <a href="https://freedomflotilla.org/donate/" target="_blank" 
-     style="display:inline-block; padding:8px 12px; margin:5px; 
-            background:#ff8080; color:white; border-radius:6px; 
-            text-decoration:none; font-weight:bold;">
-    🚢 Donate to FFC
-  </a>
-  <a href="https://thousandmadleens.org" target="_blank" 
-     style="display:inline-block; padding:8px 12px; margin:5px; 
-            background:#444; color:white; border-radius:6px; 
-            text-decoration:none;">
-    ✨ Thousand Madleens
-  </a>
-  <a href="https://globalsumudflotilla.org/" target="_blank" 
-     style="display:inline-block; padding:8px 12px; margin:5px; 
-            background:#444; color:white; border-radius:6px; 
-            text-decoration:none;">
-    🌍 Global Sumud
-  </a>
-</div>
 
-<details class="section">
-  <summary>👉 Take Action / Learn More</summary>
-  <p><b>💸 Donate / Support Directly</b></p>
-  <ul>
-    <li><a href="https://freedomflotilla.org/donate/" target="_blank">Freedom Flotilla Coalition</a> – help fund boats, legal defense, and global campaigning.</li>
-    <li><a href="https://thousandmadleens.org" target="_blank">Thousand Madleens to Gaza</a> – support creative solidarity inspired by Madleen’s story.</li>
-    <li><a href="https://globalsumudflotilla.org/" target="_blank">Global Sumud Flotilla</a> – connect with struggles for justice and resilience worldwide.</li>
-  </ul>
+    <!-- Take Action / Donate / Learn More Section -->
+    <div style="text-align:center; margin:15px 0;">
+      <a href="https://freedomflotilla.org/donate/" target="_blank" 
+         style="display:inline-block; padding:8px 12px; margin:5px; 
+                background:#ff8080; color:white; border-radius:6px; 
+                text-decoration:none; font-weight:bold;">
+        🚢 Donate to FFC
+      </a>
+      <a href="https://thousandmadleens.org" target="_blank" 
+         style="display:inline-block; padding:8px 12px; margin:5px; 
+                background:#444; color:white; border-radius:6px; 
+                text-decoration:none;">
+        ✨ Thousand Madleens
+      </a>
+      <a href="https://globalsumudflotilla.org/" target="_blank" 
+         style="display:inline-block; padding:8px 12px; margin:5px; 
+                background:#444; color:white; border-radius:6px; 
+                text-decoration:none;">
+        🌍 Global Sumud
+      </a>
+    </div>
 
-  <p><b>📢 Spread the Word</b></p>
-  <ul>
-    <li>Share voyage screenshots with <code>#VirtualVoyageToGaza</code> and <code>#EndTheBlockade</code>.</li>
-    <li>Talk to friends, family, or community groups about Gaza.</li>
-  </ul>
+    <details class="section">
+      <summary>👉 Take Action / Learn More</summary>
+      <p><b>💸 Donate / Support Directly</b></p>
+      <ul>
+        <li><a href="https://freedomflotilla.org/donate/" target="_blank">Freedom Flotilla Coalition</a> – help fund boats, legal defense, and global campaigning.</li>
+        <li><a href="https://thousandmadleens.org" target="_blank">Thousand Madleens to Gaza</a> – support creative solidarity inspired by Madleen’s story.</li>
+        <li><a href="https://globalsumudflotilla.org/" target="_blank">Global Sumud Flotilla</a> – connect with struggles for justice and resilience worldwide.</li>
+      </ul>
 
-  <p><b>📝 Stay Involved</b></p>
-  <ul>
-    <li><a href="https://freedomflotilla.org/" target="_blank">Sign petitions and statements</a> to pressure governments.</li>
-    <li>Join or organize local solidarity events: teach-ins, vigils, art actions, banner drops.</li>
-  </ul>
-</details>
+      <p><b>📢 Spread the Word</b></p>
+      <ul>
+        <li>Share voyage screenshots with <code>#VirtualVoyageToGaza</code> and <code>#EndTheBlockade</code>.</li>
+        <li>Talk to friends, family, or community groups about Gaza.</li>
+      </ul>
 
-   
+      <p><b>📝 Stay Involved</b></p>
+      <ul>
+        <li><a href="https://freedomflotilla.org/" target="_blank">Sign petitions and statements</a> to pressure governments.</li>
+        <li>Join or organize local solidarity events: teach-ins, vigils, art actions, banner drops.</li>
+      </ul>
+    </details>
+
     <div id="boat-list"></div>
   </div>
 
@@ -159,9 +160,9 @@
     function updateMap(index){
       breadcrumbsLayer.clearLayers();
       markersLayer.clearLayers();
-      const showBreadcrumbs = true;
-      let latSum=0, lonSum=0, count=0, scrubTime=null;
+      const showBreadcrumbs = true; // always show
 
+      let latSum=0, lonSum=0, count=0, scrubTime=null;
       for(const shipId in positions){if(positions[shipId].length>index){scrubTime=new Date(positions[shipId][index].timestamp); break;} }
       if(!scrubTime) return;
 
@@ -181,7 +182,6 @@
         markersLayer.addLayer(marker);
         boatMarkers[shipId]=marker;
 
-        // apply drift overlay if available
         if(driftOverlay[shipId]) marker.setLatLng([
           pos.lat + driftOverlay[shipId].offsetLat || 0,
           pos.lon + driftOverlay[shipId].offsetLon || 0
@@ -249,7 +249,6 @@
     window.addEventListener('load', refreshMapSize);
 
     document.getElementById('timeSlider').addEventListener('input', e => updateMap(parseInt(e.target.value)));
-    document.getElementById('breadcrumbsToggle').addEventListener('change', ()=>updateMap(parseInt(document.getElementById('timeSlider').value)));
 
     loadPastFlotillas();
     loadPositions().then(()=> refreshMapSize());
@@ -273,18 +272,17 @@
             };
           }
           const drift = driftOverlay[shipId];
-          const t = now / 10000; // faster updates for smoother sway
+          const t = now / 10000;
           drift.offsetLat = drift.ampLat * Math.sin(t + drift.phase);
           drift.offsetLon = drift.ampLon * Math.cos(t + drift.phase);
         } else {
-          // reset drift when moving
           if(driftOverlay[shipId]) delete driftOverlay[shipId];
         }
       }
       updateMap(parseInt(document.getElementById('timeSlider').value));
     }
 
-    setInterval(applyDrift, 10000); // every 10 seconds
+    setInterval(applyDrift, 10000);
   </script>
 </body>
 </html>
