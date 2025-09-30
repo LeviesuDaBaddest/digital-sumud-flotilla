@@ -4526,6 +4526,15 @@
       "name": "Al Awda",
       "speed": 4.92,
       "heading": 292.4
+    },
+    {
+      "lat": 34.988301666666665,
+      "lon": 28.386225,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 5.05,
+      "heading": 292.9
     }
   ],
   "ghost_ma\u2019an": [
@@ -9055,6 +9064,15 @@
       "name": "Ma\u2019an",
       "speed": 5.17,
       "heading": 304.1
+    },
+    {
+      "lat": 34.99310698190553,
+      "lon": 28.370657946994125,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 5.31,
+      "heading": 280.5
     }
   ],
   "ghost_navaren": [
@@ -13575,6 +13593,15 @@
       "name": "Navaren",
       "speed": 4.52,
       "heading": 292.3
+    },
+    {
+      "lat": 34.97272491719324,
+      "lon": 28.4295170840187,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 4.64,
+      "heading": 292.7
     }
   ],
   "ghost_al quds": [
@@ -18086,6 +18113,15 @@
       "name": "Al Quds",
       "speed": 4.63,
       "heading": 292.2
+    },
+    {
+      "lat": 34.96520221996026,
+      "lon": 28.44129447193297,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 4.74,
+      "heading": 292.6
     }
   ],
   "ghost_ramallah": [
@@ -22588,6 +22624,15 @@
       "name": "Ramallah",
       "speed": 5.16,
       "heading": 287.7
+    },
+    {
+      "lat": 34.99447287942163,
+      "lon": 28.37452108393525,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 5.32,
+      "heading": 270.3
     }
   ],
   "ghost_ode": [
@@ -27081,6 +27126,15 @@
       "name": "Ode",
       "speed": 4.83,
       "heading": 291.9
+    },
+    {
+      "lat": 34.99011654538075,
+      "lon": 28.382079564410713,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 4.96,
+      "heading": 291.4
     }
   ],
   "ghost_miami": [
@@ -31565,6 +31619,15 @@
       "name": "Miami",
       "speed": 5.29,
       "heading": 281.1
+    },
+    {
+      "lat": 35.0080282508965,
+      "lon": 28.386801828665696,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 5.45,
+      "heading": 271.7
     }
   ],
   "ghost_gaza city": [
@@ -36040,6 +36103,15 @@
       "name": "Gaza City",
       "speed": 5.1,
       "heading": 309.9
+    },
+    {
+      "lat": 34.99564546107292,
+      "lon": 28.375562049785984,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 5.24,
+      "heading": 288.5
     }
   ],
   "ghost_freedom": [
@@ -40506,6 +40578,15 @@
       "name": "Freedom",
       "speed": 4.72,
       "heading": 292.9
+    },
+    {
+      "lat": 34.987998479467855,
+      "lon": 28.386439051599638,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 4.84,
+      "heading": 292.8
     }
   ],
   "ghost_argo": [
@@ -44963,6 +45044,15 @@
       "name": "Argo",
       "speed": 5.1,
       "heading": 304.2
+    },
+    {
+      "lat": 34.99693132471115,
+      "lon": 28.37380171845212,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 5.25,
+      "heading": 326.7
     }
   ],
   "ghost_brune": [
@@ -49411,6 +49501,15 @@
       "name": "Brune",
       "speed": 4.94,
       "heading": 291.9
+    },
+    {
+      "lat": 34.980617148468994,
+      "lon": 28.39591297408972,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 5.06,
+      "heading": 292.6
     }
   ],
   "ghost_inman": [
@@ -53850,6 +53949,15 @@
       "name": "Inman",
       "speed": 4.75,
       "heading": 295.1
+    },
+    {
+      "lat": 34.97829528457896,
+      "lon": 28.40209348736565,
+      "timestamp": "2025-09-30 22:14:38",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 4.88,
+      "heading": 294.9
     }
   ]
 }
