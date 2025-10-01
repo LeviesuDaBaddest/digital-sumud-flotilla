@@ -5903,6 +5903,15 @@
       "name": "Al Awda",
       "speed": 6.26,
       "heading": 264.8
+    },
+    {
+      "lat": 34.92972666666667,
+      "lon": 26.667975,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 6.28,
+      "heading": 265.1
     }
   ],
   "ghost_ma\u2019an": [
@@ -11809,6 +11818,15 @@
       "name": "Ma\u2019an",
       "speed": 6.38,
       "heading": 295.1
+    },
+    {
+      "lat": 34.912525582487945,
+      "lon": 26.709787145642316,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 6.39,
+      "heading": 293.0
     }
   ],
   "ghost_navaren": [
@@ -17706,6 +17724,15 @@
       "name": "Navaren",
       "speed": 6.33,
       "heading": 284.4
+    },
+    {
+      "lat": 34.91041791154962,
+      "lon": 26.763796728267064,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 6.35,
+      "heading": 283.4
     }
   ],
   "ghost_al quds": [
@@ -23594,6 +23621,15 @@
       "name": "Al Quds",
       "speed": 6.41,
       "heading": 282.8
+    },
+    {
+      "lat": 34.90531215259588,
+      "lon": 26.795364297910677,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 6.42,
+      "heading": 281.8
     }
   ],
   "ghost_ramallah": [
@@ -29473,6 +29509,15 @@
       "name": "Ramallah",
       "speed": 6.37,
       "heading": 277.8
+    },
+    {
+      "lat": 34.94057861588888,
+      "lon": 26.72181440182518,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 6.39,
+      "heading": 275.6
     }
   ],
   "ghost_ode": [
@@ -35343,6 +35388,15 @@
       "name": "Ode",
       "speed": 6.41,
       "heading": 285.2
+    },
+    {
+      "lat": 34.914822143541784,
+      "lon": 26.73557400326702,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 6.45,
+      "heading": 284.5
     }
   ],
   "ghost_miami": [
@@ -41204,6 +41258,15 @@
       "name": "Miami",
       "speed": 6.42,
       "heading": 295.4
+    },
+    {
+      "lat": 34.91275040859268,
+      "lon": 26.71026091311565,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 6.46,
+      "heading": 295.0
     }
   ],
   "ghost_gaza city": [
@@ -47056,6 +47119,15 @@
       "name": "Gaza City",
       "speed": 6.57,
       "heading": 286.3
+    },
+    {
+      "lat": 34.916220543631745,
+      "lon": 26.747102857672196,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 6.61,
+      "heading": 285.2
     }
   ],
   "ghost_freedom": [
@@ -52899,6 +52971,15 @@
       "name": "Freedom",
       "speed": 6.09,
       "heading": 284.2
+    },
+    {
+      "lat": 34.90936023518932,
+      "lon": 26.754637974405036,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 6.13,
+      "heading": 284.7
     }
   ],
   "ghost_argo": [
@@ -58733,6 +58814,15 @@
       "name": "Argo",
       "speed": 6.44,
       "heading": 293.0
+    },
+    {
+      "lat": 34.91846766833132,
+      "lon": 26.71647879005127,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 6.44,
+      "heading": 292.4
     }
   ],
   "ghost_brune": [
@@ -64558,6 +64648,15 @@
       "name": "Brune",
       "speed": 6.16,
       "heading": 289.5
+    },
+    {
+      "lat": 34.91588278520362,
+      "lon": 26.73662202633451,
+      "timestamp": "2025-10-01 17:10:17",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 6.2,
+      "heading": 288.8
     }
   ],
   "ghost_inman": [
@@ -70370,6 +70469,15 @@
       "lat": 34.903568603096744,
       "lon": 26.796409685391605,
       "timestamp": "2025-10-01 17:05:13",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 6.55,
+      "heading": 281.5
+    },
+    {
+      "lat": 34.90556838228688,
+      "lon": 26.784385624229618,
+      "timestamp": "2025-10-01 17:10:17",
       "ghost": true,
       "name": "Inman",
       "speed": 6.55,
