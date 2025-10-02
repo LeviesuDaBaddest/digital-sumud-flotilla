@@ -6605,6 +6605,15 @@
       "name": "Al Awda",
       "speed": 0.0,
       "heading": 0.0
+    },
+    {
+      "lat": 34.939075,
+      "lon": 26.179905,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 0.0,
+      "heading": 0.0
     }
   ],
   "ghost_ma\u2019an": [
@@ -13213,6 +13222,15 @@
       "name": "Ma\u2019an",
       "speed": 0.08,
       "heading": 52.5
+    },
+    {
+      "lat": 34.92427806693142,
+      "lon": 26.138728013022853,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 0.08,
+      "heading": 54.6
     }
   ],
   "ghost_navaren": [
@@ -19812,6 +19830,15 @@
       "name": "Navaren",
       "speed": 0.08,
       "heading": 353.9
+    },
+    {
+      "lat": 34.91003535149554,
+      "lon": 26.163266016281447,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 0.08,
+      "heading": 357.2
     }
   ],
   "ghost_al quds": [
@@ -26402,6 +26429,15 @@
       "name": "Al Quds",
       "speed": 0.08,
       "heading": 353.9
+    },
+    {
+      "lat": 34.90860195332821,
+      "lon": 26.16902585605511,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 0.08,
+      "heading": 357.7
     }
   ],
   "ghost_ramallah": [
@@ -32983,6 +33019,15 @@
       "name": "Ramallah",
       "speed": 0.08,
       "heading": 34.5
+    },
+    {
+      "lat": 34.92042381056348,
+      "lon": 26.144664305117097,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 0.08,
+      "heading": 38.0
     }
   ],
   "ghost_ode": [
@@ -39555,6 +39600,15 @@
       "name": "Ode",
       "speed": 0.08,
       "heading": 28.1
+    },
+    {
+      "lat": 34.91459755039276,
+      "lon": 26.145445347465518,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 0.08,
+      "heading": 30.5
     }
   ],
   "ghost_miami": [
@@ -46118,6 +46172,15 @@
       "name": "Miami",
       "speed": 0.08,
       "heading": 38.8
+    },
+    {
+      "lat": 34.917358830514,
+      "lon": 26.139212809756025,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 0.08,
+      "heading": 41.8
     }
   ],
   "ghost_gaza city": [
@@ -52672,6 +52735,15 @@
       "name": "Gaza City",
       "speed": 0.08,
       "heading": 22.1
+    },
+    {
+      "lat": 34.91827318725565,
+      "lon": 26.14910190784413,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 0.08,
+      "heading": 26.3
     }
   ],
   "ghost_freedom": [
@@ -59217,6 +59289,15 @@
       "name": "Freedom",
       "speed": 0.08,
       "heading": 358.3
+    },
+    {
+      "lat": 34.91153405406483,
+      "lon": 26.166146200876398,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 0.08,
+      "heading": 2.9
     }
   ],
   "ghost_argo": [
@@ -65753,6 +65834,15 @@
       "name": "Argo",
       "speed": 0.08,
       "heading": 34.6
+    },
+    {
+      "lat": 34.91692997603402,
+      "lon": 26.142770015515897,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 0.08,
+      "heading": 36.4
     }
   ],
   "ghost_brune": [
@@ -72280,6 +72370,15 @@
       "name": "Brune",
       "speed": 0.08,
       "heading": 4.4
+    },
+    {
+      "lat": 34.9095699886569,
+      "lon": 26.161836498740527,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 0.08,
+      "heading": 8.2
     }
   ],
   "ghost_inman": [
@@ -78798,6 +78897,15 @@
       "name": "Inman",
       "speed": 0.08,
       "heading": 13.6
+    },
+    {
+      "lat": 34.911150378141535,
+      "lon": 26.152244504612472,
+      "timestamp": "2025-10-02 18:59:59",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 0.08,
+      "heading": 18.5
     }
   ]
 }
