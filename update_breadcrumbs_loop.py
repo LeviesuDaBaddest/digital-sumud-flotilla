@@ -39,7 +39,9 @@ RENDEZVOUS_POINTS = [
 # ----------------------
 # GLOBAL STATE
 # ----------------------
-GHOST_STATES = {}
+GHOST_STATES = {}          # ghost_id -> state
+SPAWN_QUEUE = {}           # queue for drip spawning
+LAST_SPAWN_TIME = {}       # last spawn time per queue
 LAST_LEADER_CHECK = time.time()
 
 # ----------------------
@@ -55,8 +57,7 @@ def read_position():
             raw = s.recv(4096).decode(errors="ignore")
             for line in raw.splitlines():
                 if line.startswith("$HDT") or line.startswith("$HDG"):
-                    try:
-                        true_heading = float(line.split(",")[1])
+                    try: true_heading = float(line.split(",")[1])
                     except: pass
                 elif line.startswith("$GPRMC"):
                     parts = line.split(",")
@@ -131,6 +132,45 @@ def initialize_ghost_states():
             }
 
 # ----------------------
+# SPAWN QUEUE MANAGEMENT
+# ----------------------
+def queue_rendezvous_ghosts(real_lat, real_lon):
+    now = time.time()
+    for point in RENDEZVOUS_POINTS:
+        distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
+        if distance_nm < 150:
+            if point["name"] not in SPAWN_QUEUE:
+                SPAWN_QUEUE[point["name"]] = []
+                for i in range(point["ships"]):
+                    ghost_id = f"{point['name'].lower()}_{i+1}"
+                    ghost_name = point["names"][i % len(point["names"])] if point.get("names") else ghost_id
+                    SPAWN_QUEUE[point["name"]].append({"id": ghost_id, "name": ghost_name})
+                LAST_SPAWN_TIME[point["name"]] = now - UPDATE_INTERVAL
+
+def spawn_from_queue(real_lat, real_lon):
+    now = time.time()
+    for queue_key, ghosts in SPAWN_QUEUE.items():
+        if not ghosts: continue
+        last_spawn = LAST_SPAWN_TIME.get(queue_key, 0)
+        if now - last_spawn >= UPDATE_INTERVAL:
+            ship = ghosts.pop(0)
+            ghost_id = ship["id"]
+            GHOST_STATES[ghost_id] = {
+                "name": ship["name"],
+                "lat": real_lat + random.uniform(-0.008,0.008),
+                "lon": real_lon + random.uniform(-0.008,0.008),
+                "slot_bearing": random.uniform(-32,32),
+                "slot_distance": random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM),
+                "phase": random.uniform(0,2*math.pi),
+                "speed_bias": 1 + random.uniform(-SPEED_VARIATION,SPEED_VARIATION),
+                "hdg": 0.0,
+                "role": assign_role(),
+                "last_burst": 0.0
+            }
+            LAST_SPAWN_TIME[queue_key] = now
+            print(f"👻 Gradually spawned ghost {ship['name']} from {queue_key}")
+
+# ----------------------
 # MOVE GHOST
 # ----------------------
 def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
@@ -150,10 +190,9 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
         state["last_burst"] = now
     ghost_speed = target_speed * burst_multiplier
 
-    # Flock + oscillation
+    # Flocking & oscillation
     flock_phase = (now / FLOCK_PERIOD) * 2 * math.pi
-    group_fan = math.sin(flock_phase)
-    fan_offset = group_fan * FAN_AMPLITUDE_NM
+    fan_offset = math.sin(flock_phase) * FAN_AMPLITUDE_NM
     oscill_bearing = math.sin(now*0.6 + state["phase"]) * SLOT_OSCILLATION_BEARING
     oscill_distance = math.sin(now*0.35 + state["phase"]) * SLOT_OSCILLATION_DISTANCE
 
@@ -169,7 +208,6 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
         role_distance_bias = random.uniform(-0.04, 0.04)
         role_bearing_bias = random.uniform(-8, 8)
 
-    # Dynamic position
     dynamic_distance = max(MIN_DISTANCE_NM, min(MAX_DISTANCE_NM + FAN_AMPLITUDE_NM,
                                                state["slot_distance"] + fan_offset + oscill_distance + role_distance_bias))
     dynamic_bearing = state["slot_bearing"] + oscill_bearing + role_bearing_bias
@@ -178,22 +216,18 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     target_lat = real_lat + (dynamic_distance * math.cos(br))/60.0
     target_lon = real_lon + (dynamic_distance * math.sin(br))/(60.0*math.cos(math.radians(real_lat)))
 
-    # Movement vector
     dlat = target_lat - state["lat"]
     dlon = target_lon - state["lon"]
     bearing_to_target = math.degrees(math.atan2(dlon, dlat)) % 360
     current_hdg = state.get("hdg") or hdg
     angle_diff = deg_normalize(bearing_to_target - current_hdg)
-    heading_adjust = angle_diff * CONVERGENCE_STRENGTH + random.uniform(-0.9, 0.9)
-    new_hdg = (current_hdg + heading_adjust) % 360
+    new_hdg = (current_hdg + angle_diff*CONVERGENCE_STRENGTH + random.uniform(-0.9,0.9)) % 360
     state["hdg"] = new_hdg
 
     move_dist_deg = ghost_speed * (UPDATE_INTERVAL / 3600.0) / 60.0
     move_rad = math.radians(new_hdg)
     delta_lat = move_dist_deg * math.cos(move_rad)
     delta_lon = move_dist_deg * math.sin(move_rad) / max(0.0001, math.cos(math.radians(state["lat"])))
-
-    # Attraction
     state["lat"] += delta_lat + dlat*0.28*0.03
     state["lon"] += delta_lon + dlon*0.28*0.03
     ghost_speed *= role_speed_bias
@@ -206,58 +240,10 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
         if ids:
             chosen = random.choice(ids)
             for gid, s in GHOST_STATES.items():
-                if gid == chosen:
-                    s["role"] = "leader"
-                elif s.get("role") == "leader":
-                    s["role"] = assign_role()
+                if gid == chosen: s["role"] = "leader"
+                elif s.get("role") == "leader": s["role"] = assign_role()
 
     return state["lat"], state["lon"], round(ghost_speed,2), round(new_hdg,1)
-
-# ----------------------
-# SPAWN GHOSTS IMMEDIATELY
-# ----------------------
-def spawn_one_ghost(real_lat, real_lon):
-    used_names = {s["name"] for s in GHOST_STATES.values()}
-    # Fleet ghosts
-    for name in GHOST_NAMES:
-        if name not in used_names:
-            ghost_id = f"ghost_{name.lower().replace(' ','_')}"
-            GHOST_STATES[ghost_id] = {
-                "name": name,
-                "lat": real_lat + random.uniform(-0.008,0.008),
-                "lon": real_lon + random.uniform(-0.008,0.008),
-                "slot_bearing": random.uniform(-32,32),
-                "slot_distance": random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM),
-                "phase": random.uniform(0,2*math.pi),
-                "speed_bias": 1 + random.uniform(-SPEED_VARIATION,SPEED_VARIATION),
-                "hdg": 0.0,
-                "role": assign_role(),
-                "last_burst": 0.0
-            }
-            print(f"👻 Spawned named ghost {name}")
-            break
-    # Rendezvous ghosts
-    for point in RENDEZVOUS_POINTS:
-        distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
-        if distance_nm < 150:
-            names = point.get("names", [])
-            for i in range(point["ships"]):
-                ghost_id = f"{point['name'].lower()}_{i+1}"
-                if ghost_id not in GHOST_STATES:
-                    name = names[i % len(names)] if names else ghost_id
-                    GHOST_STATES[ghost_id] = {
-                        "name": name,
-                        "lat": real_lat + random.uniform(-0.008,0.008),
-                        "lon": real_lon + random.uniform(-0.008,0.008),
-                        "slot_bearing": random.uniform(-32,32),
-                        "slot_distance": random.uniform(MIN_DISTANCE_NM, MAX_DISTANCE_NM),
-                        "phase": random.uniform(0,2*math.pi),
-                        "speed_bias": 1 + random.uniform(-SPEED_VARIATION,SPEED_VARIATION),
-                        "hdg": 0.0,
-                        "role": assign_role(),
-                        "last_burst": 0.0
-                    }
-                    print(f"👻 Spawned rendezvous ghost {name} at {point['name']}")
 
 # ----------------------
 # UPDATE & APPEND
@@ -288,7 +274,8 @@ def append_positions(real_lat, real_lon, sog, hdg):
         "speed": round(sog,2),
         "heading": round(hdg or 0.0,1)
     })
-    spawn_one_ghost(real_lat, real_lon)
+    queue_rendezvous_ghosts(real_lat, real_lon)
+    spawn_from_queue(real_lat, real_lon)
     fleet = generate_or_update_ghosts(real_lat, real_lon, sog, hdg, fleet)
     save_positions(fleet)
     print(f"📌 Appended real ship + {len(GHOST_STATES)} ghost ships.")
@@ -316,4 +303,3 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
-
