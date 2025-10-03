@@ -258,7 +258,7 @@ def spawn_one_ghost(real_lat, real_lon):
     # Rendezvous ghosts (spawn once per rendezvous point)
     for point in RENDEZVOUS_POINTS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
-        if distance_nm < 40:
+        if distance_nm < 150:
             names = point.get("names", [])
             for i in range(point["ships"]):
                 ghost_id = f"{point['name'].lower()}_{i+1}"
