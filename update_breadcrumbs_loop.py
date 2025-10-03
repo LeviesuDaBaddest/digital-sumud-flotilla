@@ -229,11 +229,12 @@ def move_ghost(real_lat, real_lon, sog, hdg, ghost_id):
     return state["lat"], state["lon"], round(ghost_speed, 2), round(new_hdg, 1)
 
 # ----------------------
-# SPAWN ONE NEW GHOST IF IN RENDEZVOUS (FIXED)
+# SPAWN ONE NEW GHOST + RENDEZVOUS (FIXED)
 # ----------------------
 def spawn_one_ghost(real_lat, real_lon):
     used_names = {s["name"] for s in GHOST_STATES.values()}
 
+    # Fleet ghosts
     for name in GHOST_NAMES:
         if name not in used_names:
             ghost_id = f"ghost_{name.lower().replace(' ', '_')}"
@@ -254,13 +255,14 @@ def spawn_one_ghost(real_lat, real_lon):
             print(f"👻 Spawned named ghost {name}")
             break
 
+    # Rendezvous ghosts (spawn once per rendezvous point)
     for point in RENDEZVOUS_POINTS:
         distance_nm = haversine_nm(real_lat, real_lon, point["lat"], point["lon"])
         if distance_nm < 40:
             names = point.get("names", [])
             for i in range(point["ships"]):
                 ghost_id = f"{point['name'].lower()}_{i+1}"
-                if ghost_id not in GHOST_STATES:
+                if ghost_id not in GHOST_STATES:  # only spawn once per rendezvous
                     name = names[i % len(names)] if names else ghost_id
                     base_bearing = -18 + (i - (point["ships"]-1)/2.0) * 14.0
                     slot_bearing = base_bearing + random.uniform(-6, 6)
@@ -278,7 +280,6 @@ def spawn_one_ghost(real_lat, real_lon):
                         "last_burst": 0.0
                     }
                     print(f"👻 Spawned rendezvous ghost {name} at {point['name']}")
-                    return
 
 # ----------------------
 # UPDATE ALL GHOSTS & APPEND POSITIONS
@@ -341,3 +342,4 @@ if __name__ == "__main__":
             push_to_git()
         print(f"⏲️ Sleeping {UPDATE_INTERVAL} seconds...")
         time.sleep(UPDATE_INTERVAL)
+
