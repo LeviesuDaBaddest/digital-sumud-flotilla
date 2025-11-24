@@ -13373,6 +13373,15 @@
       "name": "Al Awda",
       "speed": 4.45,
       "heading": 289.3
+    },
+    {
+      "lat": 35.78411666666667,
+      "lon": 19.53537,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": false,
+      "name": "Al Awda",
+      "speed": 4.83,
+      "heading": 289.9
     }
   ],
   "ghost_ma\u2019an": [
@@ -26749,6 +26758,15 @@
       "name": "Ma\u2019an",
       "speed": 4.52,
       "heading": 288.5
+    },
+    {
+      "lat": 35.786003997941094,
+      "lon": 19.529727040500422,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Ma\u2019an",
+      "speed": 4.91,
+      "heading": 289.3
     }
   ],
   "ghost_navaren": [
@@ -40116,6 +40134,15 @@
       "name": "Navaren",
       "speed": 4.4,
       "heading": 286.9
+    },
+    {
+      "lat": 35.77243951298387,
+      "lon": 19.546554319362812,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Navaren",
+      "speed": 4.78,
+      "heading": 287.8
     }
   ],
   "ghost_al quds": [
@@ -53474,6 +53501,15 @@
       "name": "Al Quds",
       "speed": 4.54,
       "heading": 289.2
+    },
+    {
+      "lat": 35.77424971813484,
+      "lon": 19.54921335587429,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Al Quds",
+      "speed": 4.91,
+      "heading": 288.6
     }
   ],
   "ghost_ramallah": [
@@ -66823,6 +66859,15 @@
       "name": "Ramallah",
       "speed": 4.81,
       "heading": 284.8
+    },
+    {
+      "lat": 35.796378740689704,
+      "lon": 19.533417303080626,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Ramallah",
+      "speed": 5.21,
+      "heading": 284.1
     }
   ],
   "ghost_ode": [
@@ -80163,6 +80208,15 @@
       "name": "Ode",
       "speed": 4.08,
       "heading": 290.5
+    },
+    {
+      "lat": 35.75292386154196,
+      "lon": 19.619320050376796,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Ode",
+      "speed": 4.42,
+      "heading": 289.2
     }
   ],
   "ghost_miami": [
@@ -93494,6 +93548,15 @@
       "name": "Miami",
       "speed": 4.49,
       "heading": 282.4
+    },
+    {
+      "lat": 35.78523687987527,
+      "lon": 19.527609175210166,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Miami",
+      "speed": 5.45,
+      "heading": 279.1
     }
   ],
   "ghost_gaza city": [
@@ -106816,6 +106879,15 @@
       "name": "Gaza City",
       "speed": 4.34,
       "heading": 287.2
+    },
+    {
+      "lat": 35.77956357224412,
+      "lon": 19.544513638042677,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Gaza City",
+      "speed": 4.72,
+      "heading": 288.5
     }
   ],
   "ghost_freedom": [
@@ -120129,6 +120201,15 @@
       "name": "Freedom",
       "speed": 4.28,
       "heading": 288.9
+    },
+    {
+      "lat": 35.777551890844016,
+      "lon": 19.549222082880036,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Freedom",
+      "speed": 4.66,
+      "heading": 288.2
     }
   ],
   "ghost_argo": [
@@ -133433,6 +133514,15 @@
       "name": "Argo",
       "speed": 4.78,
       "heading": 287.7
+    },
+    {
+      "lat": 35.78484502466484,
+      "lon": 19.52372874759039,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Argo",
+      "speed": 5.18,
+      "heading": 294.9
     }
   ],
   "ghost_brune": [
@@ -146728,6 +146818,15 @@
       "name": "Brune",
       "speed": 4.39,
       "heading": 292.6
+    },
+    {
+      "lat": 35.78406705650428,
+      "lon": 19.530197342547012,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Brune",
+      "speed": 4.77,
+      "heading": 290.8
     }
   ],
   "ghost_inman": [
@@ -160014,6 +160113,15 @@
       "name": "Inman",
       "speed": 4.25,
       "heading": 289.6
+    },
+    {
+      "lat": 35.77132427641719,
+      "lon": 19.568478233051565,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Inman",
+      "speed": 4.61,
+      "heading": 288.9
     }
   ],
   "koufonisi_1": [
@@ -166703,6 +166811,15 @@
       "name": "Serenity",
       "speed": 4.33,
       "heading": 288.5
+    },
+    {
+      "lat": 35.77532996282546,
+      "lon": 19.554131362409457,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Serenity",
+      "speed": 4.7,
+      "heading": 288.0
     }
   ],
   "koufonisi_2": [
@@ -173392,6 +173509,15 @@
       "name": "Puppet",
       "speed": 4.38,
       "heading": 289.6
+    },
+    {
+      "lat": 35.78035225998565,
+      "lon": 19.539438549436376,
+      "timestamp": "2025-11-24 03:53:13",
+      "ghost": true,
+      "name": "Puppet",
+      "speed": 4.77,
+      "heading": 289.8
     }
   ]
 }
